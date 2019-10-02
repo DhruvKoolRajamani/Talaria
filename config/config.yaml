@@ -1,0 +1,8 @@
+# STM Nucleo Ethernet Adapter Configuration File
+# Read only as of now, use this file to set hostname/ip in the future
+
+Adapter:
+  static_ip: "10.42.0.134"
+  mac_address: "00:80:e1:30:00:24"
+  host_ip: "10.42.0.1"
+  port: 80
