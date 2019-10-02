@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 .pio/
 .vscode/
-lib/ros/
 platformio/platforms/ststm32/appveyor.yml
 platformio/platforms/ststm32/boards
 platformio/platforms/ststm32/builder

@@ -17,6 +17,10 @@
 class BMI_160 : public I2CDevice
 {
 private:
+enum REGISTER
+{
+    
+}
 protected:
 public:
   // CONSTRUCTORS

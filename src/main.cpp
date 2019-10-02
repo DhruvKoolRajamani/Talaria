@@ -10,6 +10,8 @@ using namespace ros;
 // I2CBus AnkleBus(2, PD_13, PD_12);
 I2CBus FootBus(3, PB_9, PB_8);
 
+const int 
+
 bool enabled = true;
 
 // I2CBus Busses[4] = { BodyBus, KneeBus, AnkleBus, FootBus };
