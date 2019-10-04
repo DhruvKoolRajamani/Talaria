@@ -23,7 +23,7 @@ private:
 
   static const int DEVICE_ID_SIZE = 8;
 
-  uint8_t* _dev_Id;
+  uint8_t *_dev_Id;
   uint8_t _dev_index;
 
 protected:
@@ -35,12 +35,9 @@ public:
    *
    */
   Device()
-    : _en_status(true)
-    , _conf_status(false)
-    , _health_status(false)
-    , _dev_index(0)
+      : _en_status(true), _conf_status(false), _health_status(false), _dev_index(0)
   {
-    _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
+    _dev_Id = static_cast<uint8_t *>(malloc(DEVICE_ID_SIZE));
   }
 
   /**
@@ -49,12 +46,9 @@ public:
    * @param uint8_t dev_index
    */
   Device(uint8_t dev_index)
-    : _en_status(true)
-    , _conf_status(false)
-    , _health_status(false)
-    , _dev_index(dev_index)
+      : _en_status(true), _conf_status(false), _health_status(false), _dev_index(dev_index)
   {
-    _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
+    _dev_Id = static_cast<uint8_t *>(malloc(DEVICE_ID_SIZE));
   }
 
   /** DESTRUCTOR */
@@ -84,7 +78,7 @@ public:
    *
    * @return uint8_t* _dev_Id
    */
-  uint8_t* getId()
+  uint8_t *getId()
   {
     return _dev_Id;
   }
@@ -138,7 +132,7 @@ public:
    * @brief Enable the Device
    *
    */
-  virtual void enable()
+  virtual void initialize()
   {
     _en_status = true;
   }
@@ -163,7 +157,7 @@ public:
    * @return true
    * @return false
    */
-  virtual bool readByteStream(uint8_t address, uint8_t* buffer, int buffer_size)
+  virtual bool readByteStream(uint8_t address, uint8_t *buffer, int buffer_size)
   {
     return false;
   }
@@ -175,7 +169,7 @@ public:
    * @param uint8_t* buffer
    * @param int buffer_size
    */
-  virtual void writeByteStream(uint8_t address, uint8_t* buffer,
+  virtual void writeByteStream(uint8_t address, uint8_t *buffer,
                                int buffer_size)
   {
   }
@@ -259,4 +253,4 @@ public:
   }
 };
 
-#endif  // DEVICE_H
+#endif // DEVICE_H

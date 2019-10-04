@@ -5,17 +5,13 @@
 
 using namespace ros;
 
-// I2CBus BodyBus(0, PA_9, PA_8);
-// I2CBus KneeBus(1, PF_0, PF_1);
-// I2CBus AnkleBus(2, PD_13, PD_12);
+I2CBus BodyBus(0, PC_9, PA_8);
+I2CBus KneeBus(1, PF_0, PF_1);
+I2CBus AnkleBus(2, PD_13, PD_12);
 I2CBus FootBus(3, PB_9, PB_8);
 
-const int 
-
-bool enabled = true;
-
-// I2CBus Busses[4] = { BodyBus, KneeBus, AnkleBus, FootBus };
-I2CBus* I2CBusses = &FootBus;
+I2CBus Busses[4] = { BodyBus, KneeBus, AnkleBus, FootBus };
+I2CBus* I2CBusses = Busses;
 
 BMI_160 Imu(0x68, 3, 0);
 
@@ -33,7 +29,7 @@ int main()
 
   while (1)
   {
-    if (Imu.ping() && enabled)
+    if (Imu.ping())
     {
       sprintf(hello_msg, "Chip Id is: %x\n", Imu.getChipId());
     }

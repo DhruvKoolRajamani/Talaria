@@ -17,16 +17,19 @@
 class BMI_160 : public I2CDevice
 {
 private:
-enum REGISTER
-{
-    
-}
+  enum REGISTER_ADDRESS
+  {
+    CHIP_ID = 0x68,
+
+    POLLING_ID = 0x12
+  } reg_addr;
+
 protected:
 public:
   // CONSTRUCTORS
 
   BMI_160(int address, uint8_t bus_Id, uint8_t dev_index)
-    : I2CDevice(address, bus_Id, dev_index)
+      : I2CDevice(address, bus_Id, dev_index)
   {
   }
 
@@ -42,4 +45,4 @@ public:
   // METHODS
 };
 
-#endif  // BMI_160_H
+#endif // BMI_160_H

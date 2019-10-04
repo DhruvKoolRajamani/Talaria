@@ -16,12 +16,12 @@
 #include "i2c/i2c_bus.h"
 #include "mbed.h"
 
-extern I2CBus* I2CBusses;
+extern I2CBus *I2CBusses;
 
 class I2CDevice : Device
 {
 private:
-  I2CBus* i2cBus;
+  I2CBus *i2cBus;
   uint8_t _chip_id = 0x00;
   int _address;
 
@@ -37,9 +37,16 @@ public:
    * @param dev_index
    */
   I2CDevice(int address, uint8_t bus_Id, uint8_t dev_index = 0)
-    : Device(dev_index), _address(address << 1)
+      : Device(dev_index), _address(address << 1)
   {
-    i2cBus = I2CBusses;
+    for (I2CBus *ptr = I2CBusses; ptr != nullptr; ptr++)
+    {
+      if (ptr->getId() == bus_Id)
+      {
+        i2cBus = ptr;
+        break;
+      }
+    }
     setIndex(dev_index);
   }
 
@@ -88,9 +95,9 @@ public:
    * @return true if read successful
    * @return false if write to register unsuccessfull
    */
-  virtual bool readByteStream(uint8_t address, char* buffer, int buffer_size)
+  virtual bool readByteStream(uint8_t address, char *buffer, int buffer_size)
   {
-    if (i2cBus->write(_address, (char*)address, 1) == 0)
+    if (i2cBus->write(_address, (char *)address, 1) == 0)
     {
       return i2cBus->read(_address, buffer, buffer_size) == 0;
     }
@@ -112,7 +119,7 @@ public:
     resetPin = true;
   }
 
-  virtual int writeByteStream(uint8_t address, char* buffer, int buffer_size)
+  virtual int writeByteStream(uint8_t address, char *buffer, int buffer_size)
   {
     char new_buffer[buffer_size + 1];
     new_buffer[0] = (char)address;
@@ -132,6 +139,16 @@ public:
   {
     return _chip_id;
   }
+
+  /**
+   * @brief Get the Address object
+   * 
+   * @return int _address
+   */
+  int getAddress()
+  {
+    return _address;
+  }
 };
 
-#endif  // I2C_DEVICE_H
+#endif // I2C_DEVICE_H
