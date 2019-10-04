@@ -41,9 +41,15 @@ cd ~/Talaria
 pio run -e <env_name> -t upload
 ```
 
-## Open a Serial Monitor
+## Running with ROS Serial
 
 ```bash
-cd ~/Talaria
-pio device monitor
+# Open a new terminal
+roscore
+
+# Open a new terminal
+rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
+
+# Open a new terminal
+rostopic echo /network_strings
 ```

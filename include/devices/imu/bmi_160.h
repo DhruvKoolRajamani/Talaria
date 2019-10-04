@@ -29,7 +29,7 @@ public:
   // CONSTRUCTORS
 
   BMI_160(int address, uint8_t bus_Id, uint8_t dev_index)
-      : I2CDevice(address, bus_Id, dev_index)
+    : I2CDevice(address, bus_Id, dev_index)
   {
   }
 
@@ -45,4 +45,4 @@ public:
   // METHODS
 };
 
-#endif // BMI_160_H
+#endif  // BMI_160_H
