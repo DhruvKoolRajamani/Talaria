@@ -45,6 +45,13 @@ cd ~/Talaria
 pio run -e <env_name> -t upload
 ```
 
+## First run
+
+```bash
+# Give rosserial access to your monitor
+sudo chmod a+rw /dev/ttyACM0
+```
+
 ## Running with ROS Serial
 
 ```bash
