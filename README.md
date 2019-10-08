@@ -36,6 +36,10 @@ pio run -e Talaria-main
 
 ## Uploading
 
+**First Time**  
+Follow the steps in this link to set your udev rules for the first time.  
+[udev rules](https://docs.platformio.org/en/latest/faq.html#faq-udev-rules)
+
 ```bash
 cd ~/Talaria
 pio run -e <env_name> -t upload
