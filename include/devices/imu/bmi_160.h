@@ -168,8 +168,8 @@ public:
     gyro_ptr++;
 
     _GYRO_X = (uint8_t)gyro[1] << 8 | (uint8_t)gyro[0];
-    _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
-    _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
+    // _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
+    // _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
 
     return true;
   }
@@ -187,8 +187,8 @@ public:
       acc_ptr++;
     }
     _ACC_X = (uint8_t)acc[1] << 8 | (uint8_t)acc[0];
-    _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
-    _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
+    // _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
+    // _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
 
     return true;
   }
