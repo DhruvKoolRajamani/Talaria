@@ -103,14 +103,14 @@ public:
   bool readGyro(){
     char *gyro_ptr = gyro;
     for(uint8_t data_addr = REGISTER_ADDRESS::DATA_8; data_addr <= REGISTER_ADDRESS::DATA_13; ++data_addr){
-      if(!readByteStream(data_addr, gyro_ptr, (int)sizeof(gyro_ptr))){
+      if(readByteStream(data_addr, gyro_ptr, (int)sizeof(gyro_ptr)) != 0){
         return false;
       }
       gyro_ptr++;
     }
     _GYRO_X = (uint8_t)gyro[1] << 8 | (uint8_t)gyro[0];
-    _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
-    _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
+    // _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
+    // _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
 
     return true;
   }
@@ -119,14 +119,14 @@ public:
     
     char *acc_ptr = acc;
     for(uint8_t data_addr = REGISTER_ADDRESS::DATA_14; data_addr <= REGISTER_ADDRESS::DATA_19; ++data_addr){
-      if(!readByteStream(data_addr, acc_ptr, (int)sizeof(acc_ptr))){
+      if(readByteStream(data_addr, acc_ptr, (int)sizeof(acc_ptr)) != 0){
         return false;
       }
       acc_ptr++;
     }
     _ACC_X = (uint8_t)acc[1] << 8 | (uint8_t)acc[0];
-    _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
-    _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
+    // _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
+    // _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
 
     return true;
   }
