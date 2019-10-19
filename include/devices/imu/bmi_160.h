@@ -13,6 +13,12 @@
 #define BMI_160_H
 
 #include "devices/base/i2c_device.h"
+// REGISTER ADDRESS
+#define CMD_ADDRESS 0x7E
+#define SOFT_RESET 0xB6
+#define ACC_NORMAL_MODE 0x11
+#define ERR_REG 0x02
+#define PMU_STATUS 0x03
 
 #ifndef DISABLE_ROS
 #include "sensor_msgs/Imu.h"
@@ -52,9 +58,7 @@ private:
 
     DATA_18 = 0x16,  // Z 7:0 bits
     DATA_19 = 0x17,  // Z 15:8 bits
-
-    POLLING_ID = 0x12
-  } reg_addr;
+  };
 
   float _GYRO_X;
   float _GYRO_Y;
@@ -66,11 +70,10 @@ private:
 
   char acc[6];
   char gyro[6];
+  uint8_t _PMU_STATUS;
 
 protected:
 public:
-  // CONSTRUCTORS
-
 #ifndef DISABLE_ROS
   BMI_160(int address, I2CBus& i2c_bus, ros::NodeHandle& nh, uint8_t dev_index,
           const char* dev_name, const char* topic_name)
@@ -120,6 +123,10 @@ public:
   {
     return _ACC_Z;
   }
+  uint8_t getPMUstatus()
+  {
+    return _PMU_STATUS;
+  }
   // SETTERS
 
   // METHODS
@@ -131,7 +138,6 @@ public:
       this->enable();
       this->setHealthStatus(true);
       // Perform calibration
-
 #ifndef DISABLE_ROS
       _msg_chip_id.data = this->getChipId();
 #endif
@@ -163,52 +169,57 @@ public:
          data_addr <= REGISTER_ADDRESS::DATA_13; ++data_addr)
     {
       if (!readRegister(data_addr, (char*)gyro_ptr, (int)sizeof(gyro_ptr)))
-        return false;
-    }
-    gyro_ptr++;
 
-    _GYRO_X = (uint8_t)gyro[1] << 8 | (uint8_t)gyro[0];
-    // _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
-    // _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
+      // void initialize()
+      // {
+      //   char soft_reset = SOFT_RESET;
+      //   char acc_mode = ACC_NORMAL_MODE;
+      //   writeByteStream(CMD_ADDRESS, &soft_reset, (int)sizeof(soft_reset));
+      //   writeByteStream(CMD_ADDRESS, &acc_mode, (int)sizeof(acc_mode));
+      //   char pmu;
+      //   readByteStream(PMU_STATUS, &pmu, (int)sizeof(pmu));
+      //   _PMU_STATUS = (uint8_t)pmu;
+      // }
 
-    return true;
-  }
-
-  bool readAcc()
-  {
-    char* acc_ptr = acc;
-    for (uint8_t data_addr = REGISTER_ADDRESS::DATA_14;
-         data_addr <= REGISTER_ADDRESS::DATA_19; ++data_addr)
-    {
-      if (!readRegister(data_addr, (char*)acc_ptr, (int)sizeof(acc_ptr)))
       {
         return false;
       }
-      acc_ptr++;
-    }
-    _ACC_X = (uint8_t)acc[1] << 8 | (uint8_t)acc[0];
-    // _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
-    // _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
+      gyro_ptr++;
 
-    return true;
-  }
+      _GYRO_X = (uint8_t)gyro[1] << 8 | (uint8_t)gyro[0];
+      // _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
+      // _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
 
-  bool updateIMU()
-  {
-    if (readGyro() && readAcc())
-    {
       return true;
     }
 
-    return false;
-  }
-  // reading and writing
-  // to specific registers
-  // initializing
-  // long polling
-  // just raw data and seperate for filtering and putting into objects of data
-  // using bmi filter data
+    bool readAcc()
+    {
+      char* acc_ptr = acc;
+      for (uint8_t data_addr = REGISTER_ADDRESS::DATA_14;
+           data_addr <= REGISTER_ADDRESS::DATA_19; ++data_addr)
+      {
+        if (!readRegister(data_addr, (char*)acc_ptr, (int)sizeof(acc_ptr)))
+        {
+          return false;
+        }
+        acc_ptr++;
+      }
+      _ACC_X = (uint8_t)acc[1] << 8 | (uint8_t)acc[0];
+      // _ACC_Y = (uint8_t)acc[3] << 8 | (uint8_t)acc[2];
+      // _ACC_Z = (uint8_t)acc[5] << 8 | (uint8_t)acc[4];
 
-  // wednesday raw data
-};
+      return true;
+    }
+
+    bool updateIMU()
+    {
+      if (readGyro() && readAcc())
+      {
+        return true;
+      }
+
+      return false;
+    }
+  };
 #endif  // BMI_160_H
