@@ -13,39 +13,38 @@
 #define BMI_160_H
 
 #include "devices/base/i2c_device.h"
+// REGISTER ADDRESS
+#define CMD_ADDRESS 0x7E
+#define SOFT_RESET 0xB6
+#define ACC_NORMAL_MODE 0x11
+#define ERR_REG 0x02
+#define PMU_STATUS 0x03
 
+
+
+
+// Data reg addresses
+#define DATA_8 0x0C //X 7:0 bits
+#define DATA_9 0x0D //X 15:8 bits
+
+#define DATA_10 0x0E //Y 7:0 bits
+#define DATA_11 0x0F //Y 15:8 bits
+
+#define DATA_12 0x10 //Z 7:0 bits
+#define DATA_13 0x11 //Z 15:8 bits
+    
+    // Accelorometer data registers
+#define DATA_14 0x12 //X 7:0 bits
+#define DATA_15 0x13 //X 15:8 bitss
+
+#define DATA_16 0x14 //Y 7:0 bits
+#define DATA_17 0x15 //Y 15:8 bits
+
+#define DATA_18 0x16 //Z 7:0 bits
+#define DATA_19 0x17 //Z 15:8 bits
 class BMI_160 : public I2CDevice
 {
 private:
- 
-  enum REGISTER_ADDRESS
-  {
-    CHIP_ID = 0x68,
-
-    // Gyroscope data registers
-    DATA_8 = 0x0C, //X 7:0 bits
-    DATA_9 = 0x0D, //X 15:8 bits
-
-    DATA_10 = 0x0E, //Y 7:0 bits
-    DATA_11 = 0x0F, //Y 15:8 bits
-
-    DATA_12 = 0x10, //Z 7:0 bits
-    DATA_13 = 0x11, //Z 15:8 bits
-    
-    // Accelorometer data registers
-    DATA_14 = 0x12, //X 7:0 bits
-    DATA_15 = 0x13, //X 15:8 bitss
-
-    DATA_16 = 0x14, //Y 7:0 bits
-    DATA_17 = 0x15, //Y 15:8 bits
-
-    DATA_18 = 0x16, //Z 7:0 bits
-    DATA_19 = 0x17, //Z 15:8 bits
-
-
-
-    POLLING_ID = 0x12
-  } reg_addr;
 
   float _GYRO_X;
   float _GYRO_Y;
@@ -57,20 +56,18 @@ private:
 
   char acc[6];
   char gyro[6];
+  uint8_t _PMU_STATUS;
+
 
 protected:
 public:
   // CONSTRUCTORS
   
   BMI_160(int address, uint8_t bus_Id, uint8_t dev_index)
-      : I2CDevice(address, bus_Id, dev_index)
-  {
-  }
+      : I2CDevice(address, bus_Id, dev_index){}
 
   // DESTRUCTORS
-  virtual ~BMI_160()
-  {
-  }
+  virtual ~BMI_160(){}
 
   // GETTERS
   float getGyroX(){
@@ -92,17 +89,27 @@ public:
   float getAccZ(){
     return _ACC_Z;
   }
+  uint8_t getPMUstatus(){
+    return _PMU_STATUS;
+  }
   // SETTERS
-  
 
 
 
+  void initialize(){
+    char soft_reset = SOFT_RESET;
+    char acc_mode = ACC_NORMAL_MODE;
+    writeByteStream(CMD_ADDRESS, &soft_reset, (int)sizeof(soft_reset));
+    writeByteStream(CMD_ADDRESS, &acc_mode, (int)sizeof(acc_mode));
+    char pmu;
+    readByteStream(PMU_STATUS, &pmu, (int)sizeof(pmu));
+    _PMU_STATUS = (uint8_t) pmu;
+  }
 
-  // METHODS
-  
+
   bool readGyro(){
     char *gyro_ptr = gyro;
-    for(uint8_t data_addr = REGISTER_ADDRESS::DATA_8; data_addr <= REGISTER_ADDRESS::DATA_13; ++data_addr){
+    for(uint8_t data_addr = DATA_8; data_addr <= DATA_13; ++data_addr){
       if(readByteStream(data_addr, gyro_ptr, (int)sizeof(gyro_ptr)) != 0){
         return false;
       }
@@ -118,7 +125,7 @@ public:
   bool readAcc(){
     
     char *acc_ptr = acc;
-    for(uint8_t data_addr = REGISTER_ADDRESS::DATA_14; data_addr <= REGISTER_ADDRESS::DATA_19; ++data_addr){
+    for(uint8_t data_addr = DATA_14; data_addr <= DATA_19; ++data_addr){
       if(readByteStream(data_addr, acc_ptr, (int)sizeof(acc_ptr)) != 0){
         return false;
       }
@@ -139,15 +146,8 @@ public:
 
     return false;
   }
-  // reading and writing
-    // to specific registers
-  // initializing
-  // long polling
-  // just raw data and seperate for filtering and putting into objects of data 
-  // using bmi filter data
 
-
-  // wednesday raw data
+  
 };
 
 #endif // BMI_160_H

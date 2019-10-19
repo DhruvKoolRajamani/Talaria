@@ -30,13 +30,17 @@ int main()
   nh.initNode();
   nh.advertise(network_pub);
   // nh.advertise(data_pub);
+  Imu.ping();
+  Imu.initialize();
 
+   sprintf(hello_msg, "Chip Id is: %x, %x", 
+        Imu.getChipId(), Imu.getPMUstatus());
   while (1)
   {
-    if (Imu.ping() && Imu.readAcc())
+    if (Imu.ping())
     {
-      sprintf(hello_msg, "Chip Id is: %x, %f", 
-        Imu.getChipId(), Imu.getAccX());
+      sprintf(hello_msg, "Chip Id is: %x, %x", 
+        Imu.getChipId(), Imu.getPMUstatus());
       
       // gdata[0] = Imu.getGyroX();
       // gdata[1] = Imu.getGyroY();
