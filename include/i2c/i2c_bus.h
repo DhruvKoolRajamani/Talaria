@@ -21,10 +21,10 @@ private:
 
   uint8_t _id;
 
-  int _clock_speed;
-
-  PinName _scl;
   PinName _sda;
+  PinName _scl;
+
+  int _clock_speed;
 
 public:
   /** CONSTRUCTORS */

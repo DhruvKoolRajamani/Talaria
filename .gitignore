@@ -73,3 +73,4 @@ platformio/packages/tool-scons
 platformio/packages/tool-stm32duino
 platformio/packages/tool-unity
 platformio/platforms/
+platformio/.cache/
