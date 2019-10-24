@@ -91,7 +91,7 @@ public:
    * @return true
    * @return false
    */
-  virtual bool ping(int chip_id_reg_address = 0x00)
+  virtual bool ping(int chip_id_reg_address = 0x00, int delay_ms = 0)
   {
     uint8_t buffer;
     if (readRegister(chip_id_reg_address, &buffer, 1))
@@ -128,10 +128,11 @@ public:
    * @return false if write to register unsuccessfull
    */
   virtual bool readRegister(int address, uint8_t* buffer, int buffer_size,
-                            bool poll = false)
+                            bool poll = false, int delay_ms = 0)
   {
     char reg_address[1] = { address };
     int write_state = _i2c_bus->write(_address, reg_address, 1, true);
+    wait_ms(delay_ms);
     int read_state = this->readBytes((char*)buffer, buffer_size);
 
 #ifdef DISABLE_ROS
@@ -156,9 +157,9 @@ public:
    * @return true if ACK
    * @return false if NACK
    */
-  virtual bool readBytes(char* buffer, int buffer_size)
+  virtual bool readBytes(char* buffer, int buffer_size, bool poll = false)
   {
-    return _i2c_bus->read(_address, buffer, buffer_size);
+    return _i2c_bus->read(_address, buffer, buffer_size, poll);
   }
 
   /**

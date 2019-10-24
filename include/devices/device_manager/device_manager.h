@@ -18,6 +18,7 @@
 #include "devices/base/device.h"
 
 #include "devices/imu/bmi_160.h"
+#include "devices/bend_sensor/bend_sensor.h"
 
 class DeviceManager
 {
