@@ -14,6 +14,7 @@
 
 #include "device.h"
 #include "i2c/i2c_bus.h"
+#include "devices/hardware.h"
 #include "mbed.h"
 
 class I2CDevice : public Device
@@ -25,7 +26,9 @@ private:
 
 protected:
 #ifndef DISABLE_ROS
+#ifndef DISABLE_DIAGNOSTICS
   diagnostic_msgs::KeyValue _diagnostic_chip_id;
+#endif
 #endif
 public:
   /** CONSTRUCTORS */
@@ -47,9 +50,9 @@ public:
   {
     // _i2c_bus = &i2c_bus;
     setIndex(dev_index);
+#ifndef DISABLE_DIAGNOSTICS
     _diagnostic_chip_id.key = "Chip Id";
     _diagnostic_chip_id.value = (char*)0x00;
-#ifndef DISABLE_DIAGNOSTICS
     this->setDiagnosticsData(_diagnostic_chip_id);
 #endif
   }
@@ -99,13 +102,13 @@ public:
       _chip_id = buffer;
 
 #ifndef DISABLE_ROS
-      _diagnostic_chip_id.value = (char*)buffer;
 #ifndef DISABLE_DIAGNOSTICS
+      _diagnostic_chip_id.value = (char*)buffer;
       this->setDiagnosticsData(_diagnostic_chip_id);
 #endif
+#else
+      printf("Chip Id is: %x", buffer);
       this->update();
-// #else
-// printf("")
 #endif
       return true;
     }
@@ -129,14 +132,14 @@ public:
   {
     char reg_address[1] = { address };
     int write_state = _i2c_bus->write(_address, reg_address, 1, true);
-    int read_state = _i2c_bus->read(_address, (char*)buffer, buffer_size);
+    int read_state = this->readBytes((char*)buffer, buffer_size);
 
 #ifdef DISABLE_ROS
     printf("Write State: %d\n", write_state);
     printf("Read State: %d\n", read_state);
 #endif
 
-    return true;
+    return !((write_state && read_state) && 0);
     // if (_i2c_bus->write(_address, reg_address, 1, true) == 0)
     // {
     //   return _i2c_bus->read(_address, (char*)buffer, buffer_size) == 0;
@@ -150,15 +153,12 @@ public:
    *
    * @param buffer
    * @param buffer_size
-   * @return true
-   * @return false
+   * @return true if ACK
+   * @return false if NACK
    */
   virtual bool readBytes(char* buffer, int buffer_size)
   {
-    if (_i2c_bus->read(_address, buffer, buffer_size) == 0)
-      return true;
-    else
-      return false;
+    return _i2c_bus->read(_address, buffer, buffer_size);
   }
 
   /**
@@ -182,8 +182,8 @@ public:
    * @param char* buffer
    * @param int buffer_size
    * @return write Status
-   * @return true
-   * @return false
+   * @return true if ACK
+   * @return false if NACK
    */
   virtual int writeRegister(uint8_t address, char* buffer, int buffer_size,
                             bool poll = false)
@@ -192,7 +192,7 @@ public:
     new_buffer[0] = (char)address;
     memcpy(&new_buffer[1], buffer, buffer_size + 1);
 
-    return _i2c_bus->write(_address, new_buffer, buffer_size + 1);
+    return _i2c_bus->write(_address, new_buffer, buffer_size + 1, poll) == 0;
   }
 
   /** GETTERS */

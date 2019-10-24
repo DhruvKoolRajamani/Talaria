@@ -29,6 +29,8 @@ private:
   uint8_t _byte_stream_pub[BYTE_STREAM_PUB_SIZE];
   uint8_t _byte_stream_sub[BYTE_STREAM_SUB_SIZE];
 
+  ros::NodeHandle* _nh;
+
 protected:
 public:
   /** VARIABLES */
@@ -40,7 +42,20 @@ public:
 
   /** CONSTRUCTORS */
 
+#ifndef DISABLE_ROS
+  /**
+   * @brief Construct a new Device Manager object
+   *
+   * @param nodehandle
+   */
+  DeviceManager(ros::NodeHandle& nh);
+#else
+  /**
+   * @brief Construct a new Device Manager object
+   *
+   */
   DeviceManager();
+#endif
 
   /** DESTRUCTOR */
   virtual ~DeviceManager()

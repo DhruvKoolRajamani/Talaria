@@ -65,31 +65,7 @@ public:
 
   // METHODS
 
-  //   bool ping(uint8_t )
-  //   {
-  //     char buffer;
-  //     // writeRegister(0x00, 0, 1);
-  //     if (readBytes(&buffer, 1))
-  //     {
-  //       setHealthStatus(true);
-  //       setConfiguredStatus(true);
-  //       setEnabledStatus(true);
-  //       this->setChipId(buffer);
-
-  // #ifndef DISABLE_ROS
-  //       _diagnostic_chip_id.value = &buffer;
-  // #ifndef DISABLE_DIAGNOSTICS
-  //       this->setDiagnosticsData(_diagnostic_chip_id);
-  // #endif
-  //       this->update();
-  // #endif
-  //       return true;
-  //     }
-  //     else
-  //       return false;
-  //   }
-
-  bool initialize()
+  bool initialize() override
   {
     if (this->ping(REGISTER_ADDRESS::CHIP_ID))
     {

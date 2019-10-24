@@ -87,19 +87,19 @@ Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
     _msg_diagnostic_status.level = diagnostic_msgs::DiagnosticStatus::OK;
     _msg_diagnostic_status.values = new diagnostic_msgs::KeyValue();
     _msg_diagnostic_status.values_length++;
-    _msg_diagnostic_status.values->key = "enable\0";
-    _msg_diagnostic_status.values->value = "true\0";
+    _msg_diagnostic_status.values->key = "enable";
+    _msg_diagnostic_status.values->value = "true";
     _msg_diagnostic_status.values = new diagnostic_msgs::KeyValue();
     _msg_diagnostic_status.values_length++;
-    _msg_diagnostic_status.values->key = "health\0";
-    _msg_diagnostic_status.values->value = "false\0";
+    _msg_diagnostic_status.values->key = "health";
+    _msg_diagnostic_status.values->value = "false";
     _msg_diagnostic_status.values = new diagnostic_msgs::KeyValue();
     _msg_diagnostic_status.values_length++;
-    _msg_diagnostic_status.values->key = "conf\0";
-    _msg_diagnostic_status.values->value = "false\0";
+    _msg_diagnostic_status.values->key = "conf";
+    _msg_diagnostic_status.values->value = "false";
     _msg_diagnostic_status.values = new diagnostic_msgs::KeyValue();
     _msg_diagnostic_status.values_length++;
-    _msg_diagnostic_status.values->key = "dev_index\0";
+    _msg_diagnostic_status.values->key = "dev_index";
     char tmp_dev_index[2];
     sprintf(tmp_dev_index, "%d", _dev_index);
     _msg_diagnostic_status.values->value = tmp_dev_index;
@@ -335,6 +335,34 @@ void Device::reset(PinName pin, int delay_ms)
   resetPin = true;
 }
 
+bool Device::strcmp(const char* str1, const char* str2)
+{
+  int cnt1 = 0, cnt2 = 0;
+  if (str1 != NULL && str2 != NULL)
+  {
+    while (str1[cnt1] != '\0')
+    {
+      cnt1++;
+    }
+    while (str2[cnt2] != '\0')
+    {
+      cnt2++;
+    }
+
+    if (cnt1 != cnt2)
+      return false;
+
+    for (int i = 0; i < cnt1; i++)
+    {
+      if (str1[i] != str2[i])
+        return false;
+    }
+    return true;
+  }
+  else
+    return false;
+}
+
 /** SETTERS */
 
 #ifndef DISABLE_ROS
@@ -372,9 +400,9 @@ void Device::setIndex(uint8_t index)
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-  _msg_diagnostic_status.values[3].key = "dev_index\0";
+  _msg_diagnostic_status.values[3].key = "dev_index";
   char tmp_dev_index[2];
-  sprintf(tmp_dev_index, "%d\0", _dev_index);
+  sprintf(tmp_dev_index, "%d", _dev_index);
   _msg_diagnostic_status.values[3].value = tmp_dev_index;
 #endif
 #endif
@@ -401,11 +429,11 @@ void Device::setHealthStatus(bool state)
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-  _msg_diagnostic_status.values[1].key = "health\0";
+  _msg_diagnostic_status.values[1].key = "health";
   if (state)
-    _msg_diagnostic_status.values[1].value = "true\0";
+    _msg_diagnostic_status.values[1].value = "true";
   else
-    _msg_diagnostic_status.values[1].value = "false\0";
+    _msg_diagnostic_status.values[1].value = "false";
 #endif
 #endif
 }
@@ -421,11 +449,11 @@ void Device::setEnabledStatus(bool state)
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-  _msg_diagnostic_status.values[0].key = "enable\0";
+  _msg_diagnostic_status.values[0].key = "enable";
   if (state)
-    _msg_diagnostic_status.values[0].value = "true\0";
+    _msg_diagnostic_status.values[0].value = "true";
   else
-    _msg_diagnostic_status.values[0].value = "false\0";
+    _msg_diagnostic_status.values[0].value = "false";
 #endif
 #endif
 }
@@ -441,11 +469,11 @@ void Device::setConfiguredStatus(bool state)
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-  _msg_diagnostic_status.values[2].key = "conf\0";
+  _msg_diagnostic_status.values[2].key = "conf";
   if (state)
-    _msg_diagnostic_status.values[2].value = "true\0";
+    _msg_diagnostic_status.values[2].value = "true";
   else
-    _msg_diagnostic_status.values[2].value = "false\0";
+    _msg_diagnostic_status.values[2].value = "false";
 #endif
 #endif
 }
@@ -504,31 +532,3 @@ void Device::setDiagnosticsData(diagnostic_msgs::KeyValue key_value)
 }
 #endif
 #endif
-
-bool Device::strcmp(const char* str1, const char* str2)
-{
-  int cnt1 = 0, cnt2 = 0;
-  if (str1 != NULL && str2 != NULL)
-  {
-    while (str1[cnt1] != '\0')
-    {
-      cnt1++;
-    }
-    while (str2[cnt2] != '\0')
-    {
-      cnt2++;
-    }
-
-    if (cnt1 != cnt2)
-      return false;
-
-    for (int i = 0; i < cnt1; i++)
-    {
-      if (str1[i] != str2[i])
-        return false;
-    }
-    return true;
-  }
-  else
-    return false;
-}

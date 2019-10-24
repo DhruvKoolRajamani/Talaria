@@ -14,4 +14,9 @@
 
 const int NUM_DEVICES = 2;
 
+#ifndef DISABLE_ROS
+#include <ros.h>
+#include <std_msgs/String.h>
+#endif
+
 #endif  // HARDWARE_H

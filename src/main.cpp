@@ -1,15 +1,6 @@
 #include "mbed.h"
-
-#ifndef DISABLE_ROS
-#include <ros.h>
-#include <std_msgs/String.h>
-#endif
-
+#include "devices/hardware.h"
 #include "devices/device_manager/device_manager.h"
-
-#ifndef DISABLE_ROS
-using namespace ros;
-#endif
 
 I2CBus BodyBus(0, PC_9, PA_8);
 I2CBus KneeBus(1, PF_0, PF_1);
@@ -17,15 +8,16 @@ I2CBus AnkleBus(2, PD_13, PD_12);
 I2CBus FootBus(3, PB_9, PB_8);
 
 #ifndef DISABLE_ROS
-NodeHandle nh;
+ros::NodeHandle nh;
+// DeviceManager device_manager(nh);
+#else
+DeviceManager device_manager;
 #endif
-
-// DeviceManager device_manager;
 
 #ifndef DISABLE_ROS
 BMI_160 Imu(0x68, FootBus, nh, 0, "imu", "/devices/body");
 std_msgs::String network_msg;
-Publisher network_pub("network_strings", &network_msg);
+ros::Publisher network_pub("network_strings", &network_msg);
 #else
 BMI_160 Imu(0x68, FootBus, 0);
 #endif
