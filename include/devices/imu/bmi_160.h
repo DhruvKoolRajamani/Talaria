@@ -41,11 +41,11 @@ public:
 
 #ifndef DISABLE_ROS
   BMI_160(int address, I2CBus& i2c_bus, ros::NodeHandle& nh, uint8_t dev_index,
-          const char* dev_name, const char* prefix_path)
-    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, prefix_path)
-    , _pub_imu(this->getTopicName(), &(this->_msg_chip_id))
+          const char* dev_name, const char* topic_name)
+    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
+    , _pub_imu(topic_name, &(this->_msg_chip_id))
   {
-    this->getNodeHandle()->advertise(_pub_imu);
+    nh.advertise(_pub_imu);
   }
 #else
   BMI_160(int address, I2CBus& i2c_bus, uint8_t dev_index)

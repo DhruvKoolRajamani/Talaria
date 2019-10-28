@@ -13,11 +13,12 @@ DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-BendSensor bend_sensor(0x12, PrimaryBus, nh, 0, "bs", "/devices/index/bs");
+StrainGauge strain_gauge(0, p15, nh, 1, "strain_gauge",
+                         "/devices/index/strain_gauge_1");
 std_msgs::String network_msg;
 ros::Publisher network_pub("network_strings", &network_msg);
 #else
-BendSensor bend_sensor(0x12, PrimaryBus, 0);
+AnalogDevice ReadStrain(0, p15, 1);
 #endif
 
 char hello_msg[50] = "";
@@ -29,29 +30,18 @@ int main()
   nh.advertise(network_pub);
 #endif
 
-  if (!bend_sensor.initialize())
+  strain_gauge.calibrate();
+  sprintf(hello_msg, "Calibrated value is: %f",
+          strain_gauge.getUnstrainedVoltage());
+
+  while (1)
   {
-    sprintf(hello_msg, "Initialize Error");
+    strain_gauge.update();
+    sprintf(hello_msg, "Strain value is: %f", strain_gauge.getStrain());
 
 #ifndef DISABLE_ROS
     network_msg.data = hello_msg;
     network_pub.publish(&network_msg);
-
-    nh.spinOnce();
-#else
-    printf("%s\n", hello_msg);
-#endif
-    wait_ms(100);
-  }
-
-  while (1)
-  {
-    bend_sensor.update();
-    sprintf(hello_msg, "Chip Id is: %x", bend_sensor.getChipId());
-
-#ifndef DISABLE_ROS
-    // network_msg.data = hello_msg;
-    // network_pub.publish(&network_msg);
 
     nh.spinOnce();
 #else

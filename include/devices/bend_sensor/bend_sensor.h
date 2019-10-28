@@ -50,9 +50,9 @@ public:
              uint8_t dev_index, const char* dev_name, const char* topic_name)
     : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
     // Change this->msg_chip_id to this-><custom_bend_message>
-    , _pub_bend_sensor(this->getTopicName(), &(this->_msg_chip_id))
+    , _pub_bend_sensor(topic_name, &(this->_msg_chip_id))
   {
-    this->getNodeHandle()->advertise(_pub_bend_sensor);
+    nh.advertise(_pub_bend_sensor);
   }
 #else
   BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index)

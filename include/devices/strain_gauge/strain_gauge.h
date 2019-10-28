@@ -35,6 +35,7 @@ private:
   float _Vin = 3.3;
   float _Vout_unstrained = 0.0f;
   float _Vout_strained = 0.0f;
+  float _strain = 0.0f;
 
 protected:
 public:
@@ -45,9 +46,9 @@ public:
               const char* dev_name, const char* topic_name)
     : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name)
     // Change this->msg_chip_id to this-><custom_bend_message>
-    , _pub_strain_gauge(this->getTopicName(), &(this->_msg_strain_gauge))
+    , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
-    this->getNodeHandle()->advertise(_pub_strain_gauge);
+    nh.advertise(_pub_strain_gauge);
   }
 #else
   StrainGauge(uint8_t id, PinName a0, uint8_t dev_index)
@@ -62,7 +63,25 @@ public:
   }
 
   // GETTERS
+  /**
+   * @brief Get the Unstrained Voltage object
+   *
+   * @return float _Vout_unstrained
+   */
+  float getUnstrainedVoltage()
+  {
+    return _Vout_unstrained;
+  }
 
+  /**
+   * @brief Get the Strain object
+   *
+   * @return float _strain
+   */
+  float getStrain()
+  {
+    return _strain;
+  }
   // SETTERS
 
   // METHODS
@@ -85,14 +104,11 @@ public:
 
     float GF = 2;
     _Vout_strained = this->readAnalogData();
-    float strain = (_Vout_strained - _Vout_unstrained) / _Vin;
-    // {
-    //   // ads_read_polled();
-    // }
+    _strain = (_Vout_strained - _Vout_unstrained) / _Vin;
 
 #ifndef DISABLE_ROS
-    // _msg_chip_id.data = this->getChipId();
-    // _pub_strain_gauge.publish(&(this->_msg_chip_id));
+    _msg_strain_gauge.data = _strain;
+    _pub_strain_gauge.publish(&(this->_msg_strain_gauge));
 #endif
   }
 };
