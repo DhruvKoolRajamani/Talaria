@@ -136,8 +136,8 @@ public:
     // }
 
 #ifndef DISABLE_ROS
-    // _msg_chip_id.data = this->getChipId();
-    // _pub_bend_sensor.publish(&(this->_msg_chip_id));
+    _msg_chip_id.data = this->getChipId();
+    _pub_bend_sensor.publish(&(this->_msg_chip_id));
 #endif
   }
 };

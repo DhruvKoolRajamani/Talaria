@@ -50,8 +50,8 @@ int main()
     sprintf(hello_msg, "Chip Id is: %x", bend_sensor.getChipId());
 
 #ifndef DISABLE_ROS
-    network_msg.data = hello_msg;
-    network_pub.publish(&network_msg);
+    // network_msg.data = hello_msg;
+    // network_pub.publish(&network_msg);
 
     nh.spinOnce();
 #else
