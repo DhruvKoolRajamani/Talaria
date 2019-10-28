@@ -43,7 +43,7 @@ private:
   ros::NodeHandle* _nh;
 
   static const int DEVICE_NAME_SIZE = 20;
-  static const int DEVICE_PREFIX_PATH_SIZE = 30;
+  static const int DEVICE_TOPIC_NAME_SIZE = 30 + DEVICE_NAME_SIZE;
 
 #ifndef DISABLE_DIAGNOSTICS
   static ros::Publisher _pub_diagnostics;
@@ -54,7 +54,6 @@ private:
 #endif
 
   char* _dev_name;
-  char* _prefix_path;
   char* _topic_name;
 #else
   // uint8_t* _shared_data_stream;

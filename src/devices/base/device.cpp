@@ -33,9 +33,7 @@ Device::Device()
   _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
 #ifndef DISABLE_ROS
   _dev_name = static_cast<char*>(malloc(DEVICE_NAME_SIZE));
-  _prefix_path = static_cast<char*>(malloc(DEVICE_PREFIX_PATH_SIZE));
-  _topic_name =
-      static_cast<char*>(malloc(DEVICE_PREFIX_PATH_SIZE + DEVICE_NAME_SIZE));
+  _topic_name = static_cast<char*>(malloc(DEVICE_TOPIC_NAME_SIZE));
 #endif
 }
 
@@ -47,7 +45,7 @@ Device::Device()
  * @param const char* dev_name
  */
 Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
-               const char* prefix_path)
+               const char* topic_name)
   : _en_status(true)
   , _conf_status(false)
   , _health_status(false)
@@ -56,17 +54,11 @@ Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
 {
   _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
   _dev_name = static_cast<char*>(malloc(DEVICE_NAME_SIZE));
-  _prefix_path = static_cast<char*>(malloc(DEVICE_PREFIX_PATH_SIZE));
-  _topic_name =
-      static_cast<char*>(malloc(DEVICE_PREFIX_PATH_SIZE + DEVICE_NAME_SIZE));
+  _topic_name = static_cast<char*>(malloc(DEVICE_TOPIC_NAME_SIZE));
   if (dev_name != NULL)
     memcpy(_dev_name, dev_name, sizeof(dev_name));
-  if (prefix_path != NULL)
-    memcpy(_prefix_path, prefix_path, sizeof(prefix_path));
-  if (dev_name != NULL && prefix_path != NULL)
-  {
-    getTopicName();
-  }
+  if (topic_name != NULL)
+    memcpy(_topic_name, topic_name, sizeof(topic_name));
 
 #ifndef DISABLE_DIAGNOSTICS
   if (!_is_diagnostic_published)
@@ -135,7 +127,6 @@ Device::~Device()
 {
   free(_dev_Id);
 #ifndef DISABLE_ROS
-  free(_prefix_path);
   free(_topic_name);
   free(_dev_name);
 #endif
@@ -238,7 +229,6 @@ char* Device::getDeviceName()
  */
 char* Device::getTopicName()
 {
-  sprintf(_topic_name, "%s/%s", _prefix_path, _dev_name);
   return _topic_name;
 }
 #endif

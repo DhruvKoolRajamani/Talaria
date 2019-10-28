@@ -13,7 +13,7 @@ DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-BendSensor bend_sensor(0x12, PrimaryBus, nh, 0, "bs", "/devices/index");
+BendSensor bend_sensor(0x12, PrimaryBus, nh, 0, "bs", "/devices/index/bs");
 std_msgs::String network_msg;
 ros::Publisher network_pub("network_strings", &network_msg);
 #else

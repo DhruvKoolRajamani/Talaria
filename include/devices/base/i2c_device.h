@@ -43,8 +43,8 @@ public:
    */
   I2CDevice(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
             uint8_t dev_index = 0, const char* dev_name = NULL,
-            const char* prefix_path = NULL)
-    : Device(dev_index, nh, dev_name, prefix_path)
+            const char* topic_name = NULL)
+    : Device(dev_index, nh, dev_name, topic_name)
     , _address(address << 1)
     , _i2c_bus(&i2c_bus)
   {

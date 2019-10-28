@@ -47,8 +47,8 @@ public:
   // CONSTRUCTORS
 #ifndef DISABLE_ROS
   BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
-             uint8_t dev_index, const char* dev_name, const char* prefix_path)
-    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, prefix_path)
+             uint8_t dev_index, const char* dev_name, const char* topic_name)
+    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
     // Change this->msg_chip_id to this-><custom_bend_message>
     , _pub_bend_sensor(this->getTopicName(), &(this->_msg_chip_id))
   {
