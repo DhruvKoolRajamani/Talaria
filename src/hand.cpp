@@ -17,7 +17,7 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, 0, "bs", "/devices/index");
 std_msgs::String network_msg;
 ros::Publisher network_pub("network_strings", &network_msg);
 #else
-BMI_160 Imu(0x68, PrimaryBus, 0);
+BendSensor bend_sensor(0x12, PrimaryBus, 0);
 #endif
 
 char hello_msg[50] = "";

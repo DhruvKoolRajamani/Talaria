@@ -30,7 +30,9 @@ private:
   uint8_t _byte_stream_pub[BYTE_STREAM_PUB_SIZE];
   uint8_t _byte_stream_sub[BYTE_STREAM_SUB_SIZE];
 
+#ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
+#endif
 
 protected:
 public:
