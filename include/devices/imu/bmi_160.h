@@ -35,6 +35,21 @@ private:
   std_msgs::Byte _msg_chip_id;
 #endif
 
+  float _GYRO_X;
+  float _GYRO_Y;
+  float _GYRO_Z;
+
+  float _ACC_X;
+  float _ACC_Y;
+  float _ACC_Z;
+
+  char acc[6];
+  char gyro[6];
+  uint8_t _PMU_STATUS;
+
+protected:
+public:
+  // CONSTRUCTORS
   enum REGISTER_ADDRESS
   {
     CHIP_ID = 0x68,
