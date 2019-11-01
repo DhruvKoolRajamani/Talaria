@@ -15,7 +15,7 @@ DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-BMI_160 Imu(0x68, FootBus, nh, 0, "imu", "/devices/body");
+BMI_160 Imu(0x68, FootBus, nh, 0, "imu", "/devices/right_foot/imu");
 std_msgs::String network_msg;
 ros::Publisher network_pub("network_strings", &network_msg);
 #else
@@ -49,25 +49,36 @@ int main()
 
   while (1)
   {
-    if (Imu.ping(BMI_160::REGISTER_ADDRESS::CHIP_ID))
-    {
-      sprintf(hello_msg, "Chip Id is: %x", Imu.getChipId());
-    }
-    else
-    {
-      sprintf(hello_msg, "Error");
-    }
-
+    Imu.update();
 #ifndef DISABLE_ROS
-    network_msg.data = hello_msg;
-    network_pub.publish(&network_msg);
-
     nh.spinOnce();
 #else
     printf("%s\n", hello_msg);
 #endif
-    wait_ms(1000);
+    wait_ms(100);
   }
 
   return 0;
 }
+
+// while (1)
+//   {
+//     if (Imu.ping(BMI_160::REGISTER_ADDRESS::CHIP_ID) && Imu.readGyro())
+//     {
+//       sprintf(hello_msg, "Chip Id is: %x, %5f, %5f, %5f, %5f, %5f, %5f", Imu.getChipId(), Imu.getGyroX(), Imu.getGyroY(), Imu.getGyroZ(),Imu.getAccX(),Imu.getAccY(),Imu.getAccZ());
+//     }
+//     else
+//     {
+//       sprintf(hello_msg, "Error");
+//     }
+
+// #ifndef DISABLE_ROS
+//     network_msg.data = hello_msg;
+//     network_pub.publish(&network_msg);
+
+//     nh.spinOnce();
+// #else
+//     printf("%s\n", hello_msg);
+// #endif
+//     wait_ms(1000);
+//   }

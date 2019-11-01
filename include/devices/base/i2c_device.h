@@ -107,7 +107,7 @@ public:
       this->setDiagnosticsData(_diagnostic_chip_id);
 #endif
 #else
-      printf("Chip Id is: %x", buffer);
+      // printf("Chip Id is: %x", buffer);
       this->update();
 #endif
       return true;
@@ -136,8 +136,8 @@ public:
     int read_state = this->readBytes((char*)buffer, buffer_size);
 
 #ifdef DISABLE_ROS
-    printf("Write State: %d\n", write_state);
-    printf("Read State: %d\n", read_state);
+    // printf("Write State: %d\n", write_state);
+    // printf("Read State: %d\n", read_state);
 #endif
 
     return !((write_state && read_state) && 0);
