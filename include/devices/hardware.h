@@ -16,6 +16,7 @@ const int NUM_DEVICES = 2;
 
 #ifndef DISABLE_ROS
 #include <ros.h>
+#include <limits.h>
 #include <std_msgs/String.h>
 #endif
 
