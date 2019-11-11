@@ -38,8 +38,8 @@ private:
   float _bend_angle = -numeric_limits<float>::max();
   float _stretch_value = -numeric_limits<float>::max();
 
-  float _r_mcp_joint = 10.2f;
-  float _r_pip_joint = 9.6f;
+  float _r_mcp_joint = 100.2f;
+  float _r_pip_joint = 90.6f;
 
   float _mcp_joint = 0.0f;
   float _pip_joint = 0.0f;
