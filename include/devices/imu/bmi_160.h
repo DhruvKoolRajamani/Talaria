@@ -199,10 +199,10 @@ public:
 
       writeRegister(CMD_ADDRESS, &SOFT_RESET, (int)(sizeof(SOFT_RESET)));
       wait_ms(1);
-      writeRegister(CMD_ADDRESS, &gyr_mode_normal, (int)sizeof(gyr_mode_normal));
-      wait_ms(1);
       writeRegister(CMD_ADDRESS, &acc_mode_normal, (int)sizeof(acc_mode_normal));
-      wait_ms(1);
+      wait_ms(10);
+      writeRegister(CMD_ADDRESS, &gyr_mode_normal, (int)sizeof(gyr_mode_normal));
+      wait_ms(10);
 
 #ifndef DISABLE_ROS
       _msg_chip_id.data = this->getChipId();
@@ -222,12 +222,17 @@ public:
     // Publish Diagnostic messages
     Device::update();
 
-    this->readGyro();
-
+    this->updateIMU();
+    
 #ifndef DISABLE_ROS
-    _imu_msg.gyro.data = &_GYRO;
-    _imu_msg.acc.data = &_ACC;
+    _imu_msg.chip_id.data = this->getChipId();
+    _imu_msg.gyro[0].data = _GYRO_X;
+    _imu_msg.gyro[1].data = _GYRO_Y;
+    _imu_msg.gyro[2].data = _GYRO_Z;
 
+    _imu_msg.acc[0].data = _ACC_X;
+    _imu_msg.acc[1].data = _ACC_Y;
+    _imu_msg.acc[2].data = _ACC_Z;
     _pub_imu.publish(&(this->_imu_msg));
 #endif
   }
@@ -275,13 +280,6 @@ public:
     {
       if (readGyro() && readAcc())
       {
-        _GYRO[0] = _GYRO_X;
-        _GYRO[1] = _GYRO_Y;
-        _GYRO[2] = _GYRO_Z;
-
-        _ACC[0] = _ACC_X;
-        _ACC[1] = _ACC_Y;
-        _ACC[2] = _ACC_Z;
         return true;
       }
 

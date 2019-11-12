@@ -49,8 +49,9 @@ int main()
 
   while (1)
   {
-    Imu.update();
     Imu.ping();
+    Imu.update();
+    
 #ifndef DISABLE_ROS
 
     sprintf(hello_msg, "Chip Id: %x", Imu.getChipId());
