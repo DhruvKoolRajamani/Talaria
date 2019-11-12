@@ -13,41 +13,47 @@ DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-StrainGauge strain_gauge(0, p15, nh, 1, "strain_gauge",
-                         "/devices/index/strain_gauge_1");
+// // StrainGauge strain_gauge(0, p15, nh, 1, "strain_gauge",
+// //                          "/devices/index/strain_gauge_1");
+BendSensor bend_sensor(0x12, PrimaryBus, nh, 1, "bs", "/devices/index/bs", p15);
 std_msgs::String network_msg;
-ros::Publisher network_pub("network_strings", &network_msg);
 #else
-AnalogDevice ReadStrain(0, p15, 1);
+BendSensor bend_sensor(0, PrimaryBus, 1);
 #endif
 
-char hello_msg[50] = "";
-
+float rate = 1;
+// 1000 * 1 / 50;
 int main()
 {
 #ifndef DISABLE_ROS
   nh.initNode();
-  nh.advertise(network_pub);
 #endif
 
-  strain_gauge.calibrate();
-  sprintf(hello_msg, "Calibrated value is: %f",
-          strain_gauge.getUnstrainedVoltage());
-
+  volatile bool is_init = false;
+  int i = 1;
   while (1)
   {
-    strain_gauge.update();
-    sprintf(hello_msg, "Strain value is: %f", strain_gauge.getStrain());
+    if (!is_init)
+    {
+      bend_sensor.softReset();
+      wait_ms(1000);
+      is_init = bend_sensor.initialize();
+    }
 
+    // Move all this to device manager
+    if (i == (1000 * 1 / 50))
+    {
+      bend_sensor.update();
+      i = 1;
+    }
+
+    if (!is_init)
+      rate = 1000;
+    wait_ms(rate);
+    i++;
 #ifndef DISABLE_ROS
-    network_msg.data = hello_msg;
-    network_pub.publish(&network_msg);
-
     nh.spinOnce();
-#else
-    printf("%s\n", hello_msg);
 #endif
-    wait_ms(100);
   }
 
   return 0;

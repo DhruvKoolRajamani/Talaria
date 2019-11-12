@@ -50,7 +50,7 @@ public:
   /**
    * @brief Construct a new Device Manager object
    *
-   * @param nodehandle
+   * @param NodeHandle
    */
   DeviceManager(ros::NodeHandle& nh);
 #else

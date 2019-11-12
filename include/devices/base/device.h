@@ -17,7 +17,6 @@
 #include "devices/hardware.h"
 
 #ifndef DISABLE_ROS
-#include "ros.h"
 
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"

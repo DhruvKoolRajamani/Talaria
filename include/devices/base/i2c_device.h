@@ -131,7 +131,7 @@ public:
                             bool poll = false, int delay_ms = 0)
   {
     char reg_address[1] = { address };
-    int write_state = _i2c_bus->write(_address, reg_address, 1, true);
+    int write_state = !_i2c_bus->write(_address, reg_address, 1, true);
     wait_ms(delay_ms);
     int read_state = this->readBytes((char*)buffer, buffer_size);
 
@@ -140,13 +140,7 @@ public:
     // printf("Read State: %d\n", read_state);
 #endif
 
-    return !((write_state && read_state) && 0);
-    // if (_i2c_bus->write(_address, reg_address, 1, true) == 0)
-    // {
-    //   return _i2c_bus->read(_address, (char*)buffer, buffer_size) == 0;
-    // }
-    // else
-    //   return false;
+    return (write_state && read_state);
   }
 
   /**
@@ -159,7 +153,7 @@ public:
    */
   virtual bool readBytes(char* buffer, int buffer_size, bool poll = false)
   {
-    return _i2c_bus->read(_address, buffer, buffer_size, poll);
+    return _i2c_bus->read(_address, buffer, buffer_size, poll) == 0;
   }
 
   /**
@@ -196,6 +190,21 @@ public:
     return _i2c_bus->write(_address, new_buffer, buffer_size + 1, poll) == 0;
   }
 
+  /**
+   * @brief Writes bytes to the i2c device address
+   *
+   * @param buffer
+   * @param buffer_size
+   * @param poll
+   * @return write Status
+   * @return true if ACK
+   * @return false if NACK
+   */
+  virtual int writeBytes(char* buffer, int buffer_size, bool poll = false)
+  {
+    return _i2c_bus->write(_address, buffer, buffer_size, poll) == 0;
+  }
+
   /** GETTERS */
 
   /**
@@ -218,6 +227,16 @@ public:
   void setChipId(uint8_t chip_id)
   {
     _chip_id = chip_id;
+  }
+
+  /**
+   * @brief Set the Device Address object
+   *
+   * @param address
+   */
+  void setDeviceAddress(int address)
+  {
+    _address = address;
   }
 };
 
