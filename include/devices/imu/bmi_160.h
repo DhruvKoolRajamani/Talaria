@@ -17,6 +17,7 @@
 #ifndef DISABLE_ROS
 #include "sensor_msgs/Imu.h"
 #include "std_msgs/Byte.h"
+#include "imu_msgs/bmi160.h"
 #endif
 
 
@@ -27,7 +28,8 @@ private:
   ros::Publisher _pub_imu;
   // Create a custom message for IMU but for now using standard
   // sensor_msgs::Imu _msg_imu;
-  std_msgs::Float32 _msg_imu; // 2 float32 arrays
+  // std_msgs::Float32 _msg_imu; // 2 float32 arrays
+  imu_msgs::bmi160 _imu_msg;
   std_msgs::Byte _msg_chip_id;
 #endif
 
@@ -42,7 +44,8 @@ private:
   uint8_t acc[6];
   uint8_t gyro[6];
   uint8_t _PMU_STATUS;
-
+  float _GYRO[3];
+  float _ACC[3];
 protected:
 public:
   // CONSTRUCTORS
@@ -135,7 +138,7 @@ public:
   BMI_160(int address, I2CBus& i2c_bus, ros::NodeHandle& nh, uint8_t dev_index,
           const char* dev_name, const char* topic_name)
     : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
-    , _pub_imu(topic_name, &(this->_msg_imu))
+    , _pub_imu(topic_name, &(this->_imu_msg))
   {
     nh.advertise(_pub_imu);
   }
@@ -222,8 +225,10 @@ public:
     this->readGyro();
 
 #ifndef DISABLE_ROS
-    _msg_imu.data = _GYRO_X;
-    _pub_imu.publish(&(this->_msg_imu));
+    _imu_msg.gyro.data = &_GYRO;
+    _imu_msg.acc.data = &_ACC;
+
+    _pub_imu.publish(&(this->_imu_msg));
 #endif
   }
 
@@ -270,6 +275,13 @@ public:
     {
       if (readGyro() && readAcc())
       {
+        _GYRO[0] = _GYRO_X;
+        _GYRO[1] = _GYRO_Y;
+        _GYRO[2] = _GYRO_Z;
+
+        _ACC[0] = _ACC_X;
+        _ACC[1] = _ACC_Y;
+        _ACC[2] = _ACC_Z;
         return true;
       }
 
