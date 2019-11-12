@@ -246,7 +246,7 @@ public:
     }
     return true;
   }
-+.
+  
     bool readAcc()
     {
       uint8_t* acc_ptr = acc;

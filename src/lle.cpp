@@ -50,7 +50,12 @@ int main()
   while (1)
   {
     Imu.update();
+    Imu.ping();
 #ifndef DISABLE_ROS
+
+    sprintf(hello_msg, "Chip Id: %x", Imu.getChipId());
+    network_msg.data = hello_msg;
+    network_pub.publish(&network_msg);
     nh.spinOnce();
 #else
     printf("%s\n", hello_msg);
