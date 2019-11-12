@@ -53,3 +53,22 @@ rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
 # Open a new terminal
 rostopic echo /network_strings
 ```
+
+## Creating New Ros Messages
+
+# For New package 
+    # in catkin_ws
+    cd src
+    catkin_create_pkg [Name] <dependencies>
+    cd [package]
+    mkdir msg
+# For new message in existing package (cd into package/msg dir)
+    #here is where the message .msg file goes
+    # update package.xml and CmakeLists in similar fashion to Ros tutorials and previously created messages
+    
+    cd ../.. # into catkin_ws
+    catkin_make
+    source ~/.bashrc #assuming source ~/../catkin_ws/devel/setup.bash in .bashrc
+    cd ../lib
+    rm -rf ros_lib
+    rosrun rosserial_mbed make_libraries.py .
