@@ -1,5 +1,5 @@
-#ifndef _ROS_lle_serial_msgs_imu_h
-#define _ROS_lle_serial_msgs_imu_h
+#ifndef _ROS_imu_msgs_bmi160_h
+#define _ROS_imu_msgs_bmi160_h
 
 #include <stdint.h>
 #include <string.h>
@@ -9,10 +9,10 @@
 #include "std_msgs/Byte.h"
 #include "std_msgs/Float32.h"
 
-namespace lle_serial_msgs
+namespace imu_msgs
 {
 
-  class imu : public ros::Msg
+  class bmi160 : public ros::Msg
   {
     public:
       typedef std_msgs::Header _header_type;
@@ -22,7 +22,7 @@ namespace lle_serial_msgs
       std_msgs::Float32 gyro[3];
       std_msgs::Float32 acc[3];
 
-    imu():
+    bmi160():
       header(),
       chip_id(),
       gyro(),
@@ -58,7 +58,7 @@ namespace lle_serial_msgs
      return offset;
     }
 
-    const char * getType(){ return "lle_serial_msgs/imu"; };
+    const char * getType(){ return "imu_msgs/bmi160"; };
     const char * getMD5(){ return "c701dc6d5e66e890505672f3444e8b60"; };
 
   };
