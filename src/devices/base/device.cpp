@@ -45,12 +45,13 @@ Device::Device()
  * @param const char* dev_name
  */
 Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
-               const char* topic_name)
+               const char* topic_name, int refresh_rate)
   : _en_status(true)
   , _conf_status(false)
   , _health_status(false)
   , _dev_index(dev_index)
   , _nh(&nh)
+  , _refresh_rate(refresh_rate)
 {
   _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
   _dev_name = static_cast<char*>(malloc(DEVICE_NAME_SIZE));
@@ -107,11 +108,12 @@ Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
  * @param uint8_t dev_index
  * @param const char* dev_name
  */
-Device::Device(uint8_t dev_index)
+Device::Device(uint8_t dev_index, int refresh_rate)
   : _en_status(true)
   , _conf_status(false)
   , _health_status(false)
   , _dev_index(dev_index)
+  , _refresh_rate(refresh_rate)
 {
   _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
 }
@@ -143,6 +145,22 @@ Device::~Device()
 ros::NodeHandle* Device::getNodeHandle()
 {
   return _nh;
+}
+
+/**
+ * @brief Get the Is Topic Advertised object
+ *
+ * @return true
+ * @return false
+ */
+bool Device::getIsTopicAdvertised()
+{
+  return _is_topic_advertised;
+}
+
+int Device::getRefreshRate()
+{
+  return _refresh_rate;
 }
 #endif
 
@@ -299,16 +317,19 @@ void Device::disable()
  * @brief Update the values of the device whether read or write
  *
  */
-void Device::update()
+void Device::update(int loop_counter)
 {
-  // Run all functions to get/set data
+  if (this->_refresh_rate == loop_counter)
+  {
+    // Run all functions to get/set data
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-  _pub_diagnostics.publish(&(this->_msg_diagnostic_array));
+    _pub_diagnostics.publish(&(this->_msg_diagnostic_array));
 #endif
 // #else
 #endif
+  }
 }
 
 /**
@@ -366,6 +387,11 @@ void Device::setNodeHandle(ros::NodeHandle* nh)
   _nh = nh;
 }
 #endif
+
+void Device::setIsTopicAdvertised(bool is_topic_advertised)
+{
+  _is_topic_advertised = is_topic_advertised;
+}
 
 /**
  * @brief Set the Pin State object

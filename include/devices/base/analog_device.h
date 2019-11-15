@@ -29,9 +29,9 @@ public:
 #ifndef DISABLE_ROS
   AnalogDevice(uint8_t id, PinName a0, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
-               const char* topic_name = NULL)
+               const char* topic_name = NULL, int refresh_rate = 1)
     : AnalogIn(a0)
-    , Device(dev_index, nh, dev_name, topic_name)
+    , Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
     , _a0(a0)
   {
@@ -46,8 +46,9 @@ public:
    * @param id
    * @param a0
    */
-  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0)
-    : AnalogIn(a0), Device(dev_index), _id(id), _a0(a0)
+  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0,
+               int refresh_rate = 1)
+    : AnalogIn(a0), Device(dev_index, refresh_rate), _id(id), _a0(a0)
   {
     setIndex(dev_index);
     setHealthStatus(true);

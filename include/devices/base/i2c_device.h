@@ -43,8 +43,8 @@ public:
    */
   I2CDevice(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
             uint8_t dev_index = 0, const char* dev_name = NULL,
-            const char* topic_name = NULL)
-    : Device(dev_index, nh, dev_name, topic_name)
+            const char* topic_name = NULL, int refresh_rate = 1)
+    : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _address(address << 1)
     , _i2c_bus(&i2c_bus)
   {
@@ -64,8 +64,9 @@ public:
    * @param bus_Id
    * @param dev_index
    */
-  I2CDevice(int address, I2CBus& i2c_bus, uint8_t dev_index = 0)
-    : Device(dev_index), _address(address << 1)
+  I2CDevice(int address, I2CBus& i2c_bus, uint8_t dev_index = 0,
+            int refresh_rate = 1)
+    : Device(dev_index, refresh_rate), _address(address << 1)
   {
     _i2c_bus = &i2c_bus;
     setIndex(dev_index);

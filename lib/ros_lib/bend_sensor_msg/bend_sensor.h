@@ -22,17 +22,17 @@ namespace bend_sensor_msg
       _chip_id_type chip_id;
       typedef std_msgs::String _debug_type;
       _debug_type debug;
-      typedef std_msgs::Float32 _mcp_joint_type;
-      _mcp_joint_type mcp_joint;
-      typedef std_msgs::Float32 _pip_joint_type;
-      _pip_joint_type pip_joint;
+      typedef std_msgs::Float32 _bend_type;
+      _bend_type bend;
+      typedef std_msgs::Float32 _stretch_type;
+      _stretch_type stretch;
 
     bend_sensor():
       header(),
       chip_id(),
       debug(),
-      mcp_joint(),
-      pip_joint()
+      bend(),
+      stretch()
     {
     }
 
@@ -42,8 +42,8 @@ namespace bend_sensor_msg
       offset += this->header.serialize(outbuffer + offset);
       offset += this->chip_id.serialize(outbuffer + offset);
       offset += this->debug.serialize(outbuffer + offset);
-      offset += this->mcp_joint.serialize(outbuffer + offset);
-      offset += this->pip_joint.serialize(outbuffer + offset);
+      offset += this->bend.serialize(outbuffer + offset);
+      offset += this->stretch.serialize(outbuffer + offset);
       return offset;
     }
 
@@ -53,13 +53,13 @@ namespace bend_sensor_msg
       offset += this->header.deserialize(inbuffer + offset);
       offset += this->chip_id.deserialize(inbuffer + offset);
       offset += this->debug.deserialize(inbuffer + offset);
-      offset += this->mcp_joint.deserialize(inbuffer + offset);
-      offset += this->pip_joint.deserialize(inbuffer + offset);
+      offset += this->bend.deserialize(inbuffer + offset);
+      offset += this->stretch.deserialize(inbuffer + offset);
      return offset;
     }
 
     const char * getType(){ return "bend_sensor_msg/bend_sensor"; };
-    const char * getMD5(){ return "3905add052559c8a675e221ba31a428e"; };
+    const char * getMD5(){ return "a771c07e6b74c7930629858c639cd62f"; };
 
   };
 

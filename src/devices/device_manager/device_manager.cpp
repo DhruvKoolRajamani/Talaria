@@ -42,7 +42,7 @@ bool DeviceManager::addDevice(Device* device, int index)
   return true;
 }
 
-bool DeviceManager::readByteStream(/* Add callback ptr*/)  // for motors
+bool DeviceManager::readByteStream(/** Add Callback here */)  // for motors
 {
   // Perform CRC here
   // Make this interrupt based Serial
@@ -60,11 +60,23 @@ void DeviceManager::writeByteStream()
 #endif
 }
 
-void DeviceManager::initializeDevices()
+bool DeviceManager::initializeDevices()
 {
+  // Add functionality to store time?
+  bool init_flag = false;
+  for (int i = 0; i < NUM_DEVICES; i++)
+  {
+    if (_devices[i] == NULL)
+      continue;
+    else
+    {
+      init_flag = _devices[i]->initialize();
+    }
+  }
+  return init_flag;
 }
 
-void DeviceManager::updateDevices()
+void DeviceManager::updateDevices(int loop_counter)
 {
   // Add functionality to store time?
   for (int i = 0; i < NUM_DEVICES; i++)
@@ -73,7 +85,27 @@ void DeviceManager::updateDevices()
       continue;
     else
     {
-      _devices[i]->update();
+      _devices[i]->update(loop_counter);
     }
   }
+}
+
+int DeviceManager::getMaxRefreshRate()
+{
+  for (int i = 0; i < NUM_DEVICES; i++)
+  {
+    if (_devices[i] == NULL)
+      continue;
+    else if (i < 1)
+    {
+      this->_max_refresh_rate = _devices[i]->getRefreshRate();
+    }
+    else
+    {
+      if (std::max(this->_max_refresh_rate, _devices[i]->getRefreshRate()) !=
+          this->_max_refresh_rate)
+        this->_max_refresh_rate = _devices[i]->getRefreshRate();
+    }
+  }
+  return this->_max_refresh_rate;
 }

@@ -41,15 +41,16 @@ public:
 
 #ifndef DISABLE_ROS
   BMI_160(int address, I2CBus& i2c_bus, ros::NodeHandle& nh, uint8_t dev_index,
-          const char* dev_name, const char* topic_name)
-    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
+          const char* dev_name, const char* topic_name, int refresh_rate = 1)
+    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name,
+                refresh_rate)
     , _pub_imu(topic_name, &(this->_msg_chip_id))
   {
-    nh.advertise(_pub_imu);
+    setIsTopicAdvertised(nh.advertise(_pub_imu));
   }
 #else
-  BMI_160(int address, I2CBus& i2c_bus, uint8_t dev_index)
-    : I2CDevice(address, i2c_bus, dev_index)
+  BMI_160(int address, I2CBus& i2c_bus, uint8_t dev_index, int refresh_rate = 1)
+    : I2CDevice(address, i2c_bus, dev_index, refresh_rate)
   {
   }
 #endif
@@ -78,7 +79,7 @@ public:
       _msg_chip_id.data = this->getChipId();
 #endif
 
-      this->update();
+      this->update(/** Try not to call this function during ping. */);
 
       return true;
     }
@@ -87,15 +88,20 @@ public:
       return false;
   }
 
-  void update()
+  void update(int loop_counter = 1)
   {
-    // Publish Diagnostic messages
-    Device::update();
+    if (this->_refresh_rate == loop_counter)
+    {
+      // Publish Diagnostic messages
+      Device::update(loop_counter);
 
 #ifndef DISABLE_ROS
-    _msg_chip_id.data = this->getChipId();
-    _pub_imu.publish(&(this->_msg_chip_id));
+      _msg_chip_id.data = this->getChipId();
+
+      if (this->getIsTopicAdvertised())
+        _pub_imu.publish(&(this->_msg_chip_id));
 #endif
+    }
   }
 };
 

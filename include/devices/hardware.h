@@ -12,12 +12,30 @@
 #ifndef HARDWARE_H
 #define HARDWARE_H
 
+#ifdef HAND
 const int NUM_DEVICES = 2;
+#elif LLE
+const int NUM_DEVICES = 1;
+#endif
 
 #ifndef DISABLE_ROS
 #include <ros.h>
 #include <limits.h>
 #include <std_msgs/String.h>
 #endif
+
+typedef enum
+{
+  BEND_SENSOR_ID,
+  AD_IMU_SENSOR_ID,
+  CURRENT_SENSE_ID,
+  STRAIN_GAUGE_ID
+} hand_devices_id_enum;
+
+typedef enum
+{
+  BMI_IMU_SENSOR_ID,
+  FSR_ID
+} lle_devices_id_enum;
 
 #endif  // HARDWARE_H

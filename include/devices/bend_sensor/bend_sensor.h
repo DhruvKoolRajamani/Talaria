@@ -38,12 +38,6 @@ private:
   float _bend_angle = -numeric_limits<float>::max();
   float _stretch_value = -numeric_limits<float>::max();
 
-  float _r_mcp_joint = 100.2f;
-  float _r_pip_joint = 90.6f;
-
-  float _mcp_joint = 0.0f;
-  float _pip_joint = 0.0f;
-
   enum COMMAND_REGISTERS
   {
     BEND_SENSOR_RUN = 0,       // Place ADS in freerun interrupt mode or standby
@@ -112,16 +106,18 @@ public:
 #ifndef DISABLE_ROS
   BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
              uint8_t dev_index, const char* dev_name, const char* topic_name,
-             PinName reset_pin)
-    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name)
+             PinName reset_pin, int refresh_rate = 1)
+    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name,
+                refresh_rate)
     , _reset_pin(reset_pin)
     , _pub_bend_sensor(topic_name, &(this->_msg_bend_sensor))
   {
-    nh.advertise(_pub_bend_sensor);
+    setIsTopicAdvertised(nh.advertise(_pub_bend_sensor));
   }
 #else
-  BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index)
-    : I2CDevice(address, i2c_bus, dev_index), _reset_pin(reset_pin)
+  BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index, int refresh_rate)
+    : I2CDevice(address, i2c_bus, dev_index, refresh_rate)
+    , _reset_pin(reset_pin)
   {
   }
 #endif
@@ -148,6 +144,8 @@ public:
     this->setConfiguredStatus(true);
 
     // this->reset(_reset_pin, 2000);
+    // bend_sensor.softReset();
+    // wait_ms(1000);
 
     if (!this->ping())
     {
@@ -220,8 +218,8 @@ public:
 
 #ifndef DISABLE_ROS
       _msg_bend_sensor.chip_id.data = this->getChipId();
-      _msg_bend_sensor.mcp_joint.data = this->_mcp_joint;
-      _msg_bend_sensor.pip_joint.data = this->_pip_joint;
+      _msg_bend_sensor.bend.data = this->_bend_angle;
+      _msg_bend_sensor.stretch.data = this->_stretch_value;
 #ifndef DISABLE_DIAGNOSTICS
       _diagnostic_chip_id.value = (char*)buffer;
       this->setDiagnosticsData(_diagnostic_chip_id);
@@ -235,29 +233,32 @@ public:
       return false;
   }
 
-  void update()
+  void update(int loop_counter = 1)
   {
-    // Publish Diagnostic messages
-    Device::update();
+    // Only update if update rate for the sensor is the same as the sampling
+    // rate
+    if (this->_refresh_rate == loop_counter)
+    {
+      // Publish Diagnostic messages
+      Device::update(loop_counter);
 
-    // this->_bend_angle = -numeric_limits<float>::max();
-    // this->_stretch_value = -numeric_limits<float>::max();
-
-    this->readData();
+      this->readData();
 
 #ifndef DISABLE_ROS
-    if (this->_data_ready == BEND_SENSOR_SAMPLE)
-    {
-      processNewData();
-      _msg_bend_sensor.chip_id.data = this->getChipId();
-      _msg_bend_sensor.mcp_joint.data = this->_mcp_joint;
-      _msg_bend_sensor.pip_joint.data = this->_pip_joint;
-      _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
-    }
+      if (this->_data_ready == BEND_SENSOR_SAMPLE)
+      {
+        processNewData();
+        _msg_bend_sensor.chip_id.data = this->getChipId();
+        _msg_bend_sensor.bend.data = this->_bend_angle;
+        _msg_bend_sensor.stretch.data = this->_stretch_value;
+        if (this->getIsTopicAdvertised())
+          _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
+      }
 #else
 // Serialize this message
 // printf("Bend Data: %f", _data[0]);
 #endif
+    }
   }
 
   inline int16_t decodeInt16(const uint8_t* p_encoded_data)  // Convert two
@@ -361,33 +362,33 @@ public:
     // Solve:
     // A*x = B
     //
-    float A[2][2], B[2], C[2], X[2] = { 0, 0 };
-    A[0][0] = 1;
-    A[0][1] = 1;
-    A[1][0] = this->_r_mcp_joint;
-    A[1][1] = this->_r_pip_joint;
+    // float A[2][2], B[2], C[2], X[2] = { 0, 0 };
+    // A[0][0] = 1;
+    // A[0][1] = 1;
+    // A[1][0] = this->_r_mcp_joint;
+    // A[1][1] = this->_r_pip_joint;
 
-    B[0] = this->_bend_angle;
-    B[1] = this->_stretch_value;
+    // B[0] = this->_bend_angle;
+    // B[1] = this->_stretch_value;
 
-    for (int i = 0; i < 2; i++)
-    {
-      C[i] = B[i];
-      for (int j = 0; j < 2; j++)
-      {
-        if (i != j)
-        {
-          C[i] -= A[i][j] * X[j];
-        }
-      }
-    }
-    for (int i = 0; i < 2; i++)
-    {
-      X[i] = C[i] / A[i][i];
-    }
+    // for (int i = 0; i < 2; i++)
+    // {
+    //   C[i] = B[i];
+    //   for (int j = 0; j < 2; j++)
+    //   {
+    //     if (i != j)
+    //     {
+    //       C[i] -= A[i][j] * X[j];
+    //     }
+    //   }
+    // }
+    // for (int i = 0; i < 2; i++)
+    // {
+    //   X[i] = C[i] / A[i][i];
+    // }
 
-    this->_mcp_joint = X[0] * 180.0f / (float)M_PI;
-    this->_pip_joint = X[1] * 180.0f / (float)M_PI;
+    // this->_mcp_joint = X[0] * 180.0f / (float)M_PI;
+    // this->_pip_joint = X[1] * 180.0f / (float)M_PI;
   }
 
   void disable()

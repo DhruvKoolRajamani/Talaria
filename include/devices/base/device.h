@@ -41,6 +41,8 @@ private:
 #ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
 
+  bool _is_topic_advertised;
+
   static const int DEVICE_NAME_SIZE = 20;
   static const int DEVICE_TOPIC_NAME_SIZE = 30 + DEVICE_NAME_SIZE;
 
@@ -60,6 +62,8 @@ private:
 #endif
 
 protected:
+  int _refresh_rate = 0;
+
 public:
   /** CONSTRUCTORS */
 
@@ -77,15 +81,15 @@ public:
    * @param const char* dev_name
    */
   Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name = NULL,
-         const char* prefix_path = NULL);
+         const char* prefix_path = NULL, int refresh_rate = 1);
 #else
   /**
    * @brief Construct a new Device object
    *
-   * @param uint8_t dev_index
-   * @param const char* dev_name
+   * @param dev_index
+   * @param refresh_rate
    */
-  Device(uint8_t dev_index);
+  Device(uint8_t dev_index, int refresh_rate);
 #endif
 
   /** DESTRUCTOR */
@@ -105,6 +109,13 @@ public:
    * @return ros::NodeHandle*
    */
   ros::NodeHandle* getNodeHandle();
+
+  /**
+   * @brief Get the Refresh Rate object
+   *
+   * @return int _refresh_rate
+   */
+  int getRefreshRate();
 #endif
 
   /**
@@ -159,6 +170,14 @@ public:
    * @return char* _dev_name
    */
   char* getDeviceName();
+
+  /**
+   * @brief Get the Is Topic Advertised object
+   *
+   * @return true
+   * @return false
+   */
+  bool getIsTopicAdvertised();
 #endif
 
 #ifndef DISABLE_ROS
@@ -194,7 +213,7 @@ public:
    * @brief Update the values of the device whether read or write
    *
    */
-  virtual void update();
+  virtual void update(int loop_counter = 1);
 
   /**
    * @brief Reset the pin for the Device and wait for a delay in ms before
@@ -237,6 +256,13 @@ public:
    * @param uint8_t id
    */
   void setId(uint8_t id);
+
+  /**
+   * @brief Set the Is Topic Advertised object
+   *
+   * @param is_topic_advertised
+   */
+  void setIsTopicAdvertised(bool is_topic_advertised);
 
   /**
    * @brief Set the Health Status object

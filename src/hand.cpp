@@ -7,27 +7,38 @@ I2CBus SecondaryBus(1, p28, p27);
 
 #ifndef DISABLE_ROS
 ros::NodeHandle nh;
-// DeviceManager device_manager(nh);
+DeviceManager device_manager(nh);
 #else
 DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-// // StrainGauge strain_gauge(0, p15, nh, 1, "strain_gauge",
-// //                          "/devices/index/strain_gauge_1");
-BendSensor bend_sensor(0x12, PrimaryBus, nh, 1, "bs", "/devices/index/bs", p15);
-std_msgs::String network_msg;
+StrainGauge strain_gauge(0, p16, nh, STRAIN_GAUGE_ID, "strain_gauge",
+                         "/devices/index/strain_gauge", 5);
+BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
+                       "/devices/index/bend_sensor", p15, 20);
+
+// std_msgs::String debug_string;
+// ros::Publisher debug_pub("/debug_pub", &debug_string);
 #else
-BendSensor bend_sensor(0, PrimaryBus, 1);
+BendSensor bend_sensor(0, PrimaryBus, BEND_SENSOR_ID);
 #endif
 
+void addDevices()
+{
+  device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
+  device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
+}
+
 float rate = 1;
-// 1000 * 1 / 50;
 int main()
 {
 #ifndef DISABLE_ROS
   nh.initNode();
+  // nh.advertise(debug_pub);
 #endif
+
+  addDevices();
 
   volatile bool is_init = false;
   int i = 1;
@@ -35,22 +46,22 @@ int main()
   {
     if (!is_init)
     {
-      bend_sensor.softReset();
-      wait_ms(1000);
-      is_init = bend_sensor.initialize();
+      is_init = device_manager.initializeDevices();
     }
 
     // Move all this to device manager
-    if (i == (1000 * 1 / 50))
-    {
-      bend_sensor.update();
-      i = 1;
-    }
+    device_manager.updateDevices(i);
 
     if (!is_init)
       rate = 1000;
+
+    if (i <= device_manager.getMaxRefreshRate())
+    {
+      i++;
+    }
+    else
+      i = 0;
     wait_ms(rate);
-    i++;
 #ifndef DISABLE_ROS
     nh.spinOnce();
 #endif

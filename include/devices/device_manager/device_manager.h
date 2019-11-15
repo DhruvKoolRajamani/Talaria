@@ -33,6 +33,7 @@ private:
 
 #ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
+  int _max_refresh_rate = 1;
 #endif
 
 protected:
@@ -67,6 +68,7 @@ public:
   }
 
   /** GETTERS */
+  int getMaxRefreshRate();
 
   /** SETTERS */
 
@@ -76,13 +78,13 @@ public:
 
   bool addDevice(Device* device, int index);
 
-  bool readByteStream(/* Add callback ptr*/);
+  bool readByteStream(/** Add callback ptr*/);
 
   void writeByteStream();
 
-  void initializeDevices();
+  bool initializeDevices();
 
-  void updateDevices();
+  void updateDevices(int loop_counter = 1);
 };
 
 extern DeviceManager device_manager;

@@ -43,12 +43,11 @@ public:
 
 #ifndef DISABLE_ROS
   StrainGauge(uint8_t id, PinName a0, ros::NodeHandle& nh, uint8_t dev_index,
-              const char* dev_name, const char* topic_name)
-    : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name)
-    // Change this->msg_chip_id to this-><custom_bend_message>
+              const char* dev_name, const char* topic_name, int refresh_rate)
+    : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name, refresh_rate)
     , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
-    nh.advertise(_pub_strain_gauge);
+    setIsTopicAdvertised(nh.advertise(_pub_strain_gauge));
   }
 #else
   StrainGauge(uint8_t id, PinName a0, uint8_t dev_index)
@@ -68,7 +67,7 @@ public:
    *
    * @return float _Vout_unstrained
    */
-  float getUnstrainedVoltage()
+  float getUnstrainedVoltag_ide()
   {
     return _Vout_unstrained;
   }
@@ -97,19 +96,23 @@ public:
     setConfiguredStatus(true);
   }
 
-  void update()
+  void update(int loop_counter = 1)
   {
-    // Publish Diagnostic messages
-    Device::update();
+    if (this->_refresh_rate == loop_counter)
+    {
+      // Publish Diagnostic messages
+      Device::update(loop_counter);
 
-    float GF = 2;
-    _Vout_strained = this->readAnalogData();
-    _strain = (_Vout_strained - _Vout_unstrained) / _Vin;
+      float GF = 2;
+      _Vout_strained = this->readAnalogData();
+      _strain = (_Vout_strained - _Vout_unstrained) / _Vin;
 
 #ifndef DISABLE_ROS
-    _msg_strain_gauge.data = _strain;
-    _pub_strain_gauge.publish(&(this->_msg_strain_gauge));
+      _msg_strain_gauge.data = _strain;
+      if (this->getIsTopicAdvertised())
+        _pub_strain_gauge.publish(&(this->_msg_strain_gauge));
 #endif
+    }
   }
 };
 
