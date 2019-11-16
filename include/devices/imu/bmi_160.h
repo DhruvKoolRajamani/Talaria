@@ -46,9 +46,17 @@ private:
   uint8_t _PMU_STATUS;
   float _GYRO[3];
   float _ACC[3];
+
+  // typedef enum{
+  //   foc_gyr_en,
+  //   foc_acc_x,
+  //   foc_acc_y,
+  //   foc_acc_z
+  // }
+
 protected:
 public:
-  // CONSTRUCTORS
+  
   enum REGISTER_ADDRESS
   {
     CHIP_ID = 0x00,
@@ -124,6 +132,7 @@ public:
     INT_EN_1 = 0x51,
     INT_EN_2 = 0x52,
 
+    FOC_CONF = 0x69,
 
     CMD_ADDRESS = 0x7E
   };
@@ -225,7 +234,7 @@ public:
     this->updateIMU();
     
 #ifndef DISABLE_ROS
-    _imu_msg.chip_id.data = this->getChipId();
+    _imu_msg.chip_id = this->getChipId();
     _imu_msg.gyro[0].data = _GYRO_X;
     _imu_msg.gyro[1].data = _GYRO_Y;
     _imu_msg.gyro[2].data = _GYRO_Z;
@@ -253,6 +262,7 @@ public:
       _GYRO_X = (uint8_t)gyro[1] << 8 | (uint8_t)gyro[0];
       _GYRO_Y = (uint8_t)gyro[3] << 8 | (uint8_t)gyro[2];
       _GYRO_Z = (uint8_t)gyro[5] << 8 | (uint8_t)gyro[4];
+
     }
     return true;
   }
@@ -284,6 +294,19 @@ public:
       }
 
       return false;
+    }
+
+    bool calibrate(){
+      char buffer = 0x7F;
+      writeRegister(REGISTER_ADDRESS::FOC_CONF, &buffer, (int)sizeof(buffer));
+
+      wait_ms(300);
+      uint8_t readBuffer;
+      readRegister(REGISTER_ADDRESS::FOC_CONF, &readBuffer, (int)sizeof(readBuffer));
+      wait_ms(44);
+      printf("%x", readBuffer);
+
+
     }
   };
 #endif  // BMI_160_H

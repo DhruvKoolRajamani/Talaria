@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include "ros/msg.h"
 #include "std_msgs/Header.h"
-#include "std_msgs/Byte.h"
 #include "std_msgs/Float32.h"
 
 namespace imu_msgs
@@ -17,14 +16,14 @@ namespace imu_msgs
     public:
       typedef std_msgs::Header _header_type;
       _header_type header;
-      typedef std_msgs::Byte _chip_id_type;
+      typedef uint8_t _chip_id_type;
       _chip_id_type chip_id;
       std_msgs::Float32 gyro[3];
       std_msgs::Float32 acc[3];
 
     bmi160():
       header(),
-      chip_id(),
+      chip_id(0),
       gyro(),
       acc()
     {
@@ -34,7 +33,8 @@ namespace imu_msgs
     {
       int offset = 0;
       offset += this->header.serialize(outbuffer + offset);
-      offset += this->chip_id.serialize(outbuffer + offset);
+      *(outbuffer + offset + 0) = (this->chip_id >> (8 * 0)) & 0xFF;
+      offset += sizeof(this->chip_id);
       for( uint32_t i = 0; i < 3; i++){
       offset += this->gyro[i].serialize(outbuffer + offset);
       }
@@ -48,7 +48,8 @@ namespace imu_msgs
     {
       int offset = 0;
       offset += this->header.deserialize(inbuffer + offset);
-      offset += this->chip_id.deserialize(inbuffer + offset);
+      this->chip_id =  ((uint8_t) (*(inbuffer + offset)));
+      offset += sizeof(this->chip_id);
       for( uint32_t i = 0; i < 3; i++){
       offset += this->gyro[i].deserialize(inbuffer + offset);
       }
@@ -59,7 +60,7 @@ namespace imu_msgs
     }
 
     const char * getType(){ return "imu_msgs/bmi160"; };
-    const char * getMD5(){ return "c701dc6d5e66e890505672f3444e8b60"; };
+    const char * getMD5(){ return "fb7a34db91cd9c52bd9bc31ae6e1f9e2"; };
 
   };
 
