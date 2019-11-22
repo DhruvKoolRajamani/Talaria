@@ -12,11 +12,17 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
 #include "mbed.h"
+
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#include "Arduino.h"
+#endif
 
 #include "devices/hardware.h"
 
 #ifndef DISABLE_ROS
+#include "ros.h"
 
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
@@ -40,8 +46,6 @@ private:
 
 #ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
-
-  bool _is_topic_advertised;
 
   static const int DEVICE_NAME_SIZE = 20;
   static const int DEVICE_TOPIC_NAME_SIZE = 30 + DEVICE_NAME_SIZE;
@@ -81,13 +85,13 @@ public:
    * @param const char* dev_name
    */
   Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name = NULL,
-         const char* prefix_path = NULL, int refresh_rate = 1);
+         const char* prefix_path = NULL);
 #else
   /**
    * @brief Construct a new Device object
    *
-   * @param dev_index
-   * @param refresh_rate
+   * @param uint8_t dev_index
+   * @param const char* dev_name
    */
   Device(uint8_t dev_index, int refresh_rate);
 #endif
@@ -222,7 +226,12 @@ public:
    * @param PinName pin
    * @param int delay_ms
    */
+  #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
   virtual void reset(PinName pin, int delay_ms = 100);
+  #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+  virtual void reset(int pin, int delay_ms = 100);  
+  #endif
+  
 
   /** SETTERS */
 
@@ -241,7 +250,11 @@ public:
    * @param PinName pin
    * @param bool state
    */
+  #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
   virtual void setPinState(PinName pin, bool state);
+  #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+  virtual void setPinState(int pin, bool state);
+  #endif
 
   /**
    * @brief Set the Index object

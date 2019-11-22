@@ -12,6 +12,8 @@
 #ifndef DEVICE_MANAGER_H
 #define DEVICE_MANAGER_H
 
+#define PACKET_SIZE 58
+
 #include "mbed.h"
 #include "devices/hardware.h"
 
@@ -51,7 +53,7 @@ public:
   /**
    * @brief Construct a new Device Manager object
    *
-   * @param NodeHandle
+   * @param nodehandle
    */
   DeviceManager(ros::NodeHandle& nh);
 #else
@@ -68,7 +70,6 @@ public:
   }
 
   /** GETTERS */
-  int getMaxRefreshRate();
 
   /** SETTERS */
 
@@ -78,13 +79,78 @@ public:
 
   bool addDevice(Device* device, int index);
 
-  bool readByteStream(/** Add callback ptr*/);
+  bool readByteStream();
+
+  uint8_t makePacket(float* measuredData)
+  {
+    uint8_t startByte, stopByte, crcWidth;
+    uint32_t checksum;
+    int32_t crcStatus;
+    bool makePacketStatus;      
+    uint8_t bytes[PACKET_SIZE];
+
+    for (int i = 0; i < PACKET_SIZE; i++)
+    {
+      float2Bytes(measuredData[i],&bytes[i]);
+    }
+
+    checksum, crcWidth, crcStatus = fetchCrcChecksum(bytes);
+    int packetLength = PACKET_SIZE + crcWidth;
+    if (crcStatus == 1)
+    {
+      
+      bytes[0] = startByte;
+      bytes[packetLength-1] = stopByte;
+      bytes[packetLength-1-crcWidth] = checksum;
+      
+    }
+
+    else 
+    {
+      makePacketStatus = false;
+    }
+
+  }
 
   void writeByteStream();
 
-  bool initializeDevices();
+  void initializeDevices();
 
   void updateDevices(int loop_counter = 1);
+
+  void float2Bytes(float val, uint8_t* bytes_array)
+  {
+    // Create union of shared memory space
+    union 
+    {
+      float float_variable;
+      uint8_t temp_array[sizeof(float)];
+    } u;
+    // Overite bytes of union with float variable
+    u.float_variable = val;
+    // Assign bytes to input array
+    memcpy(bytes_array, u.temp_array, sizeof(float));
+
+  }
+
+  float fetchCrcChecksum(uint8_t data[])
+  {
+    MbedCRC<POLY_32BIT_ANSI, 32> ct;
+    
+    uint32_t crcPolynomial,checksum;
+    uint8_t crcWidth;
+    int32_t crcStatus;
+
+    checksum = 0;
+
+    crcPolynomial = ct.get_polynomial();
+    crcWidth = ct.get_width();
+    crcStatus = ct.compute((void *)data, strlen((const char*)data), &checksum);
+
+    return checksum, crcWidth, crcStatus;
+
+  }
+
 };
 
 extern DeviceManager device_manager;
