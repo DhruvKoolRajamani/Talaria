@@ -47,12 +47,13 @@ private:
   float _GYRO[3];
   float _ACC[3];
 
-  // typedef enum{
-  //   foc_gyr_en,
-  //   foc_acc_x,
-  //   foc_acc_y,
-  //   foc_acc_z
-  // }
+  enum {
+    gyro_2000 = 0x00,
+    gyro_1000,
+    gyro_500,
+    gyro_250,
+    gyro_125
+  } gyro_range;
 
 protected:
 public:
@@ -138,7 +139,8 @@ public:
   };
   char gyr_mode_normal = 0x15;
   char acc_mode_normal = 0x11;
-
+  char foc_start = 0x03;
+  char foc_conf = 0x40;
   char SOFT_RESET = 0xB6;
 
 protected:
@@ -212,6 +214,15 @@ public:
       wait_ms(10);
       writeRegister(CMD_ADDRESS, &gyr_mode_normal, (int)sizeof(gyr_mode_normal));
       wait_ms(10);
+
+
+      writeRegister(FOC_CONF, &foc_conf, (int)sizeof(foc_conf));
+      wait_ms(300);
+      writeRegister(CMD_ADDRESS, &foc_start, (int)sizeof(foc_start));
+      wait_ms(300);
+
+      writeRegister(GYR_CONF, (char *) this->gyro_250, (int)sizeof(this->gyro_250)/sizeof(char));
+
 
 #ifndef DISABLE_ROS
       _msg_chip_id.data = this->getChipId();

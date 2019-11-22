@@ -16,6 +16,7 @@ DeviceManager device_manager;
 
 #ifndef DISABLE_ROS
 BMI_160 Imu(0x68, FootBus, nh, 0, "imu", "/devices/right_foot/imu");
+// BMI_160 Imu2(0x69, FootBus, nh, 0, "imu", "/devices/left_foot/imu");
 std_msgs::String network_msg;
 ros::Publisher network_pub("network_strings", &network_msg);
 #else
@@ -51,6 +52,8 @@ int main()
   {
     Imu.ping();
     Imu.update();
+    // Imu2.ping();
+    // Imu2.update();
     
 #ifndef DISABLE_ROS
 
