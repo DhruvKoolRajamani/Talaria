@@ -212,6 +212,10 @@ public:
       wait_ms(1);
       writeRegister(CMD_ADDRESS, &acc_mode_normal, (int)sizeof(acc_mode_normal));
       wait_ms(10);
+
+      writeRegister(GYR_CONF, (char *) this->gyro_250, (int)sizeof(this->gyro_250));
+      wait_ms(300);
+
       writeRegister(CMD_ADDRESS, &gyr_mode_normal, (int)sizeof(gyr_mode_normal));
       wait_ms(10);
 
@@ -221,8 +225,8 @@ public:
       writeRegister(CMD_ADDRESS, &foc_start, (int)sizeof(foc_start));
       wait_ms(300);
 
-      writeRegister(GYR_CONF, (char *) this->gyro_250, (int)sizeof(this->gyro_250)/sizeof(char));
-
+      // writeRegister(GYR_CONF, (char *) this->gyro_250, (int)sizeof(this->gyro_250));
+      // wait_ms(300);
 
 #ifndef DISABLE_ROS
       _msg_chip_id.data = this->getChipId();
