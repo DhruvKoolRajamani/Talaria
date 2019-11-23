@@ -22,7 +22,6 @@
 #include "devices/hardware.h"
 
 #ifndef DISABLE_ROS
-#include "ros.h"
 
 #include "std_msgs/Bool.h"
 #include "std_msgs/Float32.h"
@@ -46,6 +45,8 @@ private:
 
 #ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
+
+  bool _is_topic_advertised;
 
   static const int DEVICE_NAME_SIZE = 20;
   static const int DEVICE_TOPIC_NAME_SIZE = 30 + DEVICE_NAME_SIZE;
@@ -85,13 +86,13 @@ public:
    * @param const char* dev_name
    */
   Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name = NULL,
-         const char* prefix_path = NULL);
+         const char* prefix_path = NULL, int refresh_rate = 1);
 #else
   /**
    * @brief Construct a new Device object
    *
-   * @param uint8_t dev_index
-   * @param const char* dev_name
+   * @param dev_index
+   * @param refresh_rate
    */
   Device(uint8_t dev_index, int refresh_rate);
 #endif
@@ -298,33 +299,33 @@ public:
    */
   void setConfiguredStatus(bool state);
 
-#ifndef DISABLE_ROS
-  /**
-   * @brief Set the Name of the Device
-   *
-   * @param const char* dev_name
-   */
-  void setDeviceName(const char* dev_name);
-#endif
+  #ifndef DISABLE_ROS
+    /**
+     * @brief Set the Name of the Device
+     *
+     * @param const char* dev_name
+     */
+    void setDeviceName(const char* dev_name);
+  #endif
 
-#ifndef DISABLE_ROS
-  /**
-   * @brief Set the Debug Data object
-   *
-   * @param data
-   */
-  void setDiagnosticsData(diagnostic_msgs::KeyValue key_value);
-#endif
+  #ifndef DISABLE_ROS
+    /**
+     * @brief Set the Debug Data object
+     *
+     * @param data
+     */
+    void setDiagnosticsData(diagnostic_msgs::KeyValue key_value);
+  #endif
 
-  /**
-   * @brief Compare two strings
-   *
-   * @param str1
-   * @param str2
-   * @return true if comparison is true
-   * @return false if comparison fails
-   */
-  bool strcmp(const char* str1, const char* str2);
-};
+    /**
+     * @brief Compare two strings
+     *
+     * @param str1
+     * @param str2
+     * @return true if comparison is true
+     * @return false if comparison fails
+     */
+    bool strcmp(const char* str1, const char* str2);
+  };
 
-#endif  // DEVICE_H
+  #endif  // DEVICE_H

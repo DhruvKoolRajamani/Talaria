@@ -8,7 +8,13 @@
  * @copyright Copyright (c) 2019
  *
  */
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
 #include "mbed.h"
+
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#include "Arduino.h"
+#endif
+
 #include "devices/hardware.h"
 #include "devices/device_manager/device_manager.h"
 
@@ -40,7 +46,17 @@ typedef enum
                                  // typically 30mm
 } ADS_CALIBRATION_STEP_T;
 float rate = 1;
-// 1000 * 1 / 50;
+// 1000 * 1 / 50; 
+
+void halt(float time_ms)
+{
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+wait_ms(time_ms);
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+delay(time_ms);
+#endif
+}
+
 int main()
 {
 #ifndef DISABLE_ROS
@@ -55,7 +71,7 @@ int main()
     if (!is_init)
     {
       bend_sensor.softReset();
-      wait_ms(1000);
+      halt(1000);
       is_init = bend_sensor.initialize();
     }
 
@@ -64,34 +80,34 @@ int main()
       printf("Calibrating: \n");
       // Restore factory calibration coefficients
       bend_sensor.calibrate(ADS_CALIBRATE_CLEAR, 0);
-      wait_ms(2000);
+      halt(2000);
       printf("Take first calibration point at zero degrees\n");
-      wait_ms(2000);
+      halt(2000);
       bend_sensor.calibrate(ADS_CALIBRATE_FIRST, 0);
       printf("Done\n");
-      wait_ms(2000);
+      halt(2000);
       printf("Take second calibration point at ninety degrees\n");
-      wait_ms(2000);
+      halt(2000);
       bend_sensor.calibrate(ADS_CALIBRATE_SECOND, 90);
       printf("Done\n");
-      wait_ms(2000);
+      halt(2000);
       printf("Calibrate the zero millimeter linear displacement\n");
-      wait_ms(2000);
+      halt(2000);
       bend_sensor.calibrate(ADS_CALIBRATE_STRETCH_ZERO, 0);
       printf("Done\n");
-      wait_ms(2000);
+      halt(2000);
       printf("Calibrate the 30 millimeter linear displacement make sure bend "
              "is 0\n");
-      wait_ms(2000);
+      halt(2000);
       bend_sensor.calibrate(ADS_CALIBRATE_STRETCH_SECOND, 30);
       printf("Done\n");
-      wait_ms(2000);
+      halt(2000);
       calibrate = 0;
     }
 
     if (!is_init)
       rate = 1000;
-    wait_ms(rate);
+    halt(rate);
     i++;
 #ifndef DISABLE_ROS
     nh.spinOnce();

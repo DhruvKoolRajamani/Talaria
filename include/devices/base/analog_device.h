@@ -44,16 +44,16 @@ public:
   #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
   AnalogDevice(uint8_t id, PinName a0, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
-               const char* topic_name = NULL)
+               const char* topic_name = NULL, int refresh_rate = 1)
     : AnalogIn(a0)
-    , Device(dev_index, nh, dev_name, topic_name)
+    , Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
     , _a0(a0)
   #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
   AnalogDevice(uint8_t id, int a0, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
-               const char* topic_name = NULL)
-    : Device(dev_index, nh, dev_name, topic_name)
+               const char* topic_name = NULL, int refresh_rate = 1)
+    : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
     , _a0(a0)
   #endif
@@ -70,10 +70,12 @@ public:
    * @param a0
    */
   #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
-  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0)
+  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0
+                int refresh_rate = 1 )
     : AnalogIn(a0), Device(dev_index), _id(id), _a0(a0)
   #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
-  AnalogDevice(uint8_t id, int a0, uint8_t dev_index = 0)
+  AnalogDevice(uint8_t id, int a0, uint8_t dev_index = 0
+                int refresh_rate = 1 )
     : Device(dev_index), _id(id), _a0(a0)
   #endif
   {

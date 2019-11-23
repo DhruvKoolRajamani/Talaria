@@ -1,4 +1,10 @@
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
 #include "mbed.h"
+
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#include "Arduino.h"
+#endif
+
 #include "devices/hardware.h"
 #include "devices/device_manager/device_manager.h"
 
@@ -28,6 +34,15 @@ void addDevices()
 {
   device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
+}
+
+void halt(float time_ms)
+{
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+wait_ms(time_ms);
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+delay(time_ms);
+#endif
 }
 
 float rate = 1;
@@ -61,7 +76,7 @@ int main()
     }
     else
       i = 0;
-    wait_ms(rate);
+    halt(rate);
 #ifndef DISABLE_ROS
     nh.spinOnce();
 #endif

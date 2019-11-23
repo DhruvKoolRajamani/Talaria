@@ -14,7 +14,14 @@
 
 #define PACKET_SIZE 58
 
+#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
 #include "mbed.h"
+
+#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#include "Arduino.h"
+#include "util/crc16.h"
+
+#endif
 #include "devices/hardware.h"
 
 #include "devices/base/device.h"
@@ -70,6 +77,7 @@ public:
   }
 
   /** GETTERS */
+  int getMaxRefreshRate();
 
   /** SETTERS */
 
@@ -83,7 +91,9 @@ public:
 
   uint8_t makePacket(float* measuredData)
   {
-    uint8_t startByte, stopByte, crcWidth;
+    uint8_t startByte, stopByte, crcWidth=0;
+    startByte = 0xAA;
+    stopByte = 0x0F;
     uint32_t checksum;
     int32_t crcStatus;
     bool makePacketStatus;      
@@ -101,7 +111,9 @@ public:
       
       bytes[0] = startByte;
       bytes[packetLength-1] = stopByte;
-      bytes[packetLength-1-crcWidth] = checksum;
+
+      if (crcWidth!=0)
+      {bytes[packetLength-1-crcWidth] = checksum;}
       
     }
 
@@ -114,7 +126,7 @@ public:
 
   void writeByteStream();
 
-  void initializeDevices();
+  bool initializeDevices();
 
   void updateDevices(int loop_counter = 1);
 
@@ -133,6 +145,7 @@ public:
 
   }
 
+  #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
   float fetchCrcChecksum(uint8_t data[])
   {
     MbedCRC<POLY_32BIT_ANSI, 32> ct;
@@ -151,6 +164,22 @@ public:
 
   }
 
+  #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+  float calcCRC(uint8_t data[])
+  {
+    uint8_t crcWidth;
+    int32_t crcStatus;
+    uint32_t c=hecksum0; // starting value as you like, must be the same before each calculation
+    for (int i=0;i<strlen(data);i++) // for each character in the string
+    {
+      checksum = _crc16_update (crc, data[i]); // update the crc value
+    }
+    crcWidth = 1;
+    crcStatus = 1;
+    return checksum, crcWidth, crcStatus;
+  }
+
+  #endif
 };
 
 extern DeviceManager device_manager;
