@@ -78,4 +78,5 @@ platformio/packages/framework-mbed@5.51304.190826
 platformio/appstate.json
 
 catkin_ws/build
-catkin_ws/devel
+catkin_ws/develplatformio/lib
+platformio/platforms
