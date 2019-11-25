@@ -80,3 +80,4 @@ platformio/appstate.json
 catkin_ws/build
 catkin_ws/develplatformio/lib
 platformio/platforms
+platformio/packages.lock
