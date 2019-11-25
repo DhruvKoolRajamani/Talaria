@@ -13,10 +13,10 @@ DeviceManager device_manager;
 #endif
 
 #ifndef DISABLE_ROS
-StrainGauge strain_gauge(0, p16, nh, STRAIN_GAUGE_ID, "strain_gauge",
-                         "/devices/index/strain_gauge", 5);
+// StrainGauge strain_gauge(0, p16, nh, STRAIN_GAUGE_ID, "strain_gauge",
+//                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
-                       "/devices/index/bend_sensor", p15, 20);
+                       "/devices/index/bend_sensor", p15, (1 / 100) * 1000);
 
 // std_msgs::String debug_string;
 // ros::Publisher debug_pub("/debug_pub", &debug_string);
@@ -27,7 +27,7 @@ BendSensor bend_sensor(0, PrimaryBus, BEND_SENSOR_ID);
 void addDevices()
 {
   device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
-  device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
+  // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
 }
 
 float rate = 1;
