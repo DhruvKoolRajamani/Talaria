@@ -85,3 +85,4 @@ catkin_ws/devel/
 platformio/packages/
 platformio/lib
 platformio/packages
+lib/ros_lib

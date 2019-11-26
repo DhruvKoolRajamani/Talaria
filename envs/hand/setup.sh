@@ -18,6 +18,7 @@ run_setup() {
     fi
 
     cd $TALARIA_WS
+    clean
 
     local FRAMEWORK_NAME=$1
     local ENV_TYPE=$2
@@ -106,17 +107,10 @@ run_setup() {
 
         if [[ "$FLAG" = "True" ]]; then
             echo "Cloning repo"
-            pio lib -d lib install -f https://github.com/DhruvKoolRajamani/ros_lib.git
-            pushd ros_lib
-            echo
-            echo "Checking out to rosserial-$FRAMEWORK_NAME"
-            echo
-            git checkout rosserial-$FRAMEWORK_NAME
-            popd
+            pio lib -d lib install -f https://github.com/DhruvKoolRajamani/ros_lib.git#rosserial-$FRAMEWORK_NAME
         fi
     fi
     
-    clean
     build $ENV_NUMBER
 
 }
