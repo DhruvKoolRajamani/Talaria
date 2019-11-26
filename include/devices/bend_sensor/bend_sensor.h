@@ -261,10 +261,7 @@ public:
     }
   }
 
-  inline int16_t decodeInt16(const uint8_t* p_encoded_data)  // Convert two
-                                                             // bytes of
-                                                             // buffer[] to
-                                                             // int16
+  inline int16_t decodeInt16(const uint8_t* p_encoded_data)
   {
     return ((((uint16_t)(p_encoded_data)[0])) |
             (((int16_t)(p_encoded_data)[1]) << 8));

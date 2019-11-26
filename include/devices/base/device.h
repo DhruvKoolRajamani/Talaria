@@ -12,10 +12,9 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
-
-#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#else
 #include "Arduino.h"
 #endif
 
@@ -220,19 +219,18 @@ public:
    */
   virtual void update(int loop_counter = 1);
 
-  /**
-   * @brief Reset the pin for the Device and wait for a delay in ms before
-   * restarting it
-   *
-   * @param PinName pin
-   * @param int delay_ms
-   */
-  #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+/**
+ * @brief Reset the pin for the Device and wait for a delay in ms before
+ * restarting it
+ *
+ * @param PinName pin
+ * @param int delay_ms
+ */
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
   virtual void reset(PinName pin, int delay_ms = 100);
-  #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
-  virtual void reset(int pin, int delay_ms = 100);  
-  #endif
-  
+#else
+  virtual void reset(int pin, int delay_ms = 100);
+#endif
 
   /** SETTERS */
 
@@ -245,17 +243,17 @@ public:
   void setNodeHandle(ros::NodeHandle* nh);
 #endif
 
-  /**
-   * @brief Set the Pin State object
-   *
-   * @param PinName pin
-   * @param bool state
-   */
-  #ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+/**
+ * @brief Set the Pin State object
+ *
+ * @param PinName pin
+ * @param bool state
+ */
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
   virtual void setPinState(PinName pin, bool state);
-  #elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#else
   virtual void setPinState(int pin, bool state);
-  #endif
+#endif
 
   /**
    * @brief Set the Index object
@@ -299,33 +297,33 @@ public:
    */
   void setConfiguredStatus(bool state);
 
-  #ifndef DISABLE_ROS
-    /**
-     * @brief Set the Name of the Device
-     *
-     * @param const char* dev_name
-     */
-    void setDeviceName(const char* dev_name);
-  #endif
+#ifndef DISABLE_ROS
+  /**
+   * @brief Set the Name of the Device
+   *
+   * @param const char* dev_name
+   */
+  void setDeviceName(const char* dev_name);
+#endif
 
-  #ifndef DISABLE_ROS
-    /**
-     * @brief Set the Debug Data object
-     *
-     * @param data
-     */
-    void setDiagnosticsData(diagnostic_msgs::KeyValue key_value);
-  #endif
+#ifndef DISABLE_ROS
+  /**
+   * @brief Set the Debug Data object
+   *
+   * @param data
+   */
+  void setDiagnosticsData(diagnostic_msgs::KeyValue key_value);
+#endif
 
-    /**
-     * @brief Compare two strings
-     *
-     * @param str1
-     * @param str2
-     * @return true if comparison is true
-     * @return false if comparison fails
-     */
-    bool strcmp(const char* str1, const char* str2);
-  };
+  /**
+   * @brief Compare two strings
+   *
+   * @param str1
+   * @param str2
+   * @return true if comparison is true
+   * @return false if comparison fails
+   */
+  bool strcmp(const char* str1, const char* str2);
+};
 
-  #endif  // DEVICE_H
+#endif  // DEVICE_H

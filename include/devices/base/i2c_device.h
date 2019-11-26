@@ -15,7 +15,11 @@
 #include "device.h"
 #include "i2c/i2c_bus.h"
 #include "devices/hardware.h"
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
+#else
+#include "Arduino.h"
+#endif
 
 class I2CDevice : public Device
 {

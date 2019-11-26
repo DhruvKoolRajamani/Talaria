@@ -12,7 +12,11 @@
 #ifndef I2C_BUS_H
 #define I2C_BUS_H
 
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
+#else
+#include "Arduino.h"
+#endif
 
 class I2CBus : public I2C
 {

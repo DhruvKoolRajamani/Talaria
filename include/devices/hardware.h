@@ -19,10 +19,10 @@ const int NUM_DEVICES = 1;
 #endif
 
 #ifndef DISABLE_ROS
-#include <ros.h>
-#include <limits.h>
+#include "ros.h"
 #include <std_msgs/String.h>
 #endif
+#include <limits.h>
 
 typedef enum
 {

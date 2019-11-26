@@ -8,10 +8,9 @@
  * @copyright Copyright (c) 2019
  *
  */
-#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
-
-#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
+#else
 #include "Arduino.h"
 #endif
 
@@ -46,14 +45,14 @@ typedef enum
                                  // typically 30mm
 } ADS_CALIBRATION_STEP_T;
 float rate = 1;
-// 1000 * 1 / 50; 
+// 1000 * 1 / 50;
 
 void halt(float time_ms)
 {
-#ifdef PIO_FRAMEWORK_MBED_RTOS_PRESENT
-wait_ms(time_ms);
-#elif defined PIO_FRAMEWORK_ARDUINO_PRESENT
-delay(time_ms);
+#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+  wait_ms(time_ms);
+#else
+  delay(time_ms);
 #endif
 }
 

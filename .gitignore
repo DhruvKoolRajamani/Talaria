@@ -81,3 +81,7 @@ catkin_ws/build
 catkin_ws/develplatformio/lib
 platformio/platforms
 platformio/packages.lock
+catkin_ws/devel/
+platformio/packages/
+platformio/lib
+platformio/packages

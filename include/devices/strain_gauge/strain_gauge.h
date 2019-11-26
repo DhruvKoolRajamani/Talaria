@@ -67,7 +67,7 @@ public:
    *
    * @return float _Vout_unstrained
    */
-  float getUnstrainedVoltag_ide()
+  float getUnstrainedVoltage()
   {
     return _Vout_unstrained;
   }
