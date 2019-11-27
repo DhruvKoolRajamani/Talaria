@@ -146,7 +146,7 @@ public:
    * @return true
    * @return false
    */
-  bool initialize() override;
+  bool initialize();
 
   bool enableStretchValues(bool enable = false);
 

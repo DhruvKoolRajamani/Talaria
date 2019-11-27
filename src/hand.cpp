@@ -38,10 +38,10 @@ ros::Publisher debug_pub("/debug", &debug_msgs);
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 StrainGauge strain_gauge(0, p15, STRAIN_GAUGE_ID, 5);
-BendSensor bend_sensor(0, PrimaryBus, BEND_SENSOR_ID, p16, (1 / 100) * 1000);
+BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, p16, (1 / 100) * 1000);
 #else
 StrainGauge strain_gauge(0, A0, STRAIN_GAUGE_ID, 5);
-BendSensor bend_sensor(0, PrimaryBus, BEND_SENSOR_ID, 3, (1 / 100) * 1000);
+BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, 3, (1 / 100) * 1000);
 #endif
 #endif
 
@@ -61,14 +61,17 @@ void halt(float time_ms)
 #endif
 }
 
+#ifndef DISABLE_ROS
 float rate = 1;
+#else
+float rate = 1;
+#endif
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 int main()
 {
 #ifndef DISABLE_ROS
   nh.initNode();
-  // nh.advertise(debug_pub);
 #endif
 
   addDevices();
@@ -110,24 +113,23 @@ void setup()
 #ifndef DISABLE_ROS
   nh.initNode();
 #else
+  delay(3000);
   Serial.begin(9600);
   delay(3000);
+  print("Hello!\n");
 #endif
 
   addDevices();
+#ifdef DISABLE_ROS
+  print("Added Devices!\n");
+#endif
+
+  is_init = device_manager.initializeDevices();
 }
 
 void loop()
 {
-  if (!is_init)
-  {
-    is_init = device_manager.initializeDevices();
-  }
-
   device_manager.updateDevices(i);
-
-  if (!is_init)
-    rate = 1000;
 
   if (i <= device_manager.getMaxRefreshRate())
   {

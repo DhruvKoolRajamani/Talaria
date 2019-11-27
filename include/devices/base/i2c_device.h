@@ -54,7 +54,7 @@ public:
     , _i2c_bus(&i2c_bus)
   {
 #else
-  I2CDevice(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+  I2CDevice(uint8_t address, I2CBus& i2c_bus, ros::NodeHandle& nh,
             uint8_t dev_index = 0, const char* dev_name = NULL,
             const char* topic_name = NULL, int refresh_rate = 1)
     : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
@@ -104,7 +104,21 @@ public:
   {
   }
 
-/** METHODS */
+  /** METHODS */
+
+#ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
+  virtual bool initialize()
+  {
+#ifdef DISABLE_ROS
+    print("Entered I2CDevice Initialize\n");
+#endif
+    _i2c_bus->initialize();
+#ifdef DISABLE_ROS
+    print("Exited I2CDevice Initialize\n");
+#endif
+    return true;
+  }
+#endif
 
 /**
  * @brief Ping the device to check if connection can be established
@@ -176,7 +190,7 @@ public:
     return (write_state && read_state);
 #else
   virtual bool readRegister(uint8_t address, uint8_t* buffer,
-                            uint16_t buffer_size, bool poll = false,
+                            uint8_t buffer_size, bool poll = false,
                             int delay_ms = 0)
   {
     if (writeBytes(&address, 1))
@@ -204,8 +218,7 @@ public:
     return _i2c_bus->read(_address, buffer, buffer_size, poll) == 0;
   }
 #else
-  virtual bool readBytes(uint8_t* buffer, uint16_t buffer_size,
-                         bool poll = false)
+  virtual bool readBytes(uint8_t* buffer, int buffer_size, bool poll = false)
   {
     _i2c_bus->requestFrom(_address, buffer_size);
     int read_ready = 0;
@@ -227,13 +240,13 @@ public:
    * @param delay_ms
    */
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  virtual void reset(PinName pin, const uint16_t delay_ms = 100)
+  virtual void reset(PinName pin, const uint8_t delay_ms = 100)
   {
     DigitalOut resetPin(pin, false);
     wait_ms(delay_ms);
     resetPin = true;
 #else
-  virtual void reset(int pin, const uint16_t delay_ms = 100)
+  virtual void reset(int pin, const uint8_t delay_ms = 100)
   {
     pinMode(pin, OUTPUT);
     digitalWrite(pin, false);
@@ -264,7 +277,7 @@ public:
   }
 #else
   virtual int writeRegister(uint8_t address, uint8_t* buffer,
-                            uint16_t buffer_size, bool poll = false)
+                            uint8_t buffer_size, bool poll = false)
   {
     uint8_t new_buffer[buffer_size + 1];
     new_buffer[0] = address;
@@ -290,7 +303,7 @@ public:
     return _i2c_bus->write(_address, buffer, buffer_size, poll) == 0;
   }
 #else
-  virtual int writeBytes(uint8_t* buffer, uint16_t buffer_size,
+  virtual int writeBytes(uint8_t* buffer, uint8_t buffer_size,
                          bool poll = false)
   {
     _i2c_bus->beginTransmission(_address);
@@ -332,6 +345,18 @@ public:
   {
     _address = address;
   }
+
+#ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
+  bool customPing()
+  {
+    _i2c_bus->beginTransmission(_address);
+    int a = _i2c_bus->endTransmission() == 0;
+    char str[20];
+    sprintf(str, (a == 1) ? "Ping True" : "Ping False");
+    Serial.println(str);
+    return a;
+  }
+#endif
 };
 
 #endif  // I2C_DEVICE_H

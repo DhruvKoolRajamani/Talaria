@@ -69,11 +69,24 @@ BendSensor::~BendSensor()
  */
 bool BendSensor::initialize()
 {
+#ifdef DISABLE_ROS
+  print("Entered Bend Initialize\n");
+#endif
+  I2CDevice::initialize();
+#ifdef DISABLE_ROS
+  print("Starting Bend Initialize\n");
+#endif
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   if (!this->ping())
+#else
+  if (!this->ping())
+#endif
   {
 #ifndef DISABLE_ROS
     _msg_bend_sensor.debug.data = "Ping failed";
     _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
+#else
+    print("Ping failed\n");
 #endif
     return false;
   }
@@ -83,6 +96,8 @@ bool BendSensor::initialize()
 #ifndef DISABLE_ROS
     _msg_bend_sensor.debug.data = "Set Sensor Rate Nack";
     _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
+#else
+    print("Set Sample Rate failed\n");
 #endif
     return false;
   }
@@ -98,6 +113,8 @@ bool BendSensor::initialize()
 #ifndef DISABLE_ROS
     _msg_bend_sensor.debug.data = "Stretch Enable Nack";
     _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
+#else
+    print("Stretch Enable failed\n");
 #endif
     return false;
   }
@@ -107,6 +124,8 @@ bool BendSensor::initialize()
 #ifndef DISABLE_ROS
     _msg_bend_sensor.debug.data = "Begin Polling Nack";
     _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
+#else
+    print("Bend Polling failed\n");
 #endif
     return false;
   }
@@ -117,7 +136,9 @@ bool BendSensor::initialize()
 #else
   delay(10);
 #endif
-
+#ifdef DISABLE_ROS
+  print("Exiting Bend Initialize\n");
+#endif
   return true;
 }
 
