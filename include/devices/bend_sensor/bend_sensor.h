@@ -28,15 +28,24 @@
 class BendSensor : public I2CDevice
 {
 private:
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PinName _reset_pin;
+#else
+  int _reset_pin;
+#endif
   static const int BEND_SENSOR_TRANSFER_SIZE = 3;
 #ifndef DISABLE_ROS
   ros::Publisher _pub_bend_sensor;
   bend_sensor_msg::bend_sensor _msg_bend_sensor;
 #endif
   uint8_t _data_ready;
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   float _bend_angle = -numeric_limits<float>::max();
   float _stretch_value = -numeric_limits<float>::max();
+#else
+  float _bend_angle = -99999.0f;
+  float _stretch_value = -99999.0f;
+#endif
 
   enum COMMAND_REGISTERS
   {
@@ -104,11 +113,23 @@ protected:
 public:
   // CONSTRUCTORS
 #ifndef DISABLE_ROS
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
              uint8_t dev_index, const char* dev_name, const char* topic_name,
              PinName reset_pin, int refresh_rate = 1);
 #else
-  BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index, int refresh_rate);
+  BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+             uint8_t dev_index, const char* dev_name, const char* topic_name,
+             int reset_pin, int refresh_rate = 1);
+#endif
+#else
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index, PinName reset_pin,
+             int refresh_rate);
+#else
+  BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index, int reset_pin,
+             int refresh_rate);
+#endif
 #endif
 
   // DESTRUCTORS
@@ -129,8 +150,14 @@ public:
 
   bool enableStretchValues(bool enable = false);
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   bool ping(int chip_id_reg_address = BEND_SENSOR_GET_DEV_ID,
             int delay_ms = 2) override;
+#else
+
+  bool ping(uint8_t chip_id_reg_address = BEND_SENSOR_GET_DEV_ID,
+            int delay_ms = 2) override;
+#endif
 
   void update(int loop_counter = 1);
 
@@ -180,7 +207,11 @@ public:
   /**
    * @brief Reset the Angular Displacement Sensor
    */
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   void reset(PinName pin, int delay_ms = 100) override;
+#else
+  void reset(int pin, int delay_ms = 100) override;
+#endif
 
   /**
    * @brief Places ADS in polled or sleep mode

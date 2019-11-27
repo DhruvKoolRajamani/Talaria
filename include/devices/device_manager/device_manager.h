@@ -14,7 +14,7 @@
 
 #define PACKET_SIZE 58
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
@@ -43,8 +43,8 @@ private:
 
 #ifndef DISABLE_ROS
   ros::NodeHandle* _nh;
-  int _max_refresh_rate = 1;
 #endif
+  int _max_refresh_rate = 1;
 
 protected:
 public:
@@ -89,48 +89,18 @@ public:
   bool addDevice(Device* device, int index);
 
   bool readByteStream();
+
 #ifdef COMPUTE_CRC
-  uint8_t makePacket(float* measuredData)
-  {
-    uint8_t startByte, stopByte, crcWidth = 0;
-    startByte = 0xAA;
-    stopByte = 0x0F;
-    uint32_t checksum;
-    int32_t crcStatus;
-    bool makePacketStatus;
-    uint8_t bytes[PACKET_SIZE];
-
-    for (int i = 0; i < PACKET_SIZE; i++)
-    {
-      float2Bytes(measuredData[i], &bytes[i]);
-    }
-
-    checksum, crcWidth, crcStatus = fetchCrcChecksum(bytes);
-    int packetLength = PACKET_SIZE + crcWidth;
-    if (crcStatus == 1)
-    {
-      bytes[0] = startByte;
-      bytes[packetLength - 1] = stopByte;
-
-      if (crcWidth != 0)
-      {
-        bytes[packetLength - 1 - crcWidth] = checksum;
-      }
-    }
-
-    else
-    {
-      makePacketStatus = false;
-    }
-  }
+  uint8_t makePacket(float* measuredData);
 #endif
+
   void writeByteStream();
 
   bool initializeDevices();
 
   void updateDevices(int loop_counter = 1);
 
-  void float2Bytes(float val, uint8_t* bytes_array)
+  inline void float2Bytes(float val, uint8_t* bytes_array)
   {
     // Create union of shared memory space
     union
@@ -144,41 +114,18 @@ public:
     memcpy(bytes_array, u.temp_array, sizeof(float));
   }
 
+#ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
+  inline int _max(int a, int b)
+  {
+    return ((a) > (b) ? (a) : (b));
+  }
+#endif
+
 #ifdef COMPUTE_CRC
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
-  float fetchCrcChecksum(uint8_t data[])
-  {
-    MbedCRC<POLY_32BIT_ANSI, 32> ct;
-
-    uint32_t crcPolynomial, checksum;
-    uint8_t crcWidth;
-    int32_t crcStatus;
-
-    checksum = 0;
-
-    crcPolynomial = ct.get_polynomial();
-    crcWidth = ct.get_width();
-    crcStatus = ct.compute((void*)data, strlen((const char*)data), &checksum);
-
-    return checksum, crcWidth, crcStatus;
-  }
-
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  float fetchCrcChecksum(uint8_t data[]);
 #else
-  float calcCRC(uint8_t data[])
-  {
-    uint8_t crcWidth;
-    int32_t crcStatus;
-    uint32_t c = hecksum0;  // starting value as you like, must be the same
-                            // before each calculation
-    for (int i = 0; i < strlen(data); i++)  // for each character in the string
-    {
-      checksum = _crc16_update(crc, data[i]);  // update the crc value
-    }
-    crcWidth = 1;
-    crcStatus = 1;
-    return checksum, crcWidth, crcStatus;
-  }
-
+  float calcCRC(uint8_t data[]);
 #endif
 #endif
 };

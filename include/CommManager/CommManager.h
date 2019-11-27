@@ -3,7 +3,7 @@
 
 #include "EthernetInterface.h"
 #include "lwip/inet.h"
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #endif
 

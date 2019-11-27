@@ -12,52 +12,50 @@
 #ifndef PWM_DEVICE_H
 #define PWM_DEVICE_H
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#include "device.h"
+
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
 #endif
 
-#include "device.h"
-
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 class PwmDevice : public PwmOut, public Device
-#else
-class PwmDevice : public Device
-#endif
 {
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
 private:
   bool _init_status;
   bool writeReady = false;
 
   uint8_t _id;
   PinName _a0;
-
 #else
+class PwmDevice : public Device
+{
 private:
   bool _init_status;
   bool writeReady = false;
 
   uint8_t _id;
   int _a0;
-  pinMode(_a0, OUTPUT);
 #endif
 
 public:
 /** CONSTRUCTORS */
 #ifndef DISABLE_ROS
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PwmDevice(uint8_t id, PinName a0, ros::NodeHandle& nh, uint8_t dev_index = 0,
             const char* dev_name = NULL, const char* topic_name = NULL)
     : PwmOut(a0), Device(dev_index, nh, dev_name, topic_name), _id(id), _a0(a0)
+  {
 #else
   PwmDevice(uint8_t id, int a0, ros::NodeHandle& nh, uint8_t dev_index = 0,
             const char* dev_name = NULL, const char* topic_name = NULL)
     : Device(dev_index, nh, dev_name, topic_name), _id(id), _a0(a0)
+  {
+    pinMode(_a0, OUTPUT);
 #endif
 
-  {
     setIndex(dev_index);
     setHealthStatus(true);
     setEnabledStatus(true);
@@ -71,18 +69,22 @@ public:
    * @param a0
    */
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PwmDevice(uint8_t id, PinName a0, uint8_t dev_index = 0)
-    : PwmOut(a0), Device(dev_index), _id(id), _a0(a0)
+    : PwmOut(a0)
+    , Device(dev_index)
+    , _id(id)
+    , _a0(a0){
 #else
   PwmDevice(uint8_t id, int a0, uint8_t dev_index = 0)
     : Device(dev_index), _id(id), _a0(a0)
-#endif
   {
-    setIndex(dev_index);
-    setHealthStatus(true);
-    setEnabledStatus(true);
-  }
+    pinMode(_a0, OUTPUT);
+#endif
+      setIndex(dev_index);
+  setHealthStatus(true);
+  setEnabledStatus(true);
+}
 
 #endif
 
@@ -119,7 +121,7 @@ public:
 //     return false;
 // }
 // }
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   virtual float writePWMData(float dutyCycle = 50.0, float pulsePeriod = 0.1)
   {
     float pwmData = dutyCycle * 0.01;
@@ -132,16 +134,16 @@ public:
   }
 
 #else
-  virtual float writePWMData(float outVolt = 1)
-  {
-    int pwmData = map(outVolt * 1000, 0, 3300, 0, 255);
+virtual float writePWMData(float outVolt = 1)
+{
+  int pwmData = map(outVolt * 1000, 0, 3300, 0, 255);
 
-    analogWrite(a0, pwmData);
-    writeReady = true;
-    // wait_ms(delay_ms);
+  analogWrite(_a0, pwmData);
+  writeReady = true;
+  // wait_ms(delay_ms);
 
-    return writeReady;
-  }
+  return writeReady;
+}
 #endif
 };
 

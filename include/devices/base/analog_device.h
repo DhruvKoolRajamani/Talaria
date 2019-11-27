@@ -12,35 +12,36 @@
 #ifndef ANALOG_DEVICE_H
 #define ANALOG_DEVICE_H
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 class AnalogDevice : public AnalogIn, public Device
+{
 #else
 class AnalogDevice : public Device
-#endif
 {
+
+#endif
 private:
   bool readReady = false;
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   uint8_t _id;
   PinName _a0;
 #else
   uint8_t _id;
   int _a0;
-  pinMode(_a0, INPUT);
 #endif
 
 public:
   /** CONSTRUCTORS */
 
 #ifndef DISABLE_ROS
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   AnalogDevice(uint8_t id, PinName a0, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
                const char* topic_name = NULL, int refresh_rate = 1)
@@ -48,6 +49,7 @@ public:
     , Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
     , _a0(a0)
+  {
 #else
   AnalogDevice(uint8_t id, int a0, ros::NodeHandle& nh, uint8_t dev_index = 0,
                const char* dev_name = NULL, const char* topic_name = NULL,
@@ -55,8 +57,9 @@ public:
     : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
     , _a0(a0)
-#endif
   {
+    pinMode(_a0, INPUT);
+#endif
     setIndex(dev_index);
     setHealthStatus(true);
     setEnabledStatus(true);
@@ -68,19 +71,24 @@ public:
  * @param id
  * @param a0
  */
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
-  AnalogDevice(uint8_t id, PinName a0,
-               uint8_t dev_index = 0 int refresh_rate = 1)
-    : AnalogIn(a0), Device(dev_index), _id(id), _a0(a0)
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0,
+               int refresh_rate = 1)
+    : AnalogIn(a0)
+    , Device(dev_index, refresh_rate)
+    , _id(id)
+    , _a0(a0){
 #else
-  AnalogDevice(uint8_t id, int a0, uint8_t dev_index = 0 int refresh_rate = 1)
-    : Device(dev_index), _id(id), _a0(a0)
-#endif
+  AnalogDevice(uint8_t id, int a0, uint8_t dev_index = 0, int refresh_rate = 1)
+    : Device(dev_index, refresh_rate), _id(id), _a0(a0)
   {
-    setIndex(dev_index);
-    setHealthStatus(true);
-    setEnabledStatus(true);
-  }
+    pinMode(_a0, INPUT);
+#endif
+
+      setIndex(dev_index);
+  setHealthStatus(true);
+  setEnabledStatus(true);
+}
 #endif
 
   /** DESTRUCTORS */
@@ -115,7 +123,7 @@ public:
 //   else
 //     return false;
 // }
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   virtual float readAnalogData(uint16_t delay_ms = 100)
   {
     float analogData;
@@ -126,16 +134,16 @@ public:
     return analogData;
   }
 #else
-  virtual float readAnalogData(uint16_t delay_ms = 100)
-  {
-    float temp, analogData;
-    temp = analogRead(a0);
-    analogData = temp * 5.0 / 1023.0;
-    readReady = true;
-    // wait_ms(delay_ms);
+virtual float readAnalogData(uint16_t delay_ms = 100)
+{
+  float temp, analogData;
+  temp = analogRead(_a0);
+  analogData = temp * 5.0 / 1023.0;
+  readReady = true;
+  // wait_ms(delay_ms);
 
-    return analogData;
-  }
+  return analogData;
+}
 #endif
 };
 

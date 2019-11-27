@@ -1,18 +1,23 @@
 #!/bin/bash
 
 TALARIA_WS="/home/dhruv/Talaria/"
+UPLOAD_FLAG="False"
 
 run_setup() {
 
     if [[ "$1" = "-h" ]] || [[ "$1" = "--help" ]]; then
-        echo "Usage: ./setup.sh [option 1] [option 2]">&2
+        echo "Usage: ./setup.sh [option 1] [option 2] [option 3]">&2
         echo
-        echo "[option 1]                                                           "
-        echo "     mbed    Runs the Talaria environment mbed with rosserial        "
-        echo "  arduino    Runs the Talaria environment arduino with rosserial     "
-        echo
-        echo "[option 2]                                                           "
-        echo "   serial    Runs the Talaria environment in the serial monitor      "
+        echo "[option 1]                                                            "
+        echo "     mbed    Runs the Talaria environment mbed with rosserial         "
+        echo "  arduino    Runs the Talaria environment arduino with rosserial      "
+        echo 
+        echo "[option 2]                                                            "
+        echo "   serial    Runs the Talaria environment in the serial monitor       "
+        echo 
+        echo "[option 2]                                                            "
+        echo "   upload    Runs the Talaria environment and uploads the environment "
+        echo "             to the microcontroller                                   "
         echo
         return
     fi
@@ -26,6 +31,14 @@ run_setup() {
     local MBED_FRAMEWORK="mbed"
     local ENV_SERIAL="serial"
     local ENV_NUMBER=0
+
+    if [[ -z "$3" ]]; then
+        if [[ "$3" = "upload" ]]; then
+            UPLOAD_FLAG="True"
+        else
+            UPLOAD_FLAG="False"
+        fi
+    fi
 
     if [[ $ENV_TYPE = $ENV_SERIAL ]]; then
         echo
@@ -122,19 +135,27 @@ build() {
 
     echo "Building"
     echo
+
+    EXTRA_ARGS=""
+
+    if [[ "$UPLOAD_FLAG" = "True" ]]; then
+        EXTRA_ARGS="-t upload"
+    else
+        EXTRA_ARGS=""
+    fi
     
     if [[ $1 -eq 1 ]]; then
         pio init --ide vscode -b lpc1768 --env-prefix Talaria-hand
-        pio run -e Talaria-hand
+        pio run -e Talaria-hand $EXTRA_ARGS
     elif [[ $1 -eq 2 ]]; then
         pio init --ide vscode -b uno --env-prefix Talaria-hand-uno
-        pio run -e Talaria-hand-uno
+        pio run -e Talaria-hand-uno $EXTRA_ARGS
     elif [[ $1 -eq 3 ]]; then
         pio init --ide vscode -b lpc1768 --env-prefix Talaria-hand-serial
-        pio run -e Talaria-hand-serial
+        pio run -e Talaria-hand-serial $EXTRA_ARGS
     elif [[ $1 -eq 4 ]]; then
         pio init --ide vscode -b uno --env-prefix Talaria-hand-uno-serial
-        pio run -e Talaria-hand-uno-serial
+        pio run -e Talaria-hand-uno-serial $EXTRA_ARGS
     else
         echo "Exiting"
         return

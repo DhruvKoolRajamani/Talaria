@@ -1,13 +1,13 @@
 #include "devices/base/analog_device.h"
 #include "devices/base/pwm_device.h"
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 PwmDevice aEnable(1, p25, 1);     // p136 -- p8
 PwmDevice vRef(1, p26, 1);        // p137 -- p4 + jumper
 AnalogDevice aVSense(0, p19, 1);  // p90 -- across R3
@@ -28,7 +28,7 @@ int nFault = 10;       // p95 -- p7r gr 50
 #define aRSense 0.1
 #define torqueConst 10.9
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 int initMotor()
 {
   nSleep = 1;   // enable driver
@@ -49,7 +49,7 @@ int initMotor()
 }
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void setPwm()
 {
   float speed = 50;  // get desired speed from usb
@@ -64,7 +64,7 @@ void setPwm()
 }
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 float getISense()
 {
   int val = aVSense.read();
@@ -83,7 +83,7 @@ float getISense()
 }
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 float getTorque()
 {
   float torque = 5;  // get desired torque from usb
@@ -98,7 +98,7 @@ float getTorque()
 }
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 float setVRef(float measuredI, float desiredTorque)
 {
   float measuredTorque = (measuredI)*torqueConst;
@@ -119,11 +119,13 @@ float setVRef(float measuredI, float desiredTorque)
 }
 #endif
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void main()
 {
   float measuredI, desiredTorque, error;
-  printf("Motor Status: %d", initMotor());
+  char str[100];
+  sprintf(str, "Motor Status: %d", initMotor());
+  print(str);
   while (1)
   {
     setPwm();
@@ -131,7 +133,9 @@ void main()
     desiredTorque = getTorque();
     error = setVRef(measuredI, desiredTorque);
 
-    printf("Measured current = %f\nMeasured torque = %f\n", measuredI, error);
+    sprintf(str, "Measured current = %f\nMeasured torque = %f\n", measuredI,
+            error);
+    print(str);
     // sendSerial(speed[0],measuredI)
   }
 }

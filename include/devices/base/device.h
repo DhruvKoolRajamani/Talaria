@@ -12,7 +12,7 @@
 #ifndef DEVICE_H
 #define DEVICE_H
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
@@ -113,6 +113,7 @@ public:
    * @return ros::NodeHandle*
    */
   ros::NodeHandle* getNodeHandle();
+#endif
 
   /**
    * @brief Get the Refresh Rate object
@@ -120,7 +121,6 @@ public:
    * @return int _refresh_rate
    */
   int getRefreshRate();
-#endif
 
   /**
    * @brief Get the Id Size object
@@ -226,7 +226,7 @@ public:
  * @param PinName pin
  * @param int delay_ms
  */
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   virtual void reset(PinName pin, int delay_ms = 100);
 #else
   virtual void reset(int pin, int delay_ms = 100);
@@ -249,7 +249,7 @@ public:
  * @param PinName pin
  * @param bool state
  */
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   virtual void setPinState(PinName pin, bool state);
 #else
   virtual void setPinState(int pin, bool state);

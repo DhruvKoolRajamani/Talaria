@@ -14,13 +14,28 @@
 
 #ifdef HAND
 const int NUM_DEVICES = 2;
-#elif LLE
+#elif defined(LLE)
 const int NUM_DEVICES = 1;
+#endif
+
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+#include "mbed.h"
+#else
+#include "Arduino.h"
 #endif
 
 #ifndef DISABLE_ROS
 #include "ros.h"
 #include <std_msgs/String.h>
+#else
+static void print(const char* str)
+{
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  printf(str);
+#else
+  Serial.print(str);
+#endif
+}
 #endif
 #include <limits.h>
 

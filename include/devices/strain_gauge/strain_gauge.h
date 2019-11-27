@@ -42,17 +42,32 @@ public:
   /** CONSTRUCTORS */
 
 #ifndef DISABLE_ROS
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   StrainGauge(uint8_t id, PinName a0, ros::NodeHandle& nh, uint8_t dev_index,
               const char* dev_name, const char* topic_name, int refresh_rate)
     : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name, refresh_rate)
     , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
+#else
+  StrainGauge(uint8_t id, int a0, ros::NodeHandle& nh, uint8_t dev_index,
+              const char* dev_name, const char* topic_name, int refresh_rate)
+    : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name, refresh_rate)
+    , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
+  {
+#endif
+
     setIsTopicAdvertised(nh.advertise(_pub_strain_gauge));
   }
 #else
-  StrainGauge(uint8_t id, PinName a0, uint8_t dev_index)
-    : AnalogDevice(id, a0, dev_index)
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  StrainGauge(uint8_t id, PinName a0, uint8_t dev_index, int refresh_rate)
+    : AnalogDevice(id, a0, dev_index, refresh_rate)
   {
+#else
+  StrainGauge(uint8_t id, int a0, uint8_t dev_index, int refresh_rate)
+    : AnalogDevice(id, a0, dev_index, refresh_rate)
+  {
+#endif
   }
 #endif
 
@@ -90,7 +105,12 @@ public:
     for (int i = 0; i < 50; i++)
     {
       _Vout_unstrained += this->readAnalogData();
+
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
       wait_ms(10);
+#else
+      delay(10);
+#endif
     }
     _Vout_unstrained /= 50;
     setConfiguredStatus(true);

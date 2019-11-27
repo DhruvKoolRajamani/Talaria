@@ -157,12 +157,12 @@ bool Device::getIsTopicAdvertised()
 {
   return _is_topic_advertised;
 }
+#endif
 
 int Device::getRefreshRate()
 {
   return _refresh_rate;
 }
-#endif
 
 /**
  * @brief Get the Id Size object
@@ -339,11 +339,25 @@ void Device::update(int loop_counter)
  * @param PinName pin
  * @param int delay_ms
  */
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void Device::reset(PinName pin, int delay_ms)
+#else
+void Device::reset(int pin, int delay_ms)
+#endif
 {
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   DigitalOut resetPin(pin, false);
-  wait_ms(delay_ms);
   resetPin = true;
+#else
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, false);
+  digitalWrite(pin, true);
+#endif
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  wait_ms(delay_ms);
+#else
+  delay(delay_ms);
+#endif
 }
 
 bool Device::strcmp(const char* str1, const char* str2)
@@ -386,12 +400,12 @@ void Device::setNodeHandle(ros::NodeHandle* nh)
 {
   _nh = nh;
 }
-#endif
 
 void Device::setIsTopicAdvertised(bool is_topic_advertised)
 {
   _is_topic_advertised = is_topic_advertised;
 }
+#endif
 
 /**
  * @brief Set the Pin State object
@@ -399,10 +413,19 @@ void Device::setIsTopicAdvertised(bool is_topic_advertised)
  * @param PinName pin
  * @param bool state
  */
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void Device::setPinState(PinName pin, bool state)
+#else
+void Device::setPinState(int pin, bool state)
+#endif
 {
   int value = (int)state;
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   DigitalOut Pin(pin, value);
+#else
+  pinMode(pin, OUTPUT);
+  digitalWrite(pin, value);
+#endif
 }
 
 /**

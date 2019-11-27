@@ -12,27 +12,40 @@
 #ifndef I2C_BUS_H
 #define I2C_BUS_H
 
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
+#include "Wire.h"
+#include "wiring_private.h"
 #endif
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 class I2CBus : public I2C
 {
+#else
+class I2CBus : public TwoWire
+{
+#endif
 private:
   bool _init_status;
 
   uint8_t _id;
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PinName _sda;
   PinName _scl;
+#else
+  int _sda;
+  int _scl;
+#endif
 
   int _clock_speed;
 
 public:
   /** CONSTRUCTORS */
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   /**
    * @brief Construct a new I2CBus object
    *
@@ -44,6 +57,13 @@ public:
     : I2C(sda, scl), _id(id), _sda(sda), _scl(scl), _clock_speed(clock_speed)
   {
     frequency(_clock_speed);
+#else
+  I2CBus(uint8_t id, int sda, int scl, int clock_speed = 400000)
+    : TwoWire(), _id(id), _sda(sda), _scl(scl), _clock_speed(clock_speed)
+  {
+    begin();
+    setClockSpeed(clock_speed);
+#endif
     _init_status = true;
   }
 
@@ -119,7 +139,11 @@ public:
   void setClockSpeed(int clock_speed)
   {
     _clock_speed = clock_speed;
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
     frequency(_clock_speed);
+#else
+    setClock(_clock_speed);
+#endif
     _init_status = true;
   }
 };

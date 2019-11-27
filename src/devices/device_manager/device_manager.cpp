@@ -102,10 +102,89 @@ int DeviceManager::getMaxRefreshRate()
     }
     else
     {
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
       if (std::max(this->_max_refresh_rate, _devices[i]->getRefreshRate()) !=
           this->_max_refresh_rate)
+#else
+      if (_max(this->_max_refresh_rate, _devices[i]->getRefreshRate()) !=
+          this->_max_refresh_rate)
+#endif
         this->_max_refresh_rate = _devices[i]->getRefreshRate();
     }
   }
   return this->_max_refresh_rate;
 }
+
+#ifdef COMPUTE_CRC
+uint8_t DeviceManager::makePacket(float* measuredData)
+{
+  uint8_t startByte, stopByte, crcWidth = 0;
+  startByte = 0xAA;
+  stopByte = 0x0F;
+  uint32_t checksum;
+  int32_t crcStatus;
+  bool makePacketStatus;
+  uint8_t bytes[PACKET_SIZE];
+
+  for (int i = 0; i < PACKET_SIZE; i++)
+  {
+    float2Bytes(measuredData[i], &bytes[i]);
+  }
+
+  checksum, crcWidth, crcStatus = fetchCrcChecksum(bytes);
+  int packetLength = PACKET_SIZE + crcWidth;
+  if (crcStatus == 1)
+  {
+    bytes[0] = startByte;
+    bytes[packetLength - 1] = stopByte;
+
+    if (crcWidth != 0)
+    {
+      bytes[packetLength - 1 - crcWidth] = checksum;
+    }
+  }
+
+  else
+  {
+    makePacketStatus = false;
+  }
+}
+#endif
+
+#ifdef COMPUTE_CRC
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+float DeviceManager::fetchCrcChecksum(uint8_t data[])
+{
+  MbedCRC<POLY_32BIT_ANSI, 32> ct;
+
+  uint32_t crcPolynomial, checksum;
+  uint8_t crcWidth;
+  int32_t crcStatus;
+
+  checksum = 0;
+
+  crcPolynomial = ct.get_polynomial();
+  crcWidth = ct.get_width();
+  crcStatus = ct.compute((void*)data, strlen((const char*)data), &checksum);
+
+  return checksum, crcWidth, crcStatus;
+}
+
+#else
+float DeviceManager::calcCRC(uint8_t data[])
+{
+  uint8_t crcWidth;
+  int32_t crcStatus;
+  uint32_t c = hecksum0;  // starting value as you like, must be the same
+                          // before each calculation
+  for (int i = 0; i < strlen(data); i++)  // for each character in the string
+  {
+    checksum = _crc16_update(crc, data[i]);  // update the crc value
+  }
+  crcWidth = 1;
+  crcStatus = 1;
+  return checksum, crcWidth, crcStatus;
+}
+
+#endif
+#endif

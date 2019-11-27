@@ -8,7 +8,7 @@
  * @copyright Copyright (c) 2019
  *
  */
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
 #else
 #include "Arduino.h"
@@ -50,7 +50,7 @@ float rate = 1;
 
 void halt(float time_ms)
 {
-#ifndef DPIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   wait_ms(time_ms);
 #else
   delay(time_ms);

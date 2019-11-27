@@ -12,6 +12,7 @@
 
 // CONSTRUCTORS
 #ifndef DISABLE_ROS
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 BendSensor::BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
                        uint8_t dev_index, const char* dev_name,
                        const char* topic_name, PinName reset_pin,
@@ -21,14 +22,33 @@ BendSensor::BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
   , _reset_pin(reset_pin)
   , _pub_bend_sensor(topic_name, &(this->_msg_bend_sensor))
 {
+#else
+BendSensor::BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+                       uint8_t dev_index, const char* dev_name,
+                       const char* topic_name, int reset_pin, int refresh_rate)
+  : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name,
+              refresh_rate)
+  , _reset_pin(reset_pin)
+  , _pub_bend_sensor(topic_name, &(this->_msg_bend_sensor))
+{
+  pinMode(_reset_pin, OUTPUT);
+#endif
   setIsTopicAdvertised(nh.advertise(_pub_bend_sensor));
 }
 #else
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 BendSensor::BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index,
-                       int refresh_rate)
+                       PinName reset_pin, int refresh_rate)
   : I2CDevice(address, i2c_bus, dev_index, refresh_rate), _reset_pin(reset_pin)
 {
 }
+#else
+BendSensor::BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index,
+                       int reset_pin, int refresh_rate)
+  : I2CDevice(address, i2c_bus, dev_index, refresh_rate), _reset_pin(reset_pin)
+{
+}
+#endif
 #endif
 
 // DESTRUCTORS
@@ -67,7 +87,11 @@ bool BendSensor::initialize()
     return false;
   }
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   wait_ms(2);
+#else
+  delay(2);
+#endif
 
   if (!this->enableStretchValues(true))
   {
@@ -88,7 +112,11 @@ bool BendSensor::initialize()
   }
   setHealthStatus(true);
   setConfiguredStatus(true);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   wait_ms(10);
+#else
+  delay(10);
+#endif
 
   return true;
 }
@@ -98,10 +126,18 @@ bool BendSensor::enableStretchValues(bool enable)
   uint8_t buffer[BEND_SENSOR_TRANSFER_SIZE] = { BEND_SENSOR_READ_STRETCH,
                                                 enable, 0 };
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   return this->writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  return this->writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 bool BendSensor::ping(int chip_id_reg_address, int delay_ms)
+#else
+bool BendSensor::ping(uint8_t chip_id_reg_address, int delay_ms)
+#endif
 {
   uint8_t buffer[BEND_SENSOR_TRANSFER_SIZE];
   if (readRegister(chip_id_reg_address, buffer, BEND_SENSOR_TRANSFER_SIZE,
@@ -120,7 +156,9 @@ bool BendSensor::ping(int chip_id_reg_address, int delay_ms)
     this->setDiagnosticsData(_diagnostic_chip_id);
 #endif
 #else
-    printf("Chip Id is: %x", this->getChipId());
+    char str[100];
+    sprintf(str, "Chip Id is: %x", this->getChipId());
+    print(str);
 #endif
     return true;
   }
@@ -141,20 +179,24 @@ void BendSensor::update(int loop_counter)
 
       this->readData();
 
-#ifndef DISABLE_ROS
       if (this->_data_ready == BEND_SENSOR_SAMPLE)
       {
         processNewData();
+#ifndef DISABLE_ROS
         _msg_bend_sensor.chip_id.data = this->getChipId();
         _msg_bend_sensor.bend.data = this->_bend_angle;
         _msg_bend_sensor.stretch.data = this->_stretch_value;
         if (this->getIsTopicAdvertised())
           _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
-      }
+
 #else
-// Serialize this message
-// printf("Bend Data: %f", _data[0]);
+        // Serialize
+        char str[100];
+        sprintf(str, "Bend:\n\tChip: %x\n\tBend: %f\n\tStretch: %f\n",
+                this->getChipId(), this->_bend_angle, this->_stretch_value);
+        print(str);
 #endif
+      }
     }
   }
   else
@@ -220,7 +262,11 @@ bool BendSensor::readData()
   uint8_t buffer[BEND_SENSOR_TRANSFER_SIZE] = { 0, 0, 0 };
   int16_t temp;
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   if (readBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE))
+#else
+  if (readBytes(buffer, BEND_SENSOR_TRANSFER_SIZE))
+#endif
   {
     this->_data_ready = buffer[0];
     if (buffer[0] == BEND_SENSOR_SAMPLE)
@@ -237,14 +283,18 @@ bool BendSensor::readData()
     }
     else
     {
+#ifndef DISABLE_ROS
       _msg_bend_sensor.debug.data = "ReadData buffer incorrect";
+#endif
       return false;
     }
     // _msg_bend_sensor.debug.data = "ReadData Success";
     return true;
   }
   this->setEnabledStatus(false);
+#ifndef DISABLE_ROS
   _msg_bend_sensor.debug.data = "ReadData Fail";
+#endif
   // fallback to initializing again.
   return false;
 }
@@ -260,9 +310,13 @@ void BendSensor::processNewData()
 void BendSensor::disable()
 {
   Device::disable();
-  char buffer[BEND_SENSOR_TRANSFER_SIZE] = { BEND_SENSOR_SHUTDOWN, 0, 0 };
+  uint8_t buffer[BEND_SENSOR_TRANSFER_SIZE] = { BEND_SENSOR_SHUTDOWN, 0, 0 };
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
   writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
 /**
@@ -288,7 +342,11 @@ bool BendSensor::calibrate(uint8_t ads_calibration_step, uint8_t degrees)
   buffer[1] = ads_calibration_step;
   buffer[2] = degrees;
 
-  return writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
 // Delete the current calibration values from non-volatile memory and restore
@@ -301,13 +359,25 @@ bool BendSensor::clearCalibration()
 /**
  * @brief Reset the Angular Displacement Sensor
  */
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void BendSensor::reset(PinName pin, int delay_ms)
+#else
+void BendSensor::reset(int pin, int delay_ms)
+#endif
 {
   // Configure reset line as an output
   this->setPinState(pin, false);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   wait_ms(10);
+#else
+  delay(10);
+#endif
   this->setPinState(pin, true);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   wait_ms(delay_ms);
+#else
+  delay(delay_ms);
+#endif
 }
 
 /**
@@ -322,7 +392,11 @@ bool BendSensor::beginPollingData(bool poll)
   buffer[0] = BEND_SENSOR_POLLED_MODE;
   buffer[1] = poll;
 
-  return writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
 /**
@@ -337,7 +411,11 @@ bool BendSensor::beginReadingData(bool run)
   buffer[0] = BEND_SENSOR_RUN;
   buffer[1] = run;
 
-  return writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
 /**
@@ -358,7 +436,11 @@ bool BendSensor::setAddress(uint8_t newAddress)
   buffer[0] = BEND_SENSOR_SET_ADDRESS;
   buffer[1] = newAddress;
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   if (writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE) == false)
+#else
+  if (writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE) == false)
+#endif
     return false;
 
   this->setDeviceAddress(newAddress);  // Update address only after success
@@ -381,7 +463,11 @@ bool BendSensor::setSampleRate(uint16_t sps)
   buffer[1] = (uint8_t)((sps & 0x00FF) >> 0);
   buffer[2] = (uint8_t)((sps & 0xFF00) >> 8);
 
-  return writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
 
 // Send command to initiate soft reset
@@ -391,5 +477,9 @@ bool BendSensor::softReset()
 
   buffer[0] = BEND_SENSOR_RESET;
 
-  return writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  writeBytes((char*)buffer, BEND_SENSOR_TRANSFER_SIZE);
+#else
+  writeBytes(buffer, BEND_SENSOR_TRANSFER_SIZE);
+#endif
 }
