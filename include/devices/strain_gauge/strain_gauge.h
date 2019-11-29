@@ -43,15 +43,15 @@ public:
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  StrainGauge(uint8_t id, PinName a0, ros::NodeHandle& nh, uint8_t dev_index,
+  StrainGauge(uint8_t id, PinName pin_name, ros::NodeHandle& nh, uint8_t dev_index,
               const char* dev_name, const char* topic_name, int refresh_rate)
-    : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name, refresh_rate)
+    : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name, refresh_rate)
     , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
 #else
-  StrainGauge(uint8_t id, int a0, ros::NodeHandle& nh, uint8_t dev_index,
+  StrainGauge(uint8_t id, int pin_name, ros::NodeHandle& nh, uint8_t dev_index,
               const char* dev_name, const char* topic_name, int refresh_rate)
-    : AnalogDevice(id, a0, nh, dev_index, dev_name, topic_name, refresh_rate)
+    : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name, refresh_rate)
     , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
 #endif
@@ -60,12 +60,12 @@ public:
   }
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  StrainGauge(uint8_t id, PinName a0, uint8_t dev_index, int refresh_rate)
-    : AnalogDevice(id, a0, dev_index, refresh_rate)
+  StrainGauge(uint8_t id, PinName pin_name, uint8_t dev_index, int refresh_rate)
+    : AnalogDevice(id, pin_name, dev_index, refresh_rate)
   {
 #else
-  StrainGauge(uint8_t id, int a0, uint8_t dev_index, int refresh_rate)
-    : AnalogDevice(id, a0, dev_index, refresh_rate)
+  StrainGauge(uint8_t id, int pin_name, uint8_t dev_index, int refresh_rate)
+    : AnalogDevice(id, pin_name, dev_index, refresh_rate)
   {
 #endif
   }

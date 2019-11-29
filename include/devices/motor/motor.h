@@ -1,185 +1,169 @@
+/**
+ * @file strain_gauge.h
+ * @author Dhruv Kool Rajamani (dkoolrajamani@wpi.edu)
+ * @brief
+ * @version 0.1
+ * @date 2019-10-24
+ *
+ * @copyright Copyright (c) 2019
+ *
+ */
+
+#ifndef MOTOR_H
+#define MOTOR_H
+
 #include "devices/base/analog_device.h"
 #include "devices/base/pwm_device.h"
 
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-#include "mbed.h"
-#else
-#include "Arduino.h"
+#ifndef DISABLE_ROS
+// Add header file for custom ros message for bend sensor
+
+#include "std_msgs/Float32.h"
+#include "std_msgs/String.h"
 #endif
 
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-PwmDevice aEnable(1, p25, 1);     // p136 -- p8
-PwmDevice vRef(1, p26, 1);        // p137 -- p4 + jumper
-AnalogDevice aVSense(0, p19, 1);  // p90 -- across R3
-DigitalOut aPhase(p5);            // p101 -- p7
-DigitalOut nSleep(p6);            // p94 -- p3
-DigitalOut nConfig(p7);           // p96 -- p5 + jumper
-DigitalIn nFault(p8);             // p95 -- p7r
-#else
-PwmDevice aEnable(3);  // p136 -- p8
-PwmDevice vRef(6);     // p137 -- p4 + jumper
-int aVSense = A0;      // p90 -- across R3 A10
-int aPhase = 8;        // p101 -- p7 br 44
-int nSleep = 12;       // p94 -- p3 or 51
-int nConfig = 11;      // p96 -- p5 + jumper bla 49
-int nFault = 10;       // p95 -- p7r gr 50
-#endif
+class Motor : public AnalogDevice
+{
+private:
 
 #define aRSense 0.1
 #define torqueConst 10.9
 
+#ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-int initMotor()
-{
-  nSleep = 1;   // enable driver
-  nConfig = 0;  // enable phase mode (DC motor)
-  aPhase = 1;   // enable output to motor
-
-  return nFault.read();
-}
-
-#else
-int initMotor()
-{
-  digitalWrite(nSleep, HIGH);  // enable driver
-  digitalWrite(nConfig, LOW);  // enable phase mode (DC motor)
-  digitalWrite(aPhase, HIGH);  // enable output to motor
-
-  return digitalRead(nFault);  // motor error status
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-void setPwm()
-{
-  float speed = 50;  // get desired speed from usb
-  aEnable.writePWMData(speed);
-}
-
-#else
-void setPwm()
-{
-  float speed = 100;  // get desired speed from usb
-  aEnable.writePWMData(speed);
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-float getISense()
-{
-  int val = aVSense.read();
-  float vSense = val * 5.0 / 1023.0;
-  float iSense = vSense * aRSense;
-  return iSense;
-}
-
-#else
-float getISense()
-{
-  int val = analogRead(aVSense);
-  float vSense = val * 5.0 / 1023.0;
-  float iSense = vSense * aRSense;
-  return iSense;
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-float getTorque()
-{
-  float torque = 5;  // get desired torque from usb
-  return torque;
-}
-
-#else
-float getTorque()
-{
-  float torque = 5;  // get desired torque from usb
-  return torque;
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-float setVRef(float measuredI, float desiredTorque)
-{
-  float measuredTorque = (measuredI)*torqueConst;
-  float newVRef = (desiredTorque * 0.5) / torqueConst;
-
-  vRef.writePWMData(newVRef);
-  return measuredTorque;
-}
-
-#else
-float setVRef(float measuredI, float desiredTorque)
-{
-  float measuredTorque = (measuredI)*torqueConst;
-  float newVRef = desiredTorque * 0.5 / torqueConst;
-
-  vRef.writePWMData(newVRef);
-  return measuredTorque;
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-void main()
-{
+  PwmDevice aEnable(p25);     // p136 -- p8 aEnable
+  PwmDevice vRef(p26);        // p137 -- p4 + jumper VRef
+  PinName aVSense = p19;  // p90 -- across R3 aVSense
+  DigitalOut aPhase(p5);            // p101 -- p7 M0
+  DigitalOut nSleep(p6);            // p94 -- p3 nSleep
+  DigitalOut nConfig(p7);           // p96 -- p5 + jumper nConfig
+  DigitalIn nFault(p8);             // p95 -- p7r nFault
   float measuredI, desiredTorque, error;
   char str[100];
-  sprintf(str, "Motor Status: %d", initMotor());
-  print(str);
-  while (1)
-  {
-    setPwm();
-    measuredI = getISense();
-    desiredTorque = getTorque();
-    error = setVRef(measuredI, desiredTorque);
-
-    sprintf(str, "Measured current = %f\nMeasured torque = %f\n", measuredI,
-            error);
-    print(str);
-    // sendSerial(speed[0],measuredI)
-  }
-}
-
+  
 #else
-void setup()
-{
-  pinMode(aEnable, OUTPUT);
-  pinMode(vRef, OUTPUT);
-  pinMode(aVSense, INPUT);
-  pinMode(aPhase, OUTPUT);
-  pinMode(nSleep, OUTPUT);
-  pinMode(nConfig, OUTPUT);
-  pinMode(nFault, INPUT);
-
-  // analogWriteResolution(12);
-
-  pinMode(13, OUTPUT);
-  int init_status = initMotor();
-  Serial.begin(9600);
-  Serial.println("Motor Status:");
-  Serial.println(init_status);
-}
-void loop()
-{
-  digitalWrite(13, HIGH);
-  delay(100);
-  digitalWrite(13, LOW);
-  delay(100);
-  int init_status = initMotor();
-
-  Serial.println("Motor Status:");
-  Serial.println(init_status);
-
+  PwmDevice aEnable(3);     // p136 -- p8
+  PwmDevice vRef(6);        // p137 -- p4 + jumper
+  int aVSense = 13;         // p90 -- across R3 A10
+  int aPhase = 8;           // p101 -- p7 br 44
+  int nSleep = 12;          // p94 -- p3 or 51
+  int nConfig = 11;         // p96 -- p5 + jumper bla 49
+  int nFault = 10;          // p95 -- p7r gr 50
   float measuredI, desiredTorque, error;
-  setPwm();
-  measuredI = getISense();
-  desiredTorque = getTorque();
-  error = setVRef(measuredI, desiredTorque);
-
-  Serial.println("Measured current = ");
-  Serial.println(measuredI);
-
-  Serial.println("Measured Torque = ");
-  Serial.println(error);
-}
+  char str[100];
+  
 #endif
+  ros::Publisher _pub_motor;
+  // Create a custom ros message for motor but for now using standard
+  std_msgs::Float32 _msg_motor; 
+#else
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  PwmDevice aEnable(1, p25, 1);     // p136 -- p8 aEnable
+  PwmDevice vRef(1, p26, 1);        // p137 -- p4 + jumper VRef
+  PinName aVSense = p19;  // p90 -- across R3 aVSense
+  DigitalOut aPhase(p5);            // p101 -- p7 M0
+  DigitalOut nSleep(p6);            // p94 -- p3 nSleep
+  DigitalOut nConfig(p7);           // p96 -- p5 + jumper nConfig
+  DigitalIn nFault(p8);             // p95 -- p7r nFault
+  float measuredI, desiredTorque, error;
+  char str[100];
+#else
+  PwmDevice aEnable(3);     // p136 -- p8
+  PwmDevice vRef(6);        // p137 -- p4 + jumper
+  int aVSense = 13;         // p90 -- across R3 A10
+  int aPhase = 8;           // p101 -- p7 br 44
+  int nSleep = 12;          // p94 -- p3 or 51
+  int nConfig = 11;         // p96 -- p5 + jumper bla 49
+  int nFault = 10;          // p95 -- p7r gr 50
+  float measuredI, desiredTorque, error;
+  char str[100];
+#endif
+#endif  
+
+protected:
+public:
+  /** CONSTRUCTORS */
+
+#ifndef DISABLE_ROS
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  Motor(uint8_t id, PinName aVSense, ros::NodeHandle& nh, uint8_t dev_index,
+              const char* dev_name, const char* topic_name, int refresh_rate=1)
+    : AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
+    , _pub_motor(topic_name, &(this->_msg_motor))
+  {
+#else
+  Motor(uint8_t id, int aVSense, ros::NodeHandle& nh, uint8_t dev_index,
+              const char* dev_name, const char* topic_name, int refresh_rate=1)
+    :AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
+    , _pub_motor(topic_name, &(this->_msg_motor))
+  {
+#endif
+
+    setIsTopicAdvertised(nh.advertise(_pub_motor));
+  }
+#else
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  Motor(uint8_t id, PinName aVSense, uint8_t dev_index, int refresh_rate=1)
+  : AnalogDevice(id, aVSense, dev_index, refresh_rate)
+  {
+#else
+  Motor(uint8_t id, int aVSense, uint8_t dev_index, int refresh_rate=1)
+  : AnalogDevice(id, aVSense, dev_index, refresh_rate)
+  {
+#endif
+  }
+#endif
+
+  // DESTRUCTORS
+  virtual ~Motor()
+  {
+  }
+
+  // GETTERS
+  
+  // SETTERS
+
+  // METHODS
+  /**
+   * @brief Initialize motor
+   *
+   * @return true
+   * @return false
+   */
+  bool initialize();
+  
+  void update(int loop_counter = 1);
+
+  /**
+   * @brief Control motor speed
+   * 
+   */
+  void setPwm();
+
+  /**
+   * @brief Read current across sense resistor
+   *
+   * @return current
+   */
+  float getISense();
+
+  /**
+   * @brief Get desired torque value
+   *
+   * @return torque
+   */
+  float getTorque();
+
+  /**
+   * @brief Initialize motor
+   *
+   * @param measuredI current measured across sense resistor
+   * @param desiredTorque desired torque value
+   * @return measured torque from current sense feedback
+   * 
+   */
+  float setVRef(float measuredI, float desiredTorque);
+
+};
+
+#endif  // MOTOR_H

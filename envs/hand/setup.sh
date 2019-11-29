@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TALARIA_WS="/home/dhruv/Talaria/"
+TALARIA_WS="/media/raunak/OS/Dynamics_project/Talaria"
 UPLOAD_FLAG="False"
 
 run_setup() {

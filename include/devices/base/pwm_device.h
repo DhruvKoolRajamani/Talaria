@@ -66,9 +66,9 @@ virtual ~PwmDevice()
   }
 
 #else
-  virtual bool writePWMData(float outVolt = 1)
+  virtual bool writePWMData(float dutyCycle = 1)
   {
-    int pwmData = map(outVolt * 1000, 0, 3300, 0, 255);
+    int pwmData = map(dutyCycle * 1000, 0, 3300, 0, 255);
 
     analogWrite(_pwm_pin, pwmData);
   }

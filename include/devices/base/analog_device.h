@@ -31,10 +31,10 @@ private:
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   uint8_t _id;
-  PinName _a0;
+  PinName _pin_name;
 #else
   uint8_t _id;
-  int _a0;
+  int _pin_name;
 #endif
 
 public:
@@ -42,23 +42,23 @@ public:
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  AnalogDevice(uint8_t id, PinName a0, ros::NodeHandle& nh,
+  AnalogDevice(uint8_t id, PinName pin_name, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
                const char* topic_name = NULL, int refresh_rate = 1)
-    : AnalogIn(a0)
+    : AnalogIn(pin_name)
     , Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
-    , _a0(a0)
+    , _pin_name(pin_name)
   {
 #else
-  AnalogDevice(uint8_t id, int a0, ros::NodeHandle& nh, uint8_t dev_index = 0,
+  AnalogDevice(uint8_t id, int pin_name, ros::NodeHandle& nh, uint8_t dev_index = 0,
                const char* dev_name = NULL, const char* topic_name = NULL,
                int refresh_rate = 1)
     : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
     , _id(id)
-    , _a0(a0)
+    , _pin_name(pin_name)
   {
-    pinMode(_a0, INPUT);
+    pinMode(_pin_name, INPUT);
 #endif
     setIndex(dev_index);
     setHealthStatus(true);
@@ -69,20 +69,20 @@ public:
  * @brief Construct a new AnalogDevice object
  *
  * @param id
- * @param a0
+ * @param pin_name
  */
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  AnalogDevice(uint8_t id, PinName a0, uint8_t dev_index = 0,
+  AnalogDevice(uint8_t id, PinName pin_name, uint8_t dev_index = 0,
                int refresh_rate = 1)
-    : AnalogIn(a0)
+    : AnalogIn(pin_name)
     , Device(dev_index, refresh_rate)
     , _id(id)
-    , _a0(a0){
+    , _pin_name(pin_name){
 #else
-  AnalogDevice(uint8_t id, int a0, uint8_t dev_index = 0, int refresh_rate = 1)
-    : Device(dev_index, refresh_rate), _id(id), _a0(a0)
+  AnalogDevice(uint8_t id, int pin_name, uint8_t dev_index = 0, int refresh_rate = 1)
+    : Device(dev_index, refresh_rate), _id(id), _pin_name(pin_name)
   {
-    pinMode(_a0, INPUT);
+    pinMode(_pin_name, INPUT);
 #endif
 
       setIndex(dev_index);
@@ -137,7 +137,7 @@ public:
 virtual float readAnalogData(uint16_t delay_ms = 100)
 {
   float temp, analogData;
-  temp = analogRead(_a0);
+  temp = analogRead(_pin_name);
   analogData = temp * 5.0 / 1023.0;
   readReady = true;
   // wait_ms(delay_ms);
