@@ -30,6 +30,8 @@
 #include "devices/imu/bmi_160.h"
 #include "devices/bend_sensor/bend_sensor.h"
 #include "devices/strain_gauge/strain_gauge.h"
+#include "devices/base/pwm_device.h"
+#include "devices/base/analog_device.h"
 
 class DeviceManager
 {
