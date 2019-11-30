@@ -55,9 +55,12 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID, (1 / 10) * 1000);
 
 void addDevices()
 {
-  device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
-  device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  device_manager.addDevice(&_aVSense, AD_IMU_SENSOR_ID);
+  // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
+  // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
+  device_manager.addDevice(&motor, 0);
+#ifdef DISABLE_ROS
+  print("Added Devices\n");
+#endif
 }
 
 // Can shift to Utils/hardware header
@@ -73,7 +76,7 @@ void halt(float time_ms)
 #ifndef DISABLE_ROS
 float rate = 1;
 #else
-float rate = 1;
+float rate = 5;
 #endif
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -81,6 +84,11 @@ int main()
 {
 #ifndef DISABLE_ROS
   nh.initNode();
+#else
+  wait_ms(1000);
+  print("Hello\n");
+  wait_ms(1000);
+  char str[100];
 #endif
 
   addDevices();
@@ -92,13 +100,23 @@ int main()
     if (!is_init)
     {
       is_init = device_manager.initializeDevices();
+#ifdef DISABLE_ROS
+      sprintf(str, "Not initialized count: %d\n", i);
+      print(str);
+#endif
     }
 
     // Move all this to device manager
     device_manager.updateDevices(i);
 
     if (!is_init)
+    {
       rate = 1000;
+#ifdef DISABLE_ROS
+      sprintf(str, "Setting rate to: %f\n", rate);
+      print(str);
+#endif
+    }
 
     if (i <= device_manager.getMaxRefreshRate())
     {

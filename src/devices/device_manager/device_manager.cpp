@@ -67,9 +67,21 @@ bool DeviceManager::initializeDevices()
   for (int i = 0; i < NUM_DEVICES; i++)
   {
     if (_devices[i] == NULL)
+    {
+#ifdef DISABLE_ROS
+      char str[100];
+      sprintf(str, "No Devices yet\n");
+      print(str);
+#endif
       continue;
+    }
     else
     {
+#ifdef DISABLE_ROS
+      char str[100];
+      sprintf(str, "device: %d\n", _devices[i]->getIndex());
+      print(str);
+#endif
       init_flag = _devices[i]->initialize();
     }
   }

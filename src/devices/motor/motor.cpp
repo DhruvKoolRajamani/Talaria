@@ -9,9 +9,9 @@
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
-      PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
-      ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-      const char* topic_name, int refresh_rate)
+             PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+             ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
+             const char* topic_name, int refresh_rate)
   : AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
@@ -23,9 +23,10 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _pub_motor(topic_name, &(this->_msg_motor))
 {
 #else
-Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
-      int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,
-      const char* dev_name, const char* topic_name, int refresh_rate)
+Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
+             int nFault, int nConfig, int aPhase, ros::NodeHandle& nh,
+             uint8_t dev_index, const char* dev_name, const char* topic_name,
+             int refresh_rate)
   : AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
@@ -49,8 +50,8 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFa
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
-      PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
-      uint8_t dev_index, int refresh_rate)
+             PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+             uint8_t dev_index, int refresh_rate)
   : AnalogDevice(id, aVSense, dev_index)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
@@ -62,8 +63,9 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
 {
 
 #else
-Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
-      int nConfig, int aPhase, uint8_t dev_index, int refresh_rate)
+Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
+             int nFault, int nConfig, int aPhase, uint8_t dev_index,
+             int refresh_rate)
   : AnalogDevice(id, aVSense, dev_index)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
@@ -98,11 +100,21 @@ Motor::~Motor()
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 bool Motor::initialize()
 {
-  DigitalOut sleep(_nSleep, 1);        // enable driver
+#ifdef DISABLE_ROS
+  sprintf(str, "Entered Motor Init\n");
+  print(str);
+#endif
+  DigitalOut sleep(_nSleep, true);     // enable driver
   DigitalOut config(_nConfig, false);  // enable phase mode (DC motor)
-  DigitalOut phase(_aPhase, false);
+  DigitalOut phase(_aPhase, true);
   // ;  // enable output to motor
   DigitalIn fault(_nFault);
+
+#ifdef DISABLE_ROS
+  sprintf(str, (_nFault) ? "fault : True\n" : "fault : False\n");
+  print(str);
+#endif
+
   if (fault)
   {
     return true;
@@ -207,7 +219,6 @@ void Motor::update(int loop_counter)
 {
   // Only update if update rate for the sensor is the same as the sampling
   // rate
-  initialize();
   if (this->_refresh_rate == loop_counter)
   {
     // Publish Diagnostic messages
@@ -217,9 +228,13 @@ void Motor::update(int loop_counter)
     measuredI = getISense();
     _desiredTorque = getTorque();
     error = setVRef(measuredI, _desiredTorque);
-
+#ifdef DISABLE_ROS
     sprintf(str, "Measured current = %f\nMeasured torque = %f\n", measuredI,
             error);
     print(str);
+    sprintf(str, "Measured current = %f\nMeasured torque = %f\n", measuredI,
+            error);
+    print(str);
+#endif
   }
 }
