@@ -215,7 +215,7 @@ void BendSensor::update(int loop_counter)
         char str[100];
         sprintf(str, "Bend:\n\tChip: %x\n\tBend: %f\n\tStretch: %f\n",
                 this->getChipId(), this->_bend_angle, this->_stretch_value);
-        print(str);
+        // print(str);
 #endif
       }
     }

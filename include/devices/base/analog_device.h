@@ -75,14 +75,14 @@ public:
  * @param pin_name
  */
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  AnalogDevice(uint8_t id, PinName pin_name, uint8_t dev_index = 0,
+  AnalogDevice(uint8_t id, PinName pin_name, uint8_t dev_index,
                int refresh_rate = 1)
     : AnalogIn(pin_name)
     , Device(dev_index, refresh_rate)
     , _id(id)
     , _pin_name(pin_name){
 #else
-  AnalogDevice(uint8_t id, int pin_name, uint8_t dev_index = 0,
+  AnalogDevice(uint8_t id, int pin_name, uint8_t dev_index,
                int refresh_rate = 1)
     : Device(dev_index, refresh_rate), _id(id), _pin_name(pin_name)
   {

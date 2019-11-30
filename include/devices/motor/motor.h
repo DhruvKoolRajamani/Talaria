@@ -46,7 +46,7 @@ private:
   PinName _nSleep = p6;   // p94 -- p3 _nSleep
   PinName _nConfig = p7;  // p96 -- p5 + jumper _nConfig
   PinName _nFault = p8;   // p95 -- p7r _nFault
-  float measuredI, _desiredTorque, error;
+  float _measuredI, _desiredTorque, _error;
 
 #else
   PwmDevice _aEnable = PwmDevice(3);  // p136 -- p8
@@ -56,7 +56,7 @@ private:
   int _nSleep = 12;                   // p94 -- p3 or 51
   int _nConfig = 11;                  // p96 -- p5 + jumper bla 49
   int _nFault = 10;                   // p95 -- p7r gr 50
-  float measuredI, _desiredTorque, error;
+  float _measuredI, _desiredTorque, _error;
 #endif
 
 #ifndef DISABLE_ROS
@@ -76,20 +76,20 @@ public:
   Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-        const char* topic_name, int refresh_rate = 1);
+        const char* topic_name, int refresh_rate);
 #else
   Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
         int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,
-        const char* dev_name, const char* topic_name, int refresh_rate = 1);
+        const char* dev_name, const char* topic_name, int refresh_rate);
 #endif
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
-        uint8_t dev_index, int refresh_rate = 1);
+        uint8_t dev_index, int refresh_rate);
 #else
   Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
-        int nConfig, int aPhase, uint8_t dev_index, int refresh_rate = 1);
+        int nConfig, int aPhase, uint8_t dev_index, int refresh_rate);
 #endif
 #endif
 
@@ -125,21 +125,21 @@ public:
   float getISense();
 
   /**
-   * @brief Get desired torque value
+   * @brief Set the Torque object
    *
-   * @return torque
+   * @param desired_torque
    */
-  float getTorque();
+  void setTorque(float desired_torque);
 
   /**
    * @brief Initialize motor
    *
-   * @param measuredI current measured across sense resistor
+   * @param _measuredI current measured across sense resistor
    * @param desiredTorque desired torque value
    * @return measured torque from current sense feedback
    *
    */
-  float setVRef(float measuredI, float desiredTorque);
+  float setVRef();
 };
 
 #endif  // MOTOR_H

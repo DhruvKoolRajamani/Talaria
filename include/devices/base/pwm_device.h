@@ -44,10 +44,12 @@ public:
   }
 
   /** METHODS */
-  virtual void writePWMData(float dutyCycle = 50.0, float pulsePeriod = 0.1)
+  virtual void writePWMData(float dutyCycle = .50, float pulsePeriod = 0.1)
   {
-    float pwmData = dutyCycle * 0.01;
-    this->period_ms(pulsePeriod);
+    float pwmData = dutyCycle;
+    // this->period_ms(pulsePeriod);
+    if (pwmData >= 1.)
+      pwmData = 0.99;
     this->write(pwmData);
   }
 };

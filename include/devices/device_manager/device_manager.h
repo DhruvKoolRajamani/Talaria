@@ -117,12 +117,10 @@ public:
     memcpy(bytes_array, u.temp_array, sizeof(float));
   }
 
-#ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
   inline int _max(int a, int b)
   {
     return ((a) > (b) ? (a) : (b));
   }
-#endif
 
 #ifdef COMPUTE_CRC
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT

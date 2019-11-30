@@ -108,19 +108,16 @@ int DeviceManager::getMaxRefreshRate()
   {
     if (_devices[i] == NULL)
       continue;
-    else if (i < 1)
-    {
-      this->_max_refresh_rate = _devices[i]->getRefreshRate();
-    }
     else
     {
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-      if (std::max(this->_max_refresh_rate, _devices[i]->getRefreshRate()) !=
-          this->_max_refresh_rate)
-#else
+#ifdef DISABLE_ROS
+      char str[50];
+      sprintf(str, "Device: %d\tRate: %d\n", _devices[i]->getIndex(),
+              _devices[i]->_refresh_rate);
+      print(str);
+#endif
       if (_max(this->_max_refresh_rate, _devices[i]->getRefreshRate()) !=
           this->_max_refresh_rate)
-#endif
         this->_max_refresh_rate = _devices[i]->getRefreshRate();
     }
   }

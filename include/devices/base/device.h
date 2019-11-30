@@ -66,9 +66,8 @@ private:
 #endif
 
 protected:
-  int _refresh_rate = 0;
-
 public:
+  int _refresh_rate = 0;
   /** CONSTRUCTORS */
 
   /**
