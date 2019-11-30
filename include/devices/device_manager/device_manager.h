@@ -32,6 +32,7 @@
 #include "devices/strain_gauge/strain_gauge.h"
 #include "devices/base/pwm_device.h"
 #include "devices/base/analog_device.h"
+#include "devices/motor/motor.h"
 
 class DeviceManager
 {

@@ -27,17 +27,17 @@ StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
                        "/devices/index/bend_sensor", p16, (1 / 100) * 1000);
-PwmDevice aEnable(p25);  // p136 -- p8
-AnalogDevice aVSense(0, p19, nh, AD_IMU_SENSOR_ID, "strain_gauge",
-                     "/devices/index/strain_gauge", 5);  // p90 -- across R3
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
+            "/devices/index/motor", (1 / 10) * 1000);
+
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
                        "/devices/index/bend_sensor", 3, (1 / 100) * 1000);
-PwmDevice aEnable(A0);
-AnalogDevice aVSense(0, A1, nh, AD_IMU_SENSOR_ID, "strain_gauge",
-                     "/devices/index/strain_gauge", 5);  // p90 -- across R3
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
+            "/devices/index/motor", (1 / 10) * 1000);
+
 #endif
 std_msgs::String debug_msgs;
 ros::Publisher debug_pub("/debug", &debug_msgs);
@@ -45,13 +45,11 @@ ros::Publisher debug_pub("/debug", &debug_msgs);
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 StrainGauge strain_gauge(0, p15, STRAIN_GAUGE_ID, 5);
 BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, p16, (1 / 100) * 1000);
-PwmDevice aEnable(p25);                             // p136 -- p8
-AnalogDevice aVSense(0, p19, AD_IMU_SENSOR_ID, 5);  // p90 -- across R3
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID, (1 / 10) * 1000);
 #else
 StrainGauge strain_gauge(0, A0, STRAIN_GAUGE_ID, 5);
 BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, 3, (1 / 100) * 1000);
-PwmDevice aEnable(A0);                             // p136 -- p8
-AnalogDevice aVSense(0, A1, AD_IMU_SENSOR_ID, 5);  // p90 -- across R3
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID, (1 / 10) * 1000);
 #endif
 #endif
 
@@ -59,7 +57,7 @@ void addDevices()
 {
   device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  device_manager.addDevice(&aVSense, AD_IMU_SENSOR_ID);
+  device_manager.addDevice(&_aVSense, AD_IMU_SENSOR_ID);
 }
 
 // Can shift to Utils/hardware header

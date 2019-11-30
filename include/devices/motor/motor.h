@@ -35,25 +35,28 @@ private:
   float torqueConst = 10.9;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  // pwm pins
+  PinName _aEnable = p25;  // p136 -- p8 _aEnable
+  PinName _vRef = p26;     // p137 -- p4 + jumper _vRef
+  // analog pin
+  PinName _aVSense = p19;  // p90 -- across R3 _aVSense
 
-  PinName aEnable = p25;  // p136 -- p8 aEnable
-  PinName vRef = p26;     // p137 -- p4 + jumper VRef
-  PinName aVSense = p19;  // p90 -- across R3 aVSense
-  PinName aPhase = p5;    // p101 -- p7 M0
-  PinName nSleep = p6;    // p94 -- p3 nSleep
-  PinName nConfig = p7;   // p96 -- p5 + jumper nConfig
-  PinName nFault = p8;    // p95 -- p7r nFault
-  float measuredI, desiredTorque, error;
+  // digital pins
+  PinName _aPhase = p5;   // p101 -- p7 M0
+  PinName _nSleep = p6;   // p94 -- p3 _nSleep
+  PinName _nConfig = p7;  // p96 -- p5 + jumper _nConfig
+  PinName _nFault = p8;   // p95 -- p7r _nFault
+  float measuredI, _desiredTorque, error;
 
 #else
-  PwmDevice aEnable = PwmDevice(3);  // p136 -- p8
-  PwmDevice vRef = PwmDevice(6);     // p137 -- p4 + jumper
-  int aVSense = 13;                  // p90 -- across R3 A10
-  int aPhase = 8;                    // p101 -- p7 br 44
-  int nSleep = 12;                   // p94 -- p3 or 51
-  int nConfig = 11;                  // p96 -- p5 + jumper bla 49
-  int nFault = 10;                   // p95 -- p7r gr 50
-  float measuredI, desiredTorque, error;
+  PwmDevice _aEnable = PwmDevice(3);  // p136 -- p8
+  PwmDevice _vRef = PwmDevice(6);     // p137 -- p4 + jumper
+  int _aVSense = 13;                  // p90 -- across R3 A10
+  int _aPhase = 8;                    // p101 -- p7 br 44
+  int _nSleep = 12;                   // p94 -- p3 or 51
+  int _nConfig = 11;                  // p96 -- p5 + jumper bla 49
+  int _nFault = 10;                   // p95 -- p7r gr 50
+  float measuredI, _desiredTorque, error;
 #endif
 
 #ifndef DISABLE_ROS
@@ -70,17 +73,23 @@ public:
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  Motor(uint8_t id, PinName aVSense, ros::NodeHandle& nh, uint8_t dev_index,
-        const char* dev_name, const char* topic_name, int refresh_rate = 1);
+  Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
+        PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+        ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
+        const char* topic_name, int refresh_rate = 1);
 #else
-  Motor(uint8_t id, int aVSense, ros::NodeHandle& nh, uint8_t dev_index,
+  Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
+        int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,
         const char* dev_name, const char* topic_name, int refresh_rate = 1);
 #endif
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  Motor(uint8_t id, PinName aVSense, uint8_t dev_index, int refresh_rate = 1);
+  Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
+        PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+        uint8_t dev_index, int refresh_rate = 1);
 #else
-  Motor(uint8_t id, int aVSense, uint8_t dev_index, int refresh_rate = 1);
+  Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
+        int nConfig, int aPhase, uint8_t dev_index, int refresh_rate = 1);
 #endif
 #endif
 

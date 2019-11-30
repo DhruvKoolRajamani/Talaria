@@ -43,7 +43,7 @@ typedef enum
 {
   BEND_SENSOR_ID,
   AD_IMU_SENSOR_ID,
-  CURRENT_SENSE_ID,
+  MOTOR_ID,
   STRAIN_GAUGE_ID
 } hand_devices_id_enum;
 
