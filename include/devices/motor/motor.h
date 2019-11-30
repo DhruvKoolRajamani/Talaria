@@ -24,7 +24,8 @@
 
 #ifndef DISABLE_ROS
 // Add header file for custom ros message for bend sensor
-#include "std_msgs/Float32.h"
+#include "motor_msg/motor_desired.h"
+#include "motor_msg/motor_measured.h"
 #include "std_msgs/String.h"
 #endif
 
@@ -61,8 +62,9 @@ private:
 
 #ifndef DISABLE_ROS
   ros::Publisher _pub_motor;
+  ros::Subscriber<motor_msg::motor_desired, Motor> _sub_motor;
   // Create a custom ros message for motor but for now using standard
-  std_msgs::Float32 _msg_motor;
+  motor_msg::motor_measured _msg_motor_measured;
 #else
   char str[100];
 #endif
@@ -76,11 +78,13 @@ public:
   Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-        const char* topic_name, int refresh_rate);
+        const char* meas_topic_name, const char* des_topic_name,
+        int refresh_rate);
 #else
   Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
         int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,
-        const char* dev_name, const char* topic_name, int refresh_rate);
+        const char* dev_name, const char* meas_topic_name,
+        const char* des_topic_name, int refresh_rate);
 #endif
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -136,10 +140,20 @@ public:
    *
    * @param _measuredI current measured across sense resistor
    * @param desiredTorque desired torque value
+   *
    * @return measured torque from current sense feedback
    *
    */
   float setVRef();
+
+#ifndef DISABLE_ROS
+  /**
+   * @brief Callback for subscriber to desired (cmd) motor value
+   *
+   * @param msg_motor_desired
+   */
+  void motorDesiredCb(const motor_msg::motor_desired& msg_motor_desired);
+#endif
 };
 
 #endif  // MOTOR_H

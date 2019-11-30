@@ -11,8 +11,10 @@
 Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
              PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
              ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-             const char* topic_name, int refresh_rate)
-  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
+             const char* meas_topic_name, const char* des_topic_name,
+             int refresh_rate)
+  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, meas_topic_name,
+                 refresh_rate)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
   , _vRef(vRef)
@@ -20,14 +22,17 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _nFault(nFault)
   , _nConfig(nConfig)
   , _aPhase(aPhase)
-  , _pub_motor(topic_name, &(this->_msg_motor))
+  , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
+  , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
 {
 #else
 Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
              int nFault, int nConfig, int aPhase, ros::NodeHandle& nh,
-             uint8_t dev_index, const char* dev_name, const char* topic_name,
+             uint8_t dev_index, const char* dev_name,
+             const char* meas_topic_name, const char* des_topic_name,
              int refresh_rate)
-  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, topic_name, refresh_rate)
+  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, meas_topic_name,
+                 refresh_rate)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
   , _vRef(vRef)
@@ -35,7 +40,8 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
   , _nFault(nFault)
   , _nConfig(nConfig)
   , _aPhase(aPhase)
-  , _pub_motor(topic_name, &(this->_msg_motor))
+  , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
+  , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
 {
   pinMode(_aVSense, INPUT);
   pinMode(_aPhase, OUTPUT);
@@ -117,6 +123,9 @@ bool Motor::initialize()
 
   if (fault)
   {
+    // setPwm();
+    // 5.2 for test, 6.3 for main
+    // setTorque(5);
     return true;
   }
   else
@@ -138,6 +147,9 @@ bool Motor::initialize()
     setPwm();
     // 5.2 for test, 6.3 for main
     setTorque(5);
+#ifndef DISABLE_ROS
+    this->getNodeHandle()->advertise(_debug_pub);
+#endif
     return true;
   }
   else
@@ -223,17 +235,28 @@ void Motor::update(int loop_counter)
     Device::update(loop_counter);
 
     _measuredI = getISense();
-    setTorque(500);
+    setTorque(500);  // Remove once subscriber works
     _error = setVRef();
 #ifdef DISABLE_ROS
-    // sprintf(cstr, "Measured current = %f\nMeasured torque = %f\n",
-    // _measuredI,
-    //         _error);
-    // print(cstr);
-    // sprintf(cstr, "Measured current = %f\nMeasured torque = %f\n",
-    // _measuredI,
-    //         _error);
-    // print(cstr);
+// sprintf(cstr, "Measured current = %f\nMeasured torque = %f\n",
+// _measuredI,
+//         _error);
+// print(cstr);
+// sprintf(cstr, "Measured current = %f\nMeasured torque = %f\n",
+// _measuredI,
+//         _error);
+// print(cstr);
+#else
+    _msg_motor_measured.motor_id.data = *this->getId();
+    _msg_motor_measured.measured_force.data = _error;
+    _pub_motor.publish(&_msg_motor_measured);
 #endif
   }
 }
+
+#ifndef DISABLE_ROS
+void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
+{
+  setTorque(msg.desired_force.data);
+}
+#endif

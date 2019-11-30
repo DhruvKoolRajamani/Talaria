@@ -28,7 +28,8 @@ DeviceManager device_manager;
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
                        "/devices/index/bend_sensor", p16, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
-            "/devices/index/motor", 20);
+            "/devices/index/motor_measured", "/devices/index/motor_desired",
+            20);
 
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
@@ -36,11 +37,10 @@ StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
                        "/devices/index/bend_sensor", 3, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
-            "/devices/index/motor", 20);
+            "/devices/index/motor_measured", "/devices/index/motor_desired",
+            20);
 
 #endif
-std_msgs::String debug_msgs;
-ros::Publisher debug_pub("/debug", &debug_msgs);
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 // StrainGauge strain_gauge(0, p15, STRAIN_GAUGE_ID, 5);
