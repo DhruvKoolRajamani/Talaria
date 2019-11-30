@@ -12,7 +12,8 @@
 #ifndef PWM_DEVICE_H
 #define PWM_DEVICE_H
 
-#include "device.h"
+#include "devices/base/device.h"
+#include "devices/hardware.h"
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
@@ -25,54 +26,62 @@ class PwmDevice : public PwmOut
 {
 private:
   PinName _pwm_pin;
-#else
-class PwmDevice
-{
-private:
-  int _pwm_pin;
-#endif
 
 public:
-/** CONSTRUCTORS */
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  PwmDevice(PinName pwm_pin)
-    : PwmOut(pwm_pin)
-    , _pwm_pin(pwm_pin){
-#else
-  PwmDevice(int pwm_pin) : _pwm_pin(pwm_pin)
+  /** CONSTRUCTORS */
+  PwmDevice(PinName pwm_pin) : PwmOut(pwm_pin), _pwm_pin(pwm_pin)
   {
-    pinMode(_pwm_pin, OUTPUT);
-#endif
-}
+  }
 
-/** DESTRUCTORS */
+  /** DESTRUCTORS */
 
-/**
- * @brief Destroy the PwmDevice object
- *
- */
-virtual ~PwmDevice()
+  /**
+   * @brief Destroy the PwmDevice object
+   *
+   */
+  virtual ~PwmDevice()
   {
   }
 
   /** METHODS */
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   virtual void writePWMData(float dutyCycle = 50.0, float pulsePeriod = 0.1)
   {
     float pwmData = dutyCycle * 0.01;
     this->period_ms(pulsePeriod);
     this->write(pwmData);
   }
-
+};
 #else
-  virtual bool writePWMData(float dutyCycle = 1)
+class PwmDevice
+{
+private:
+  int _pwm_pin;
+
+public:
+  /** CONSTRUCTORS */
+  PwmDevice(int pwm_pin) : _pwm_pin(pwm_pin)
+  {
+    pinMode(_pwm_pin, OUTPUT);
+  }
+
+  /** DESTRUCTORS */
+
+  /**
+   * @brief Destroy the PwmDevice object
+   *
+   */
+  virtual ~PwmDevice()
+  {
+  }
+
+  /** METHODS */
+  virtual void writePWMData(float dutyCycle = 1)
   {
     int pwmData = map(dutyCycle * 1000, 0, 3300, 0, 255);
 
     analogWrite(_pwm_pin, pwmData);
   }
-#endif
 };
+#endif
 
 #endif  // ANALOG_DEVICE_H

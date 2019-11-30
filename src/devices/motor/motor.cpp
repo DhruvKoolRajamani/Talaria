@@ -8,58 +8,61 @@
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  Motor::Motor(uint8_t id, PinName pin_name, ros::NodeHandle& nh, uint8_t dev_index,
-              const char* dev_name, const char* topic_name, int refresh_rate)
-    : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name, refresh_rate)
-    , _pub_motor(topic_name, &(this->_msg_motor))
-  {
+Motor::Motor(uint8_t id, PinName pin_name, ros::NodeHandle& nh,
+             uint8_t dev_index, const char* dev_name, const char* topic_name,
+             int refresh_rate)
+  : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name,
+                 refresh_rate)
+  , _pub_motor(topic_name, &(this->_msg_motor))
+{
 #else
-  Motor::Motor(uint8_t id, int pin_name, ros::NodeHandle& nh, uint8_t dev_index,
-              const char* dev_name, const char* topic_name, int refresh_rate)
-    :AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name, refresh_rate)
-    , _pub_motor(topic_name, &(this->_msg_motor))
-  {
-    pinMode(aVSense, INPUT);
-    pinMode(aPhase, OUTPUT);
-    pinMode(nSleep, OUTPUT);
-    pinMode(nConfig, OUTPUT);
-    pinMode(nFault, INPUT);
-    // analogWriteResolution(12);
-    pinMode(13, OUTPUT);
+Motor::Motor(uint8_t id, int pin_name, ros::NodeHandle& nh, uint8_t dev_index,
+             const char* dev_name, const char* topic_name, int refresh_rate)
+  : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name,
+                 refresh_rate)
+  , _pub_motor(topic_name, &(this->_msg_motor))
+{
+  pinMode(aVSense, INPUT);
+  pinMode(aPhase, OUTPUT);
+  pinMode(nSleep, OUTPUT);
+  pinMode(nConfig, OUTPUT);
+  pinMode(nFault, INPUT);
+  // analogWriteResolution(12);
+  pinMode(13, OUTPUT);
 #endif
 
-    setIsTopicAdvertised(nh.advertise(_pub_motor));
-  }
+  setIsTopicAdvertised(nh.advertise(_pub_motor));
+}
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  Motor::Motor(uint8_t id, PinName pin_name, uint8_t dev_index, int refresh_rate)
+Motor::Motor(uint8_t id, PinName pin_name, uint8_t dev_index, int refresh_rate)
   : AnalogDevice(id, pin_name, dev_index, refresh_rate)
-  {
+{
 #else
-  Motor::Motor(uint8_t id, int pin_name, uint8_t dev_index, int refresh_rate)
+Motor::Motor(uint8_t id, int pin_name, uint8_t dev_index, int refresh_rate)
   : AnalogDevice(id, pin_name, dev_index, refresh_rate)
-  {
-    pinMode(aVSense, INPUT);
-    pinMode(aPhase, OUTPUT);
-    pinMode(nSleep, OUTPUT);
-    pinMode(nConfig, OUTPUT);
-    pinMode(nFault, INPUT);
-    // analogWriteResolution(12);
-    pinMode(13, OUTPUT);
+{
+  pinMode(aVSense, INPUT);
+  pinMode(aPhase, OUTPUT);
+  pinMode(nSleep, OUTPUT);
+  pinMode(nConfig, OUTPUT);
+  pinMode(nFault, INPUT);
+  // analogWriteResolution(12);
+  pinMode(13, OUTPUT);
 #endif
-  }
+}
 #endif
 
 // DESTRUCTORS
-  Motor::~Motor()
-  {
-  }
+Motor::~Motor()
+{
+}
 
-  // GETTERS
-  
-  // SETTERS
+// GETTERS
 
-  // METHODS
+// SETTERS
+
+// METHODS
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 bool Motor::initialize()
@@ -68,13 +71,13 @@ bool Motor::initialize()
   nConfig = 0;  // enable phase mode (DC motor)
   aPhase = 1;   // enable output to motor
 
-  if(nFault.read())
+  if (nFault.read())
   {
-    return true
+    return true;
   }
   else
   {
-    return false
+    return false;
   }
 }
 
@@ -86,7 +89,7 @@ bool Motor::initialize()
   digitalWrite(aPhase, HIGH);  // enable output to motor
 
   // motor error status
-  if(digitalRead(nFault))
+  if (digitalRead(nFault))
   {
     return true;
   }
@@ -167,17 +170,16 @@ float Motor::setVRef(float measuredI, float desiredTorque)
 }
 #endif
 
-
 void Motor::update(int loop_counter)
 {
- // Only update if update rate for the sensor is the same as the sampling
- // rate
- initialize();
- if (this->_refresh_rate == loop_counter)
+  // Only update if update rate for the sensor is the same as the sampling
+  // rate
+  initialize();
+  if (this->_refresh_rate == loop_counter)
   {
     // Publish Diagnostic messages
     Device::update(loop_counter);
-  
+
     setPwm();
     measuredI = getISense();
     desiredTorque = getTorque();
