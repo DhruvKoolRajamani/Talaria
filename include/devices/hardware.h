@@ -25,8 +25,9 @@ const int NUM_DEVICES = 1;
 #endif
 
 #ifndef DISABLE_ROS
-#include "ros.h"
+#include <ros.h>
 #include <std_msgs/String.h>
+#include <ros/time.h>
 #else
 static void print(const char* str)
 {

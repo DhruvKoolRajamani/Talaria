@@ -88,6 +88,9 @@ float rate = 1;
 float rate = 1;
 #endif
 
+volatile bool is_init = false;
+int i = 1;
+
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 int main()
 {
@@ -138,8 +141,6 @@ int main()
   return 0;
 }
 #else
-volatile bool is_init = false;
-int i = 1;
 void setup()
 {
 #ifndef DISABLE_ROS

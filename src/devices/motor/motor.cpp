@@ -123,9 +123,13 @@ bool Motor::initialize()
 
   if (fault)
   {
-    // setPwm();
-    // 5.2 for test, 6.3 for main
-    // setTorque(5);
+// setPwm();
+// 5.2 for test, 6.3 for main
+// setTorque(5);
+#ifndef DISABLE_ROS
+    _msg_motor_measured.header.frame_id = this->getDeviceName();
+    _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
+#endif
     return true;
   }
   else
@@ -148,7 +152,7 @@ bool Motor::initialize()
     // 5.2 for test, 6.3 for main
     setTorque(5);
 #ifndef DISABLE_ROS
-    this->getNodeHandle()->advertise(_debug_pub);
+    _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
 #endif
     return true;
   }
@@ -247,6 +251,7 @@ void Motor::update(int loop_counter)
 //         _error);
 // print(cstr);
 #else
+    _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
     _msg_motor_measured.motor_id.data = *this->getId();
     _msg_motor_measured.measured_force.data = _error;
     _pub_motor.publish(&_msg_motor_measured);

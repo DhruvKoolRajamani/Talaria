@@ -75,6 +75,9 @@ bool BendSensor::initialize()
   I2CDevice::initialize();
 #ifdef DISABLE_ROS
   print("Starting Bend Initialize\n");
+#else
+  _msg_bend_sensor.header.frame_id = this->getDeviceName();
+  _msg_bend_sensor.header.stamp = this->getNodeHandle()->now();
 #endif
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   if (!this->ping())
@@ -204,6 +207,7 @@ void BendSensor::update(int loop_counter)
       {
         processNewData();
 #ifndef DISABLE_ROS
+        _msg_bend_sensor.header.stamp = this->getNodeHandle()->now();
         _msg_bend_sensor.chip_id.data = this->getChipId();
         _msg_bend_sensor.bend.data = this->_bend_angle;
         _msg_bend_sensor.stretch.data = this->_stretch_value;
