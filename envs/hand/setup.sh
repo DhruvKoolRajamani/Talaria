@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TALARIA_WS="/media/raunak/OS/Dynamics_project/Talaria"
+TALARIA_WS="/home/kingmoney/Talaria"
 UPLOAD_FLAG="False"
 
 run_setup() {

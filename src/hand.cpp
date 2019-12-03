@@ -25,32 +25,32 @@ DeviceManager device_manager;
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-// BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
+// BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
 //                        "/devices/index/bend_sensor", p16, 10);
-Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "index",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
-            20);
+            10);
 
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
                          "/devices/index/strain_gauge", 50);
-BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
+BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
                        "/devices/index/bend_sensor", 3, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
-            20);
+            10);
 
 #endif
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 // StrainGauge strain_gauge(0, p15, STRAIN_GAUGE_ID, 5);
-BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, p16, 10);
-Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID, 20);
+// BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, p16, 10);
+Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID, 10);
 #else
 StrainGauge strain_gauge(0, A0, STRAIN_GAUGE_ID, 50);
 BendSensor bend_sensor(0x12, PrimaryBus, BEND_SENSOR_ID, 3, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID,
-            20);  // change arduino pins
+            10);  // change arduino pins
 #endif
 #endif
 
@@ -126,16 +126,16 @@ int main()
       rate = 1000;
     }
 
-    if (i <= MAX_REFRESH_RATE)
+    if (i <= device_manager.getMaxRefreshRate())
     {
       i++;
     }
     else
       i = 0;
-    halt(rate);
 #ifndef DISABLE_ROS
     nh.spinOnce();
 #endif
+    halt(rate);
   }
 
   return 0;
@@ -170,9 +170,9 @@ void loop()
   }
   else
     i = 0;
-  halt(rate);
 #ifndef DISABLE_ROS
   nh.spinOnce();
+  halt(rate);
 #endif
 }
 #endif
