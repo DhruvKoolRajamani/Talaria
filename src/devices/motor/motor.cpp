@@ -52,6 +52,7 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
   pinMode(13, OUTPUT);
 #endif
   setIsTopicAdvertised(nh.advertise(_pub_motor));
+  nh.subscribe(_sub_motor);
 }
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -239,7 +240,7 @@ void Motor::update(int loop_counter)
     Device::update(loop_counter);
 
     _measuredI = getISense();
-    setTorque(500);  // Remove once subscriber works
+    //setTorque(500);  // Remove once subscriber works
     _error = setVRef();
 #ifdef DISABLE_ROS
 // sprintf(cstr, "Measured current = %f\nMeasured torque = %f\n",
@@ -253,7 +254,7 @@ void Motor::update(int loop_counter)
 #else
     _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
     _msg_motor_measured.motor_id.data = *this->getId();
-    _msg_motor_measured.measured_force.data = _error;
+
     _pub_motor.publish(&_msg_motor_measured);
 #endif
   }
@@ -262,6 +263,7 @@ void Motor::update(int loop_counter)
 #ifndef DISABLE_ROS
 void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
 {
+  _msg_motor_measured.measured_force.data = msg.desired_force.data;
   setTorque(msg.desired_force.data);
 }
 #endif

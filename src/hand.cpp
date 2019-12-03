@@ -25,8 +25,8 @@ DeviceManager device_manager;
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
-                       "/devices/index/bend_sensor", p16, 10);
+// BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
+//                        "/devices/index/bend_sensor", p16, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "motor",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
             20);
@@ -58,9 +58,9 @@ static int MAX_REFRESH_RATE = 1;
 
 void addDevices()
 {
-  device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
+  // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  device_manager.addDevice(&motor, 1);  // MOTOR_ID
+  device_manager.addDevice(&motor, 0);  // MOTOR_ID
 #ifdef DISABLE_ROS
   print("Added Devices\n");
 #endif
