@@ -114,7 +114,6 @@ bool Motor::initialize()
   DigitalOut sleep(_nSleep, true);     // enable driver
   DigitalOut config(_nConfig, false);  // enable phase mode (DC motor)
   DigitalOut phase(_aPhase, true);
-  // ;  // enable output to motor
   DigitalIn fault(_nFault);
 
 #ifdef DISABLE_ROS
@@ -124,12 +123,12 @@ bool Motor::initialize()
 
   if (fault)
   {
-// setPwm();
+    // setPwm();
 // 5.2 for test, 6.3 for main
 // setTorque(5);
 #ifndef DISABLE_ROS
-    // _msg_motor_measured.header.frame_id = "index";
-    // _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
+    _msg_motor_measured.header.frame_id = "index";
+    _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
 #endif
     return true;
   }
@@ -151,7 +150,7 @@ bool Motor::initialize()
   {
     setPwm();
     // 5.2 for test, 6.3 for main
-    setTorque(1);
+    // setTorque(1);
 #ifndef DISABLE_ROS
     // _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
 #endif
@@ -167,7 +166,7 @@ bool Motor::initialize()
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void Motor::setPwm()
 {
-  float speed = 1;  // get desired speed from usb
+  float speed = .1;  // get desired speed from usb
   PwmDevice enable(_aEnable);
   enable.writePWMData(speed);
 }
@@ -200,14 +199,21 @@ float Motor::getISense()
 void Motor::setTorque(float desired_torque)
 {
   _desiredTorque = abs(desired_torque);
+  _desiredDir = (desired_torque > 0) ? 1 : 0;
+  setDir();
 }
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+void Motor::setDir()
+{
+  DigitalOut phase(_aPhase, _desiredDir);
+}
+
 float Motor::setVRef()
 {
   float measuredTorque = (_measuredI)*torqueConst;
   float t_error = _desiredTorque - measuredTorque;
-  float new_vRef = (_desiredTorque * 5) / torqueConst;  //+ t_error;
+  float new_vRef = (_desiredTorque * .5) / torqueConst;  //+ t_error;
   PwmDevice ref(_vRef);
   ref.writePWMData(new_vRef);
   return measuredTorque;
@@ -238,10 +244,10 @@ void Motor::update(int loop_counter)
   {
     // Publish Diagnostic messages
     Device::update(loop_counter);
-
-    // _measuredI = getISense();
+    // setPwm();
+    _measuredI = getISense();
     // setTorque(1);  // Remove once subscriber works
-    // _error = setVRef();
+    //_error = setVRef();
 #ifdef DISABLE_ROS
     sprintf(cstr, "Measured torque = %f\n", _error);
     print(cstr);
@@ -249,10 +255,10 @@ void Motor::update(int loop_counter)
     print(cstr);
 #else
     motor_msg::motor_measured temp = motor_msg::motor_measured();
-    temp.header.frame_id = "index\0";
+    temp.header.frame_id = "index";
     temp.header.stamp = this->getNodeHandle()->now();
-    temp.motor_id.data = 1;
-    temp.measured_force.data = 0.;
+    temp.motor_id.data = 0;
+    temp.measured_force.data = _error;
 
     // _msg_motor_measured = temp;
 
@@ -265,7 +271,7 @@ void Motor::update(int loop_counter)
 void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
 {
   // _measuredI = getISense();
-  _measuredI = 0.5;
+  // _measuredI = 0.5;
   setTorque(msg.desired_force.data);
   _error = setVRef();
 }

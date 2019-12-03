@@ -32,7 +32,7 @@
 class Motor : public AnalogDevice
 {
 private:
-  float aRSense = 0.1;
+  float aRSense = 1;
   float torqueConst = 10.9;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -48,6 +48,7 @@ private:
   PinName _nConfig = p7;  // p96 -- p5 + jumper _nConfig
   PinName _nFault = p8;   // p95 -- p7r _nFault
   float _measuredI, _desiredTorque, _error;
+  bool _desiredDir;
 
 #else
   PwmDevice _aEnable = PwmDevice(3);  // p136 -- p8
@@ -58,6 +59,7 @@ private:
   int _nConfig = 11;                  // p96 -- p5 + jumper bla 49
   int _nFault = 10;                   // p95 -- p7r gr 50
   float _measuredI, _desiredTorque, _error;
+  bool _desiredDir;
 #endif
 
 #ifndef DISABLE_ROS
@@ -134,7 +136,7 @@ public:
    * @param desired_torque
    */
   void setTorque(float desired_torque);
-
+  void setDir();
   /**
    * @brief Initialize motor
    *
