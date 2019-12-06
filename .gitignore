@@ -73,5 +73,16 @@ platformio/packages/tool-scons
 platformio/packages/tool-stm32duino
 platformio/packages/tool-unity
 platformio/platforms/
+platformio/.cache/
+platformio/packages/framework-mbed@5.51304.190826
+platformio/appstate.json
 
-appstate.json
+catkin_ws/build
+catkin_ws/develplatformio/lib
+platformio/platforms
+platformio/packages.lock
+catkin_ws/devel/
+platformio/packages/
+platformio/lib
+platformio/packages
+lib/ros_lib

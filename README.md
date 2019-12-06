@@ -64,3 +64,30 @@ rosrun rosserial_python serial_node.py _port:=/dev/ttyACM0
 # Open a new terminal
 rostopic echo /network_strings
 ```
+
+## Device Manager updates:  
+
+In order to test the latest code, the use of environment bash files can help in 
+cleaner development.  
+
+Eg. To run the code for the Hope hand check the help:
+
+```bash
+cd Talaria
+source envs/hand/setup.sh
+run_setup --help
+```
+
+To run on an mbed device:  
+
+```bash
+run_setup mbed #This will run with ROS
+```
+
+or  
+
+```bash
+run_setup mbed serial #without ROS
+```
+
+**Make sure to source the envs/bash file everytime a new terminal is used**

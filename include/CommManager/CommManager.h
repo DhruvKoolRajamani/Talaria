@@ -3,7 +3,9 @@
 
 #include "EthernetInterface.h"
 #include "lwip/inet.h"
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
+#endif
 
 class CommManager
 {

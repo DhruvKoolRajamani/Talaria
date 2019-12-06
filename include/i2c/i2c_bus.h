@@ -12,23 +12,40 @@
 #ifndef I2C_BUS_H
 #define I2C_BUS_H
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"
+#else
+#include "Arduino.h"
+#include "Wire.h"
+#include "wiring_private.h"
+#endif
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 class I2CBus : public I2C
 {
+#else
+class I2CBus : public TwoWire
+{
+#endif
 private:
   bool _init_status;
 
   uint8_t _id;
 
-  int _clock_speed;
-
-  PinName _scl;
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PinName _sda;
+  PinName _scl;
+  int _clock_speed;
+#else
+  int _sda;
+  int _scl;
+  uint32_t _clock_speed;
+#endif
 
 public:
   /** CONSTRUCTORS */
 
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   /**
    * @brief Construct a new I2CBus object
    *
@@ -39,8 +56,14 @@ public:
   I2CBus(uint8_t id, PinName sda, PinName scl, int clock_speed = 400000)
     : I2C(sda, scl), _id(id), _sda(sda), _scl(scl), _clock_speed(clock_speed)
   {
-    frequency(_clock_speed);
     _init_status = true;
+    frequency(_clock_speed);
+#else
+  I2CBus(uint8_t id, int sda, int scl, uint32_t clock_speed = 400000)
+    : TwoWire(), _id(id), _sda(sda), _scl(scl), _clock_speed(clock_speed)
+  {
+    _init_status = false;
+#endif
   }
 
   /** DESTRUCTORS */
@@ -112,12 +135,34 @@ public:
    *
    * @param clock_speed
    */
-  void setClockSpeed(int clock_speed)
+  void setClockSpeed(uint32_t clock_speed)
   {
     _clock_speed = clock_speed;
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
     frequency(_clock_speed);
+#else
+    setClock(_clock_speed);
+#endif
     _init_status = true;
   }
+
+#ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
+  void initialize()
+  {
+    if (!_init_status)
+    {
+#ifdef DISABLE_ROS
+      print("Entered Wire Initialize\n");
+#endif
+      begin();
+      setClockSpeed(_clock_speed);
+      delay(3000);
+#ifdef DISABLE_ROS
+      print("Exited Wire Initialize\n");
+#endif
+    }
+  }
+#endif
 };
 
 #endif  // I2C_BUS_H

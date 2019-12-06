@@ -1,0 +1,3 @@
+std_msgs/Header header
+std_msgs/UInt8 motor_id
+std_msgs/Float32 measured_force
