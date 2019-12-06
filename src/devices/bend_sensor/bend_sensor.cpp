@@ -299,7 +299,7 @@ bool BendSensor::readData()
       temp = decodeInt16(&buffer[1]);
       // Negative sign for orientation of the sensor
       // * ((float)M_PI / 180.0f);
-      this->_bend_angle = -(float)((float)temp / 64.0f);
+      this->_bend_angle = (float)((float)temp / 64.0f);
     }
     else if (buffer[0] == BEND_SENSOR_STRETCH_SAMPLE)
     {

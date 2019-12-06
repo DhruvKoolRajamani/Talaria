@@ -13,7 +13,7 @@
 #define HARDWARE_H
 
 #ifdef HAND
-const int NUM_DEVICES = 1;
+const int NUM_DEVICES = 2;
 #elif defined(LLE)
 const int NUM_DEVICES = 1;
 #endif
@@ -43,7 +43,7 @@ static void print(const char* str)
 typedef enum
 {
   BEND_SENSOR_ID,
-  AD_IMU_SENSOR_ID,
+  // AD_IMU_SENSOR_ID,
   MOTOR_ID,
   STRAIN_GAUGE_ID
 } hand_devices_id_enum;
