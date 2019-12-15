@@ -8,8 +8,15 @@
 #include "devices/device_manager/device_manager.h"
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef NUCLEO
 I2CBus PrimaryBus(0, p9, p10);
 I2CBus SecondaryBus(1, p28, p27);
+#else
+// I2CBus PrimaryBus(0, PC_9, PA_8);
+// I2CBus SecondaryBus1(1, PF_0, PF_1);
+// I2CBus SecondaryBus2(2, PD_13, PD_12);
+I2CBus PrimaryBus(3, PD_15, PD_14);
+#endif
 #else
 I2CBus PrimaryBus(0, PIN_WIRE_SDA, PIN_WIRE_SCL);
 #endif
@@ -23,6 +30,7 @@ DeviceManager device_manager;
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+#ifndef NUCLEO
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
@@ -30,7 +38,22 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "index",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
             20);
+#else
+// StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
+//                          "/devices/index/strain_gauge", 5);
+BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
+                       "/devices/index/bend_sensor", PF_12, 10);
 
+// Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
+//         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+//         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
+//         const char* meas_topic_name, const char* des_topic_name,
+//         int refresh_rate);
+
+Motor motor(0, PC_2, PA_5, PA_6, PF_13, PE_9, PE_11, PF_14, nh, MOTOR_ID,
+            "index", "/devices/index/motor_measured",
+            "/devices/index/motor_desired", 20);
+#endif
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
                          "/devices/index/strain_gauge", 50);

@@ -37,16 +37,16 @@ private:
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   // pwm pins
-  PinName _aEnable = p25;  // p136 -- p8 _aEnable
-  PinName _vRef = p26;     // p137 -- p4 + jumper _vRef
+  PinName _aEnable;  // p136 -- p8 _aEnable
+  PinName _vRef;     // p137 -- p4 + jumper _vRef
   // analog pin
-  PinName _aVSense = p19;  // p90 -- across R3 _aVSense
+  PinName _aVSense;  // p90 -- across R3 _aVSense
 
   // digital pins
-  PinName _aPhase = p5;   // p101 -- p7 M0
-  PinName _nSleep = p6;   // p94 -- p3 _nSleep
-  PinName _nConfig = p7;  // p96 -- p5 + jumper _nConfig
-  PinName _nFault = p8;   // p95 -- p7r _nFault
+  PinName _aPhase;   // p101 -- p7 M0
+  PinName _nSleep;   // p94 -- p3 _nSleep
+  PinName _nConfig;  // p96 -- p5 + jumper _nConfig
+  PinName _nFault;   // p95 -- p7r _nFault
   float _measuredI, _desiredTorque, _error;
   bool _desiredDir;
 
