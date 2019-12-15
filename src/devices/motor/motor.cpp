@@ -24,6 +24,7 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _aPhase(aPhase)
   , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
   , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
+  , _ref(new PwmDevice(vRef))
 {
 #else
 Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
@@ -182,8 +183,8 @@ void Motor::setPwm()
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 float Motor::getISense()
 {
-  int iSense = this->readAnalogData();
-  return iSense;
+  float iSense = this->readAnalogData();
+  return iSense - 0.5;
 }
 
 #else
@@ -196,8 +197,9 @@ float Motor::getISense()
 }
 #endif
 
-void Motor::setTorque(float desired_torque)
+void Motor::setTorque(float desired_torque, float torque_constant)
 {
+  torqueConst = torque_constant;
   _desiredTorque = abs(desired_torque);
   _desiredDir = (desired_torque > 0) ? 1 : 0;
   setDir();
@@ -211,11 +213,10 @@ void Motor::setDir()
 
 float Motor::setVRef()
 {
-  float measuredTorque = (_measuredI)*torqueConst;
+  float measuredTorque = (_measuredI * 6 / 5) * torqueConst;
   float t_error = _desiredTorque - measuredTorque;
-  float new_vRef = (_desiredTorque * .5) / torqueConst;  //+ t_error;
-  PwmDevice ref(_vRef);
-  ref.writePWMData(new_vRef);
+  float new_vRef = (_desiredTorque * 0.5 * 80 / 6) / torqueConst;  //+ t_error;
+  _ref->writePWMData(new_vRef);
   return measuredTorque;
 }
 
@@ -247,7 +248,7 @@ void Motor::update(int loop_counter)
     // setPwm();
     _measuredI = getISense();
     // setTorque(1);  // Remove once subscriber works
-    //_error = setVRef();
+    _error = setVRef();
 #ifdef DISABLE_ROS
     sprintf(cstr, "Measured torque = %f\n", _error);
     print(cstr);
@@ -258,6 +259,7 @@ void Motor::update(int loop_counter)
     temp.header.frame_id = "index";
     temp.header.stamp = this->getNodeHandle()->now();
     temp.motor_id.data = 0;
+    temp.desired_force.data = _desiredTorque * _desiredDir;
     temp.measured_force.data = _error;
 
     // _msg_motor_measured = temp;
@@ -270,9 +272,9 @@ void Motor::update(int loop_counter)
 #ifndef DISABLE_ROS
 void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
 {
-  // _measuredI = getISense();
+  _measuredI = getISense();
   // _measuredI = 0.5;
-  setTorque(msg.desired_force.data);
+  setTorque(msg.desired_force.data, msg.torque_constant.data);
   _error = setVRef();
 }
 #endif

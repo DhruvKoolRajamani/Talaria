@@ -37,7 +37,7 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
                        "/devices/index/bend_sensor", p16, 10);
 Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "index",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
-            20);
+            10);
 #else
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);

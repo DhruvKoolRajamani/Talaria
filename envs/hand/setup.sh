@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TALARIA_WS="/home/kingmoney/Talaria"
+TALARIA_WS="/home/dhruv/Talaria"
 UPLOAD_FLAG="False"
 
 run_setup() {

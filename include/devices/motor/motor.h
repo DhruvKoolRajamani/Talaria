@@ -33,7 +33,7 @@ class Motor : public AnalogDevice
 {
 private:
   float aRSense = 1;
-  float torqueConst = 10.9;
+  float torqueConst;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   // pwm pins
@@ -41,6 +41,7 @@ private:
   PinName _vRef;     // p137 -- p4 + jumper _vRef
   // analog pin
   PinName _aVSense;  // p90 -- across R3 _aVSense
+  PwmDevice* _ref = nullptr;
 
   // digital pins
   PinName _aPhase;   // p101 -- p7 M0
@@ -135,7 +136,7 @@ public:
    *
    * @param desired_torque
    */
-  void setTorque(float desired_torque);
+  void setTorque(float desired_torque, float torque_constant = 0.0f);
   void setDir();
   /**
    * @brief Initialize motor
