@@ -11,6 +11,7 @@ run_setup() {
         echo "[option 1]                                                            "
         echo "     mbed    Runs the Talaria environment mbed with rosserial         "
         echo "  arduino    Runs the Talaria environment arduino with rosserial      "
+        echo "  nucleo    Runs the Talaria environment arduino with rosserial      "
         echo 
         echo "[option 2]                                                            "
         echo "   serial    Runs the Talaria environment in the serial monitor       "
@@ -29,6 +30,7 @@ run_setup() {
     local ENV_TYPE=$2
     local ARD_FRAMEWORK="arduino"
     local MBED_FRAMEWORK="mbed"
+    local NUCLEO_FRAMEWORK="nucleo"
     local ENV_SERIAL="serial"
     local ENV_NUMBER=0
 
@@ -47,10 +49,13 @@ run_setup() {
 
         if [[ "$FRAMEWORK_NAME" = "$MBED_FRAMEWORK" ]]; then
             PLATFORMIO_DEFAULT_ENVS="Talaria-hand-serial"
-            ENV_NUMBER=3
+            ENV_NUMBER=4
         elif [[ "$FRAMEWORK_NAME" = "$ARD_FRAMEWORK" ]]; then
             PLATFORMIO_DEFAULT_ENVS="Talaria-hand-uno-serial"
-            ENV_NUMBER=4
+            ENV_NUMBER=5
+        elif [[ "$FRAMEWORK_NAME" = "$NUCLEO_FRAMEWORK" ]]; then
+            PLATFORMIO_DEFAULT_ENVS="Talaria-hand-nucleo-serial"
+            ENV_NUMBER=6
         else
             echo
             echo "Incorrect arguments provided, exiting"
@@ -64,6 +69,9 @@ run_setup() {
         elif [[ "$FRAMEWORK_NAME" = "$ARD_FRAMEWORK" ]]; then
             PLATFORMIO_DEFAULT_ENVS="Talaria-hand-uno"
             ENV_NUMBER=2
+        elif [[ "$FRAMEWORK_NAME" = "$NUCLEO_FRAMEWORK" ]]; then
+            PLATFORMIO_DEFAULT_ENVS="Talaria-hand-nucleo"
+            ENV_NUMBER=3
         else
             echo
             echo "Incorrect arguments provided, exiting"
@@ -151,11 +159,17 @@ build() {
         pio init --ide vscode -b uno --env-prefix Talaria-hand-uno
         pio run -e Talaria-hand-uno $EXTRA_ARGS
     elif [[ $1 -eq 3 ]]; then
+        pio init --ide vscode -b nucleo_f413zh --env-prefix Talaria-hand-nucleo
+        pio run -e Talaria-hand-nucleo $EXTRA_ARGS
+    elif [[ $1 -eq 4 ]]; then
         pio init --ide vscode -b lpc1768 --env-prefix Talaria-hand-serial
         pio run -e Talaria-hand-serial $EXTRA_ARGS
-    elif [[ $1 -eq 4 ]]; then
+    elif [[ $1 -eq 5 ]]; then
         pio init --ide vscode -b uno --env-prefix Talaria-hand-uno-serial
         pio run -e Talaria-hand-uno-serial $EXTRA_ARGS
+    elif [[ $1 -eq 6 ]]; then
+        pio init --ide vscode -b nucleo_f413zh --env-prefix Talaria-hand-nucleo-serial
+        pio run -e Talaria-hand-nucleo-serial $EXTRA_ARGS
     else
         echo "Exiting"
         return

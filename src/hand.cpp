@@ -13,9 +13,9 @@ I2CBus PrimaryBus(0, p9, p10);
 I2CBus SecondaryBus(1, p28, p27);
 #else
 // I2CBus PrimaryBus(0, PC_9, PA_8);
-// I2CBus SecondaryBus1(1, PF_0, PF_1);
+I2CBus PrimaryBus(1, PF_0, PF_1);
 // I2CBus SecondaryBus2(2, PD_13, PD_12);
-I2CBus PrimaryBus(3, PD_15, PD_14);
+// I2CBus PrimaryBus(3, PD_15, PD_14);
 #endif
 #else
 I2CBus PrimaryBus(0, PIN_WIRE_SDA, PIN_WIRE_SCL);
@@ -50,9 +50,11 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
 //         const char* meas_topic_name, const char* des_topic_name,
 //         int refresh_rate);
 
-Motor motor(0, PC_2, PA_5, PA_6, PF_13, PE_9, PE_11, PF_14, nh, MOTOR_ID,
-            "index", "/devices/index/motor_measured",
-            "/devices/index/motor_desired", 20);
+Motor motor(0, PA_3 /*aVSense*/, PC_8 /*aEnable*/, PC_9 /*vRef*/,
+            PF_2 /*nSleep*/, PG_2 /*nFault*/, PE_11 /*nConfig*/,
+            PG_3 /*aPhase*/, nh, MOTOR_ID, "index",
+            "/devices/index/motor_measured", "/devices/index/motor_desired",
+            10);
 #endif
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
