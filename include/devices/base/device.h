@@ -67,6 +67,12 @@ private:
 
 protected:
 public:
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+  uint64_t _prev_update_time = 0;  // get_ms_count();
+#else
+  unsigned long _prev_update_time = 0;  // millis();
+#endif
+  bool first_update = true;
   int _refresh_rate = 0;
   /** CONSTRUCTORS */
 

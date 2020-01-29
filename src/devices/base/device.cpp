@@ -319,17 +319,14 @@ void Device::disable()
  */
 void Device::update(int loop_counter)
 {
-  if (this->_refresh_rate == loop_counter)
-  {
-    // Run all functions to get/set data
+  // Run all functions to get/set data
 
 #ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
-    _pub_diagnostics.publish(&(this->_msg_diagnostic_array));
+  _pub_diagnostics.publish(&(this->_msg_diagnostic_array));
 #endif
 // #else
 #endif
-  }
 }
 
 /**

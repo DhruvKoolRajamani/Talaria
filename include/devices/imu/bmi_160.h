@@ -90,8 +90,15 @@ public:
 
   void update(int loop_counter = 1)
   {
-    if (this->_refresh_rate == loop_counter)
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+    uint64_t current_time = get_ms_count();
+#else
+    unsigned long current_time = millis();
+#endif
+    if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
     {
+      first_update = false;
+      _prev_update_time = current_time;
       // Publish Diagnostic messages
       Device::update(loop_counter);
 
