@@ -13,7 +13,7 @@ I2CBus PrimaryBus(0, p9, p10);
 I2CBus SecondaryBus(1, p28, p27);
 #else
 // I2CBus PrimaryBus(0, PC_9, PA_8);
-I2CBus PrimaryBus(1, PF_0, PF_1);
+I2CBus PrimaryBus(0, PF_0, PF_1);
 // I2CBus SecondaryBus2(2, PD_13, PD_12);
 // I2CBus PrimaryBus(3, PD_15, PD_14);
 #endif
@@ -42,7 +42,7 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "index",
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
-                       "/devices/index/bend_sensor", PF_12, 10);
+                       "/devices/index/bend_sensor", PF_2, 10);
 
 // Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
 //         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
@@ -50,9 +50,9 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
 //         const char* meas_topic_name, const char* des_topic_name,
 //         int refresh_rate);
 
-Motor motor(0, PA_3 /*aVSense*/, PC_8 /*aEnable*/, PC_9 /*vRef*/,
-            PF_2 /*nSleep*/, PG_2 /*nFault*/, PE_11 /*nConfig*/,
-            PG_3 /*aPhase*/, nh, MOTOR_ID, "index",
+Motor motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+            PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+            PF_13 /*aPhase*/, nh, MOTOR_ID, "index",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
             10);
 #endif

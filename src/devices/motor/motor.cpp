@@ -116,17 +116,18 @@ bool Motor::initialize()
   DigitalOut config(_nConfig, false);  // enable phase mode (DC motor)
   DigitalOut phase(_aPhase, true);
   DigitalIn fault(_nFault);
+  // fault.mode(PullUp);
 
 #ifdef DISABLE_ROS
   sprintf(str, (_nFault) ? "fault : True\n" : "fault : False\n");
   print(str);
 #endif
 
-  if (fault)
+  if (true)
   {
-    // setPwm();
-// 5.2 for test, 6.3 for main
-// setTorque(5);
+    setPwm();
+    // 5.2 for test, 6.3 for main
+    // setTorque(5);
 #ifndef DISABLE_ROS
     _msg_motor_measured.header.frame_id = "index";
     _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
@@ -149,7 +150,7 @@ bool Motor::initialize()
   // motor error status
   if (digitalRead(_nFault))
   {
-    setPwm();
+    // setPwm();
     // 5.2 for test, 6.3 for main
     // setTorque(1);
 #ifndef DISABLE_ROS
@@ -167,7 +168,7 @@ bool Motor::initialize()
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 void Motor::setPwm()
 {
-  float speed = .1;  // get desired speed from usb
+  float speed = 1;  // get desired speed from usb
   PwmDevice enable(_aEnable);
   enable.writePWMData(speed);
 }
@@ -184,7 +185,7 @@ void Motor::setPwm()
 float Motor::getISense()
 {
   float iSense = this->readAnalogData();
-  return iSense - 0.5;
+  return (iSense)-0.5;  // *10
 }
 
 #else
@@ -200,7 +201,7 @@ float Motor::getISense()
 void Motor::setTorque(float desired_torque, float torque_constant)
 {
   torqueConst = torque_constant;
-  _desiredTorque = abs(desired_torque);
+  _desiredTorque = desired_torque;
   _desiredDir = (desired_torque > 0) ? 1 : 0;
   setDir();
 }
@@ -266,8 +267,8 @@ void Motor::update(int loop_counter)
     temp.header.frame_id = "index";
     temp.header.stamp = this->getNodeHandle()->now();
     temp.motor_id.data = 0;
-    temp.desired_force.data = _desiredTorque * _desiredDir;
-    temp.measured_force.data = _error;
+    temp.desired_force.data = _desiredTorque;
+    temp.measured_force.data = _measuredI;
 
     // _msg_motor_measured = temp;
 

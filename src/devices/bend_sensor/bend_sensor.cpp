@@ -91,6 +91,7 @@ bool BendSensor::initialize()
 #else
     print("Ping failed\n");
 #endif
+    setConfiguredStatus(false);
     return false;
   }
 
@@ -102,6 +103,7 @@ bool BendSensor::initialize()
 #else
     print("Set Sample Rate failed\n");
 #endif
+    setConfiguredStatus(false);
     return false;
   }
 
@@ -119,6 +121,7 @@ bool BendSensor::initialize()
 #else
     print("Stretch Enable failed\n");
 #endif
+    setConfiguredStatus(false);
     return false;
   }
 
@@ -130,6 +133,7 @@ bool BendSensor::initialize()
 #else
     print("Bend Polling failed\n");
 #endif
+    setConfiguredStatus(false);
     return false;
   }
   setHealthStatus(true);
@@ -201,7 +205,8 @@ void BendSensor::update(int loop_counter)
 #else
     unsigned long current_time = millis();
 #endif
-    if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
+    if ((first_update || (current_time - _prev_update_time) >= _refresh_rate) &&
+        this->getConfiguredStatus())
     {
       first_update = false;
       _prev_update_time = current_time;
