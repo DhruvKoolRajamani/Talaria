@@ -215,8 +215,9 @@ void Motor::setDir()
 float Motor::setVRef()
 {
   float measuredTorque = (_measuredI * 6 / 5) * torqueConst;
-  float t_error = _desiredTorque - measuredTorque;
-  float new_vRef = (_desiredTorque * 0.5 * 80 / 6) / torqueConst;  //+ t_error;
+  float t_error = abs(_desiredTorque) - measuredTorque;
+  float new_vRef =
+      (abs(_desiredTorque) * 0.5 * 80 / 6) / torqueConst;  //+ t_error;
   _ref->writePWMData(new_vRef);
   return measuredTorque;
 }
@@ -268,7 +269,7 @@ void Motor::update(int loop_counter)
     temp.header.stamp = this->getNodeHandle()->now();
     temp.motor_id.data = 0;
     temp.desired_force.data = _desiredTorque;
-    temp.measured_force.data = _measuredI;
+    temp.measured_force.data = _error;
 
     // _msg_motor_measured = temp;
 
