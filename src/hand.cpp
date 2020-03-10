@@ -121,6 +121,7 @@ int i = 1;
 int main()
 {
 #ifndef DISABLE_ROS
+  nh.getHardware()->setBaud(115200);
   nh.initNode();
 #else
   wait_ms(1000);
