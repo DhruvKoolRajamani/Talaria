@@ -33,7 +33,7 @@ class Motor : public AnalogDevice
 {
 private:
   float aRSense = 1;
-  float torqueConst;
+  float _torqueConst;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   // pwm pins
@@ -147,7 +147,7 @@ public:
    * @return measured torque from current sense feedback
    *
    */
-  float setVRef();
+  float setVRef(float desired_torque);
 
 #ifndef DISABLE_ROS
   /**

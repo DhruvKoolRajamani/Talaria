@@ -184,8 +184,17 @@ void Motor::setPwm()
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 float Motor::getISense()
 {
-  float iSense = this->readAnalogData();
-  return (iSense)-0.5;  // *10
+  AnalogIn input(_aVSense);
+  float iSense = input;  // this->readAnalogData();
+  if (_desiredTorque > 0)
+  {
+    return iSense;
+  }
+  else
+  {
+    return -1 * iSense;
+  }
+  // return (iSense);//*(_desiredTorque > 0) ? 1 : -1);  // *10
 }
 
 #else
@@ -200,7 +209,7 @@ float Motor::getISense()
 
 void Motor::setTorque(float desired_torque, float torque_constant)
 {
-  torqueConst = torque_constant;
+  _torqueConst = torque_constant;
   _desiredTorque = desired_torque;
   _desiredDir = (desired_torque > 0) ? 1 : 0;
   setDir();
@@ -212,24 +221,18 @@ void Motor::setDir()
   DigitalOut phase(_aPhase, _desiredDir);
 }
 
-float Motor::setVRef()
+float Motor::setVRef(float desiredTorque)
 {
-  float measuredTorque = (_measuredI * 6 / 5) * torqueConst;
-  float t_error = abs(_desiredTorque) - measuredTorque;
-  float new_vRef =
-      (abs(_desiredTorque) * 0.5 * 80 / 6) / torqueConst;  //+ t_error;
+  float new_vRef = (abs(desiredTorque) * 0.5 * 80 / 6) / _torqueConst;
   _ref->writePWMData(new_vRef);
-  return measuredTorque;
 }
 
 #else
-float Motor::setVRef()
+float Motor::setVRef(float desiredTorque)
 {
-  float measuredTorque = (_measuredI)*torqueConst;
-  float new_vRef = _desiredTorque * 0.5 / torqueConst;
+  float new_vRef = desiredTorque * 0.5 / _torqueConst;
 
   _vRef.writePWMData(new_vRef);
-  return measuredTorque;
 }
 #endif
 
@@ -255,9 +258,9 @@ void Motor::update(int loop_counter)
     // Publish Diagnostic messages
     Device::update(loop_counter);
     // setPwm();
-    _measuredI = getISense();
+
     // setTorque(1);  // Remove once subscriber works
-    _error = setVRef();
+    _error = (_measuredI)*_torqueConst;
 #ifdef DISABLE_ROS
     sprintf(cstr, "Measured torque = %f\n", _error);
     print(cstr);
@@ -281,9 +284,9 @@ void Motor::update(int loop_counter)
 #ifndef DISABLE_ROS
 void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
 {
-  _measuredI = getISense();
   // _measuredI = 0.5;
   setTorque(msg.desired_force.data, msg.torque_constant.data);
-  _error = setVRef();
+  setVRef(msg.desired_force.data);
+  _measuredI = getISense();
 }
 #endif

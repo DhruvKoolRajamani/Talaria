@@ -35,7 +35,8 @@ DeviceManager device_manager;
 //                          "/devices/index/strain_gauge", 5);
 BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
                        "/devices/index/bend_sensor", p16, 10);
-Motor motor(0, p18, p25, p26, p6, p8, p7, p5, nh, MOTOR_ID, "index",
+Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
+            p8 /*nFault*/, p7 /*nConfig*/, p5 /*aPhase*/, nh, MOTOR_ID, "index",
             "/devices/index/motor_measured", "/devices/index/motor_desired",
             10);
 #else
