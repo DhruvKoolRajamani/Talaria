@@ -36,8 +36,7 @@ bool DeviceManager::initialize()
 
 bool DeviceManager::addDevice(Device* device, int index)
 {
-  if (index > NUM_DEVICES)
-    return false;
+  if (index > NUM_DEVICES) return false;
   _devices[index] = device;
   return true;
 }
@@ -88,7 +87,12 @@ bool DeviceManager::initializeDevices()
   return init_flag;
 }
 
-void DeviceManager::updateDevices(int loop_counter)
+void DeviceManager::initializeDevice(int device_id)
+{
+  _devices[device_id]->initialize();
+}
+
+void DeviceManager::updateDevices()
 {
   // Add functionality to store time?
   for (int i = 0; i < NUM_DEVICES; i++)
@@ -97,7 +101,7 @@ void DeviceManager::updateDevices(int loop_counter)
       continue;
     else
     {
-      _devices[i]->update(loop_counter);
+      _devices[i]->update();
     }
   }
 }

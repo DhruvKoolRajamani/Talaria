@@ -86,3 +86,5 @@ platformio/packages/
 platformio/lib
 platformio/packages
 lib/ros_lib
+catkin_ws/ros_lib/
+catkin_ws/src/imu_msg/

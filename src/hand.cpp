@@ -42,8 +42,8 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 #else
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
-                       "/devices/index/bend_sensor", PF_2, 10);
+// BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
+//                        "/devices/index/bend_sensor", PF_2, 10);
 
 // Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
 //         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
@@ -51,11 +51,19 @@ BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
 //         const char* meas_topic_name, const char* des_topic_name,
 //         int refresh_rate);
 
-Motor motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-            PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
-            PF_13 /*aPhase*/, nh, MOTOR_ID, "index",
-            "/devices/index/motor_measured", "/devices/index/motor_desired",
-            10);
+// Motor motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+//             PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+//             PF_13 /*aPhase*/, nh, MOTOR_ID, "index",
+//             "/devices/index/motor_measured", "/devices/index/motor_desired",
+//             10);
+
+// ADIS16470(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName dr,
+//             PinName rst, ros::NodeHandle& nh, int clock_speed = 100000,
+//             uint8_t dev_index = 0, const char* dev_name = NULL,
+//             const char* topic_name = NULL, int refresh_rate = 1)
+ADIS16470 imu(PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
+              "imu", "/devices/hand/imu", 20);
+
 #endif
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
@@ -80,13 +88,14 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID,
 #endif
 #endif
 
-static int MAX_REFRESH_RATE = 1;
+static int MAX_REFRESH_RATE = rate;
 
 void addDevices()
 {
-  device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
+  // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  device_manager.addDevice(&motor, MOTOR_ID);
+  // device_manager.addDevice(&motor, MOTOR_ID);
+  device_manager.addDevice(&imu, 0);
 #ifdef DISABLE_ROS
   print("Added Devices\n");
 #endif
@@ -108,20 +117,13 @@ void halt(float time_ms)
 #endif
 }
 
-#ifndef DISABLE_ROS
-float rate = 1;
-#else
-float rate = 1;
-#endif
-
 volatile bool is_init = false;
-int i = 1;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 int main()
 {
 #ifndef DISABLE_ROS
-  nh.getHardware()->setBaud(115200);
+  nh.getHardware()->setBaud(115200);  // 57600
   nh.initNode();
 #else
   wait_ms(1000);
@@ -133,7 +135,6 @@ int main()
   addDevices();
 
   volatile bool is_init = false;
-  int i = 1;
   while (1)
   {
     if (!is_init)
@@ -146,19 +147,8 @@ int main()
     }
 
     // Move all this to device manager
-    device_manager.updateDevices(i);
+    device_manager.updateDevices();
 
-    if (!is_init)
-    {
-      rate = 1000;
-    }
-
-    if (i <= device_manager.getMaxRefreshRate())
-    {
-      i++;
-    }
-    else
-      i = 0;
 #ifndef DISABLE_ROS
     nh.spinOnce();
 #endif

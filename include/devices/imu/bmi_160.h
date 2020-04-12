@@ -56,9 +56,7 @@ public:
 #endif
 
   // DESTRUCTORS
-  virtual ~BMI_160()
-  {
-  }
+  virtual ~BMI_160() {}
 
   // GETTERS
 
@@ -88,28 +86,39 @@ public:
       return false;
   }
 
-  void update(int loop_counter = 1)
+  void update()
   {
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-    uint64_t current_time = get_ms_count();
-#else
-    unsigned long current_time = millis();
-#endif
-    if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
+    if (this->getEnabledStatus())
     {
-      first_update = false;
-      _prev_update_time = current_time;
-      // Publish Diagnostic messages
-      Device::update(loop_counter);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+      uint64_t current_time = get_ms_count();
+#else
+      unsigned long current_time = millis();
+#endif
+      if ((first_update ||
+           (current_time - _prev_update_time) >= _refresh_rate) &&
+          this->getConfiguredStatus())
+      {
+        first_update = false;
+        _prev_update_time = current_time;
+        // Publish Diagnostic messages
+        Device::update();
 
 #ifndef DISABLE_ROS
-      _msg_chip_id.data = this->getChipId();
+        _msg_chip_id.data = this->getChipId();
 
-      if (this->getIsTopicAdvertised())
-        _pub_imu.publish(&(this->_msg_chip_id));
+        if (this->getIsTopicAdvertised())
+          _pub_imu.publish(&(this->_msg_chip_id));
 #endif
+      }
     }
   }
-};
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT uint64_t current_time = get_ms_count();
+#else
+unsigned long current_time = millis();
+#endif
+  if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
+  {
+  };
 
 #endif  // BMI_160_H

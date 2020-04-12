@@ -116,7 +116,7 @@ public:
    */
   bool initialize() override;
 
-  void update(int loop_counter = 1) override;
+  void update() override;
 
   /**
    * @brief Control motor speed

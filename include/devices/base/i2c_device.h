@@ -13,7 +13,7 @@
 #define I2C_DEVICE_H
 
 #include "device.h"
-#include "i2c/i2c_bus.h"
+#include "CommManager/i2c_bus.h"
 #include "devices/hardware.h"
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
 #include "mbed.h"

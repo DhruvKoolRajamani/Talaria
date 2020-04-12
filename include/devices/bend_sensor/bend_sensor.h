@@ -16,7 +16,6 @@
 #include <math.h>
 
 #ifndef DISABLE_ROS
-#include "sensor_msgs/Imu.h"
 
 // Add header file for custom ros message for bend sensor
 
@@ -159,7 +158,7 @@ public:
             int delay_ms = 2) override;
 #endif
 
-  void update(int loop_counter = 1);
+  void update();
 
   // Convert two bytes of buffer[] to int16
   inline int16_t decodeInt16(const uint8_t* p_encoded_data);

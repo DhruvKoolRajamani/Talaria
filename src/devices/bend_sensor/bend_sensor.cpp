@@ -52,9 +52,7 @@ BendSensor::BendSensor(int address, I2CBus& i2c_bus, uint8_t dev_index,
 #endif
 
 // DESTRUCTORS
-BendSensor::~BendSensor()
-{
-}
+BendSensor::~BendSensor() {}
 
 // GETTERS
 
@@ -194,7 +192,7 @@ bool BendSensor::ping(uint8_t chip_id_reg_address, int delay_ms)
     return false;
 }
 
-void BendSensor::update(int loop_counter)
+void BendSensor::update()
 {
   // Only update if update rate for the sensor is the same as the sampling
   // rate
@@ -212,7 +210,7 @@ void BendSensor::update(int loop_counter)
       _prev_update_time = current_time;
 
       // Publish Diagnostic messages
-      Device::update(loop_counter);
+      Device::update();
 
       this->readData();
 

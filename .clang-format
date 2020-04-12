@@ -4,9 +4,6 @@ ConstructorInitializerIndentWidth: 2
 AlignEscapedNewlinesLeft: false
 AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
-AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
-AllowShortFunctionsOnASingleLine: None
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true
 AlwaysBreakBeforeMultilineStrings: false
@@ -50,15 +47,16 @@ SpaceAfterCStyleCast: false
 BreakBeforeBraces: Custom
 
 # Control of individual brace wrapping cases
-BraceWrapping: {
-    AfterClass: 'true',
-    AfterControlStatement: 'true',
-    AfterEnum : 'true',
-    AfterFunction : 'true',
-    AfterNamespace : 'true',
-    AfterStruct : 'true',
-    AfterUnion : 'true',
-    BeforeCatch : 'true',
-    BeforeElse : 'true',
-    IndentBraces : 'false'
-}
+BraceWrapping:
+    {
+        AfterClass: "true",
+        AfterControlStatement: "true",
+        AfterEnum: "true",
+        AfterFunction: "true",
+        AfterNamespace: "true",
+        AfterStruct: "true",
+        AfterUnion: "true",
+        BeforeCatch: "true",
+        BeforeElse: "true",
+        IndentBraces: "false",
+    }

@@ -27,12 +27,13 @@
 
 #include "devices/base/device.h"
 
-#include "devices/imu/bmi_160.h"
+#include "devices/imu/adis_16470.h"
 #include "devices/bend_sensor/bend_sensor.h"
 #include "devices/strain_gauge/strain_gauge.h"
 #include "devices/base/pwm_device.h"
 #include "devices/base/analog_device.h"
 #include "devices/motor/motor.h"
+#include "std_msgs/String.h"
 
 class DeviceManager
 {
@@ -76,9 +77,7 @@ public:
 #endif
 
   /** DESTRUCTOR */
-  virtual ~DeviceManager()
-  {
-  }
+  virtual ~DeviceManager() {}
 
   /** GETTERS */
   int getMaxRefreshRate();
@@ -101,7 +100,9 @@ public:
 
   bool initializeDevices();
 
-  void updateDevices(int loop_counter = 1);
+  void initializeDevice(int device_id);
+
+  void updateDevices();
 
   inline void float2Bytes(float val, uint8_t* bytes_array)
   {
@@ -117,10 +118,7 @@ public:
     memcpy(bytes_array, u.temp_array, sizeof(float));
   }
 
-  inline int _max(int a, int b)
-  {
-    return ((a) > (b) ? (a) : (b));
-  }
+  inline int _max(int a, int b) { return ((a) > (b) ? (a) : (b)); }
 
 #ifdef COMPUTE_CRC
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT

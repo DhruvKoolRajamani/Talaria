@@ -95,9 +95,7 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
 #endif
 
 // DESTRUCTORS
-Motor::~Motor()
-{
-}
+Motor::~Motor() {}
 
 // GETTERS
 
@@ -132,6 +130,9 @@ bool Motor::initialize()
     _msg_motor_measured.header.frame_id = "index";
     _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
 #endif
+    this->setEnabledStatus(true);
+    this->setConfiguredStatus(true);
+    this->setHealthStatus(true);
     return true;
   }
   else
@@ -216,10 +217,7 @@ void Motor::setTorque(float desired_torque, float torque_constant)
 }
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-void Motor::setDir()
-{
-  DigitalOut phase(_aPhase, _desiredDir);
-}
+void Motor::setDir() { DigitalOut phase(_aPhase, _desiredDir); }
 
 float Motor::setVRef(float desiredTorque)
 {
@@ -236,48 +234,50 @@ float Motor::setVRef(float desiredTorque)
 }
 #endif
 
-void Motor::update(int loop_counter)
+void Motor::update()
 {
   // Only update if update rate for the sensor is the same as the sampling
   // rate
-
+  if (this->getEnabledStatus())
+  {
 #ifdef DISABLE_ROS
-  char cstr[100];
-  // sprintf(cstr, "loop_counter: %d\n", loop_counter);
-  print(cstr);
+    char cstr[100];
+    print(cstr);
 #endif
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  uint64_t current_time = get_ms_count();
+    uint64_t current_time = get_ms_count();
 #else
-  unsigned long current_time = millis();
+    unsigned long current_time = millis();
 #endif
-  if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
-  {
-    first_update = false;
-    _prev_update_time = current_time;
-    // Publish Diagnostic messages
-    Device::update(loop_counter);
-    // setPwm();
+    if (first_update || (current_time - _prev_update_time) >= _refresh_rate &&
+                            this->getConfiguredStatus())
+    {
+      first_update = false;
+      _prev_update_time = current_time;
+      // Publish Diagnostic messages
+      Device::update();
+      // setPwm();
 
-    // setTorque(1);  // Remove once subscriber works
-    _error = (_measuredI)*_torqueConst;
+      // setTorque(1);  // Remove once subscriber works
+      _error = (_measuredI)*_torqueConst;
 #ifdef DISABLE_ROS
-    sprintf(cstr, "Measured torque = %f\n", _error);
-    print(cstr);
-    sprintf(cstr, "Measured torque = %f\n", _error);
-    print(cstr);
+      sprintf(cstr, "Measured torque = %f\n", _error);
+      print(cstr);
+      sprintf(cstr, "Measured torque = %f\n", _error);
+      print(cstr);
 #else
-    motor_msg::motor_measured temp = motor_msg::motor_measured();
-    temp.header.frame_id = "index";
-    temp.header.stamp = this->getNodeHandle()->now();
-    temp.motor_id.data = 0;
-    temp.desired_force.data = _desiredTorque;
-    temp.measured_force.data = _error;
+      motor_msg::motor_measured temp = motor_msg::motor_measured();
+      temp.header.frame_id = "index";
+      temp.header.stamp = this->getNodeHandle()->now();
+      temp.motor_id.data = 0;
+      temp.desired_force.data = _desiredTorque;
+      temp.measured_force.data = _error;
 
-    // _msg_motor_measured = temp;
+      // _msg_motor_measured = temp;
 
-    _pub_motor.publish(&temp);
+      _pub_motor.publish(&temp);
 #endif
+    }
   }
 }
 

@@ -13,7 +13,7 @@
 #define HARDWARE_H
 
 #ifdef HAND
-const int NUM_DEVICES = 2;
+const int NUM_DEVICES = 1;
 #elif defined(LLE)
 const int NUM_DEVICES = 1;
 #endif
@@ -45,7 +45,8 @@ typedef enum
   BEND_SENSOR_ID,
   // AD_IMU_SENSOR_ID,
   MOTOR_ID,
-  STRAIN_GAUGE_ID
+  STRAIN_GAUGE_ID,
+  ADI_IMU_ID
 } hand_devices_id_enum;
 
 typedef enum
@@ -53,5 +54,11 @@ typedef enum
   BMI_IMU_SENSOR_ID,
   FSR_ID
 } lle_devices_id_enum;
+
+#ifndef DISABLE_ROS
+const float rate = 2;
+#else
+const float rate = 1;
+#endif
 
 #endif  // HARDWARE_H

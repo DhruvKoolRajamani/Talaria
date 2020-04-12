@@ -75,9 +75,7 @@ public:
 #endif
 
   // DESTRUCTORS
-  virtual ~StrainGauge()
-  {
-  }
+  virtual ~StrainGauge() {}
 
   // GETTERS
   /**
@@ -85,20 +83,14 @@ public:
    *
    * @return float _Vout_unstrained
    */
-  float getUnstrainedVoltage()
-  {
-    return _Vout_unstrained;
-  }
+  float getUnstrainedVoltage() { return _Vout_unstrained; }
 
   /**
    * @brief Get the Strain object
    *
    * @return float _strain
    */
-  float getStrain()
-  {
-    return _strain;
-  }
+  float getStrain() { return _strain; }
   // SETTERS
 
   // METHODS
@@ -119,29 +111,34 @@ public:
     setConfiguredStatus(true);
   }
 
-  void update(int loop_counter = 1)
+  void update()
   {
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-    uint64_t current_time = get_ms_count();
-#else
-    unsigned long current_time = millis();
-#endif
-    if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
+    if (this->getEnabledStatus())
     {
-      first_update = false;
-      _prev_update_time = current_time;
-      // Publish Diagnostic messages
-      Device::update(loop_counter);
+#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+      uint64_t current_time = get_ms_count();
+#else
+      unsigned long current_time = millis();
+#endif
+      if ((first_update ||
+           (current_time - _prev_update_time) >= _refresh_rate) &&
+          this->getConfiguredStatus())
+      {
+        first_update = false;
+        _prev_update_time = current_time;
+        // Publish Diagnostic messages
+        Device::update();
 
-      float GF = 2;
-      _Vout_strained = this->readAnalogData();
-      _strain = (_Vout_strained - _Vout_unstrained) / _Vin;
+        float GF = 2;
+        _Vout_strained = this->readAnalogData();
+        _strain = (_Vout_strained - _Vout_unstrained) / _Vin;
 
 #ifndef DISABLE_ROS
-      _msg_strain_gauge.data = _strain;
-      if (this->getIsTopicAdvertised())
-        _pub_strain_gauge.publish(&(this->_msg_strain_gauge));
+        _msg_strain_gauge.data = _strain;
+        if (this->getIsTopicAdvertised())
+          _pub_strain_gauge.publish(&(this->_msg_strain_gauge));
 #endif
+      }
     }
   }
 };

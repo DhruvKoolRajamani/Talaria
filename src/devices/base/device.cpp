@@ -51,15 +51,16 @@ Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
   , _health_status(false)
   , _dev_index(dev_index)
   , _nh(&nh)
-  , _refresh_rate(refresh_rate)
+  , _refresh_rate(refresh_rate)  // 1000 * ((rate <= 2) ? 2 : rate /
+                                 // refresh_rate)
 {
+  int dev_name_len = strlen(dev_name);
+  int topic_name_len = strlen(topic_name);
   _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
-  _dev_name = static_cast<char*>(malloc(DEVICE_NAME_SIZE));
-  _topic_name = static_cast<char*>(malloc(DEVICE_TOPIC_NAME_SIZE));
-  if (dev_name != NULL)
-    memcpy(_dev_name, dev_name, sizeof(dev_name));
-  if (topic_name != NULL)
-    memcpy(_topic_name, topic_name, sizeof(topic_name));
+  _dev_name = static_cast<char*>(malloc(dev_name_len + 1));
+  _topic_name = static_cast<char*>(malloc(topic_name_len + 1));
+  if (dev_name != NULL) snprintf(_dev_name, dev_name_len + 1, dev_name);
+  if (topic_name != NULL) snprintf(_topic_name, topic_name_len + 1, topic_name);
 
 #ifndef DISABLE_DIAGNOSTICS
   if (!_is_diagnostic_published)
@@ -142,10 +143,7 @@ Device::~Device()
  *
  * @return ros::NodeHandle*
  */
-ros::NodeHandle* Device::getNodeHandle()
-{
-  return _nh;
-}
+ros::NodeHandle* Device::getNodeHandle() { return _nh; }
 
 /**
  * @brief Get the Is Topic Advertised object
@@ -153,46 +151,31 @@ ros::NodeHandle* Device::getNodeHandle()
  * @return true
  * @return false
  */
-bool Device::getIsTopicAdvertised()
-{
-  return _is_topic_advertised;
-}
+bool Device::getIsTopicAdvertised() { return _is_topic_advertised; }
 #endif
 
-int Device::getRefreshRate()
-{
-  return _refresh_rate;
-}
+int Device::getRefreshRate() { return _refresh_rate; }
 
 /**
  * @brief Get the Id Size object
  *
  * @return int DEVICE_ID_SIZE
  */
-int Device::getIdSize()
-{
-  return DEVICE_ID_SIZE;
-}
+int Device::getIdSize() { return DEVICE_ID_SIZE; }
 
 /**
  * @brief Get the Id object
  *
  * @return uint8_t* _dev_Id
  */
-uint8_t* Device::getId()
-{
-  return _dev_Id;
-}
+uint8_t* Device::getId() { return _dev_Id; }
 
 /**
  * @brief Get the Index object
  *
  * @return uint8_t _dev_index
  */
-uint8_t Device::getIndex()
-{
-  return _dev_index;
-}
+uint8_t Device::getIndex() { return _dev_index; }
 
 /**
  * @brief Get the Health Status object
@@ -200,10 +183,7 @@ uint8_t Device::getIndex()
  * @return true _health_status
  * @return false _health_status
  */
-bool Device::getHealthStatus()
-{
-  return _health_status;
-}
+bool Device::getHealthStatus() { return _health_status; }
 
 /**
  * @brief Get the Configured Status object
@@ -211,10 +191,7 @@ bool Device::getHealthStatus()
  * @return true _conf_status
  * @return false _conf_status
  */
-bool Device::getConfiguredStatus()
-{
-  return _conf_status;
-}
+bool Device::getConfiguredStatus() { return _conf_status; }
 
 /**
  * @brief Get the Enabled Status object
@@ -222,10 +199,7 @@ bool Device::getConfiguredStatus()
  * @return true _en_status
  * @return false _en_status
  */
-bool Device::getEnabledStatus()
-{
-  return _en_status;
-}
+bool Device::getEnabledStatus() { return _en_status; }
 
 #ifndef DISABLE_ROS
 /**
@@ -233,10 +207,7 @@ bool Device::getEnabledStatus()
  *
  * @return char* _dev_name
  */
-char* Device::getDeviceName()
-{
-  return _dev_name;
-}
+char* Device::getDeviceName() { return _dev_name; }
 #endif
 
 #ifndef DISABLE_ROS
@@ -245,10 +216,7 @@ char* Device::getDeviceName()
  *
  * @return char* _topic_name
  */
-char* Device::getTopicName()
-{
-  return _topic_name;
-}
+char* Device::getTopicName() { return _topic_name; }
 #endif
 
 /** METHODS */
@@ -284,10 +252,7 @@ bool Device::initialize()
  * @brief Enable the Device
  *
  */
-void Device::enable()
-{
-  _en_status = true;
-}
+void Device::enable() { _en_status = true; }
 
 /**
  * @brief Disable the Device
@@ -317,7 +282,7 @@ void Device::disable()
  * @brief Update the values of the device whether read or write
  *
  */
-void Device::update(int loop_counter)
+void Device::update()
 {
   // Run all functions to get/set data
 
@@ -371,13 +336,11 @@ bool Device::strcmp(const char* str1, const char* str2)
       cnt2++;
     }
 
-    if (cnt1 != cnt2)
-      return false;
+    if (cnt1 != cnt2) return false;
 
     for (int i = 0; i < cnt1; i++)
     {
-      if (str1[i] != str2[i])
-        return false;
+      if (str1[i] != str2[i]) return false;
     }
     return true;
   }
@@ -393,10 +356,7 @@ bool Device::strcmp(const char* str1, const char* str2)
  *
  * @param ptrnh
  */
-void Device::setNodeHandle(ros::NodeHandle* nh)
-{
-  _nh = nh;
-}
+void Device::setNodeHandle(ros::NodeHandle* nh) { _nh = nh; }
 
 void Device::setIsTopicAdvertised(bool is_topic_advertised)
 {
@@ -449,10 +409,7 @@ void Device::setIndex(uint8_t index)
  *
  * @param uint8_t id
  */
-void Device::setId(uint8_t id)
-{
-  *_dev_Id = id;
-}
+void Device::setId(uint8_t id) { *_dev_Id = id; }
 
 /**
  * @brief Set the Health Status object
@@ -522,15 +479,13 @@ void Device::setConfiguredStatus(bool state)
  */
 void Device::setDeviceName(const char* dev_name)
 {
-  memcpy(_dev_name, dev_name, sizeof(dev_name));
+  memcpy(_dev_name, dev_name, strlen(dev_name));
 #ifndef DISABLE_DIAGNOSTICS
   _msg_diagnostic_status.name = _dev_name;
   _msg_diagnostic_status.level = diagnostic_msgs::DiagnosticStatus::WARN;
 #endif
 }
-#endif
 
-#ifndef DISABLE_ROS
 #ifndef DISABLE_DIAGNOSTICS
 /**
  * @brief Set the Debug Data object

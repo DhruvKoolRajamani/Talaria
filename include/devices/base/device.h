@@ -222,7 +222,7 @@ public:
    * @brief Update the values of the device whether read or write
    *
    */
-  virtual void update(int loop_counter = 1);
+  virtual void update();
 
 /**
  * @brief Reset the pin for the Device and wait for a delay in ms before
@@ -306,7 +306,7 @@ public:
   /**
    * @brief Set the Name of the Device
    *
-   * @param const char* dev_name
+   * @param dev_name
    */
   void setDeviceName(const char* dev_name);
 #endif
