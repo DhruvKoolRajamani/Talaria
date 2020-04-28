@@ -52,30 +52,30 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 //         int refresh_RATE);
 
 // Index
-Motor thumb_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-                  PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+Motor thumb_motor(0, PA_3 /*aVSense*/, PD_8 /*aEnable*/, PC_8 /*vRef*/,
+                  PE_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
                   PF_13 /*aPhase*/, nh, THUMB_MOTOR_ID, "thumb",
                   "/devices/thumb/motor_measured",
                   "/devices/thumb/motor_desired", 50);
 
 // Index
-Motor index_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-                  PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
-                  PF_13 /*aPhase*/, nh, INDEX_MOTOR_ID, "index",
+Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PC_9 /*vRef*/,
+                  PF_14 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+                  PE_11 /*aPhase*/, nh, INDEX_MOTOR_ID, "index",
                   "/devices/index/motor_measured",
                   "/devices/index/motor_desired", 50);
 
 // Index
-Motor middle_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-                   PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
-                   PF_13 /*aPhase*/, nh, MIDDLE_MOTOR_ID, "middle",
+Motor middle_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
+                   PF_15 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+                   PE_13 /*aPhase*/, nh, MIDDLE_MOTOR_ID, "middle",
                    "/devices/middle/motor_measured",
                    "/devices/middle/motor_desired", 50);
 
 // Index
-Motor ring_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-                 PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
-                 PF_13 /*aPhase*/, nh, RING_MOTOR_ID, "ring",
+Motor ring_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_9 /*vRef*/,
+                 PG_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+                 PG_14 /*aPhase*/, nh, RING_MOTOR_ID, "ring",
                  "/devices/ring/motor_measured", "/devices/ring/motor_desired",
                  50);
 
@@ -117,10 +117,10 @@ void addDevices()
   // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
   device_manager.addDevice(&imu, ADI_IMU_ID);
-  device_manager.addDevice(&thumb_motor, THUMB_MOTOR_ID);
-  device_manager.addDevice(&index_motor, INDEX_MOTOR_ID);
-  device_manager.addDevice(&middle_motor, MIDDLE_MOTOR_ID);
-  device_manager.addDevice(&ring_motor, RING_MOTOR_ID);
+  // device_manager.addDevice(&thumb_motor, THUMB_MOTOR_ID);
+  device_manager.addDevice(&index_motor, 1);
+  // device_manager.addDevice(&middle_motor, MIDDLE_MOTOR_ID);
+  // device_manager.addDevice(&ring_motor, RING_MOTOR_ID);
 
 #ifdef DISABLE_ROS
   print("Added Devices\n");
