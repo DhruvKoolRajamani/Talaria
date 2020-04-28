@@ -51,8 +51,9 @@ Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
   , _health_status(false)
   , _dev_index(dev_index)
   , _nh(&nh)
-  , _refresh_rate(refresh_rate)  // 1000 * ((rate <= 2) ? 2 : rate /
-                                 // refresh_rate)
+  , _refresh_rate(RATE * 1000. / (float)(refresh_rate))  // 1000 * ((rate <= 2)
+                                                         // ? 2 : rate /
+                                                         // refresh_rate)
 {
   int dev_name_len = strlen(dev_name);
   int topic_name_len = strlen(topic_name);

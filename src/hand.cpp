@@ -49,20 +49,42 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 //         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
 //         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
 //         const char* meas_topic_name, const char* des_topic_name,
-//         int refresh_rate);
+//         int refresh_RATE);
 
-// Motor motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
-//             PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
-//             PF_13 /*aPhase*/, nh, MOTOR_ID, "index",
-//             "/devices/index/motor_measured", "/devices/index/motor_desired",
-//             10);
+// Index
+Motor thumb_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+                  PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+                  PF_13 /*aPhase*/, nh, THUMB_MOTOR_ID, "thumb",
+                  "/devices/thumb/motor_measured",
+                  "/devices/thumb/motor_desired", 50);
+
+// Index
+Motor index_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+                  PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+                  PF_13 /*aPhase*/, nh, INDEX_MOTOR_ID, "index",
+                  "/devices/index/motor_measured",
+                  "/devices/index/motor_desired", 50);
+
+// Index
+Motor middle_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+                   PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+                   PF_13 /*aPhase*/, nh, MIDDLE_MOTOR_ID, "middle",
+                   "/devices/middle/motor_measured",
+                   "/devices/middle/motor_desired", 50);
+
+// Index
+Motor ring_motor(0, PA_3 /*aVSense*/, PB_9 /*aEnable*/, PC_9 /*vRef*/,
+                 PE_9 /*nSleep*/, PF_14 /*nFault*/, PE_11 /*nConfig*/,
+                 PF_13 /*aPhase*/, nh, RING_MOTOR_ID, "ring",
+                 "/devices/ring/motor_measured", "/devices/ring/motor_desired",
+                 50);
 
 // ADIS16470(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName dr,
 //             PinName rst, ros::NodeHandle& nh, int clock_speed = 100000,
 //             uint8_t dev_index = 0, const char* dev_name = NULL,
-//             const char* topic_name = NULL, int refresh_rate = 1)
+//             const char* topic_name = NULL, int refresh_RATE = 1)
 ADIS16470 imu(PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
-              "imu", "/devices/hand/imu", 20);
+              "imu", "/devices/hand/imu", 100);  // Hertz
 
 #endif
 #else
@@ -88,14 +110,18 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID,
 #endif
 #endif
 
-static int MAX_REFRESH_RATE = rate;
+static int MAX_REFRESH_RATE = RATE;
 
 void addDevices()
 {
   // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
   // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  // device_manager.addDevice(&motor, MOTOR_ID);
-  device_manager.addDevice(&imu, 0);
+  device_manager.addDevice(&imu, ADI_IMU_ID);
+  device_manager.addDevice(&thumb_motor, THUMB_MOTOR_ID);
+  device_manager.addDevice(&index_motor, INDEX_MOTOR_ID);
+  device_manager.addDevice(&middle_motor, MIDDLE_MOTOR_ID);
+  device_manager.addDevice(&ring_motor, RING_MOTOR_ID);
+
 #ifdef DISABLE_ROS
   print("Added Devices\n");
 #endif
@@ -152,7 +178,7 @@ int main()
 #ifndef DISABLE_ROS
     nh.spinOnce();
 #endif
-    halt(rate);
+    halt(RATE);
   }
 
   return 0;
@@ -189,7 +215,7 @@ void loop()
     i = 0;
 #ifndef DISABLE_ROS
   nh.spinOnce();
-  halt(rate);
+  halt(RATE);
 #endif
 }
 #endif

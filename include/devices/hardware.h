@@ -42,11 +42,13 @@ static void print(const char* str)
 
 typedef enum
 {
-  BEND_SENSOR_ID,
+  // BEND_SENSOR_ID,
   // AD_IMU_SENSOR_ID,
-  MOTOR_ID,
-  STRAIN_GAUGE_ID,
-  ADI_IMU_ID
+  ADI_IMU_ID,
+  THUMB_MOTOR_ID,
+  INDEX_MOTOR_ID,
+  MIDDLE_MOTOR_ID,
+  RING_MOTOR_ID
 } hand_devices_id_enum;
 
 typedef enum
@@ -56,9 +58,9 @@ typedef enum
 } lle_devices_id_enum;
 
 #ifndef DISABLE_ROS
-const float rate = 2;
+const float RATE = 2;
 #else
-const float rate = 1;
+const float RATE = 1;
 #endif
 
 #endif  // HARDWARE_H
