@@ -1,6 +1,7 @@
 #!/bin/bash
 
-TALARIA_WS="/media/raunak/OS/ADI_challenge/Talaria"
+# TALARIA_WS="/home/dhruv/Talaria"
+TALARIA_WS="$pwd"
 UPLOAD_FLAG="False"
 
 run_setup() {

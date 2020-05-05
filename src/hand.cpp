@@ -42,8 +42,9 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 #else
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-BendSensor bend_sensor(0, 0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
-                       "index", "/devices/index/bend_sensor", PF_2, 50);
+// BendSensor bend_sensor(0, 0x12, PrimaryBus, nh, BEND_SENSOR_ID,
+// "bend_sensor",
+//                        "index", "/devices/index/bend_sensor", PF_2, 50);
 
 // Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
 //         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
@@ -112,17 +113,12 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID,
 #endif
 
 static int MAX_REFRESH_RATE = RATE;
-static int devices_counter = 0;
+int devices_counter = 0;
 
 void addDevice(Device* device)
 {
   device_manager.addDevice(device, devices_counter);
   devices_counter++;
-  //   char str[100];
-  // #ifndef DISABLE_ROS
-  //   sprintf(str, "Counter: %d", devices_counter);
-  //   nh.logdebug(str);
-  // #endif
 }
 
 void addDevices()
@@ -215,10 +211,9 @@ int main()
         }
       }
 
-      if (is_init)
-        nh.loginfo("Initialization Successful");
-      else
-        nh.logwarn("Initialization Failed, Retrying ...");
+      if (is_init) nh.loginfo("Initialization Successful");
+        // else
+        // nh.logwarn("Initialization Failed, Retrying ...");
 #else
       print(str);
 #endif
