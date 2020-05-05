@@ -42,8 +42,8 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 #else
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-// BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
-//                        "/devices/index/bend_sensor", PF_2, 10);
+BendSensor bend_sensor(0, 0x12, PrimaryBus, nh, BEND_SENSOR_ID, "bend_sensor",
+                       "index", "/devices/index/bend_sensor", PF_2, 50);
 
 // Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
 //         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
@@ -51,40 +51,41 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 //         const char* meas_topic_name, const char* des_topic_name,
 //         int refresh_RATE);
 
-// Index
-Motor thumb_motor(0, PA_3 /*aVSense*/, PD_8 /*aEnable*/, PC_8 /*vRef*/,
-                  PE_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
-                  PF_13 /*aPhase*/, nh, THUMB_MOTOR_ID, "thumb",
-                  "/devices/thumb/motor_measured",
-                  "/devices/thumb/motor_desired", 50);
+// // Index
+// Motor thumb_motor(0, PA_3 /*aVSense*/, PD_8 /*aEnable*/, PC_8 /*vRef*/,
+//                   PE_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+//                   PF_13 /*aPhase*/, nh, MOTOR_ID, "thumb",
+//                   "/devices/thumb/motor_measured",
+//                   "/devices/thumb/motor_desired", 50);
 
 // Index
 Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PC_9 /*vRef*/,
-                  PF_14 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
-                  PE_11 /*aPhase*/, nh, INDEX_MOTOR_ID, "index",
+                  PF_14 /*nSleep*/, PE_8 /*nFault*/, PE_13 /*nConfig*/,
+                  PE_11 /*aPhase*/, nh, MOTOR_ID, "motor", "index",
                   "/devices/index/motor_measured",
-                  "/devices/index/motor_desired", 50);
+                  "/devices/index/motor_desired", 20 /*Hz*/);  // 10
 
-// Index
-Motor middle_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
-                   PF_15 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
-                   PE_13 /*aPhase*/, nh, MIDDLE_MOTOR_ID, "middle",
-                   "/devices/middle/motor_measured",
-                   "/devices/middle/motor_desired", 50);
+// // Index
+// Motor middle_motor(2, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
+//                    PF_15 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+//                    PE_13 /*aPhase*/, nh, MOTOR_ID, "middle",
+//                    "/devices/middle/motor_measured",
+//                    "/devices/middle/motor_desired", 50);
 
-// Index
-Motor ring_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_9 /*vRef*/,
-                 PG_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
-                 PG_14 /*aPhase*/, nh, RING_MOTOR_ID, "ring",
-                 "/devices/ring/motor_measured", "/devices/ring/motor_desired",
-                 50);
+// // Index
+// Motor ring_motor(3, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_9 /*vRef*/,
+//                  PG_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+//                  PG_14 /*aPhase*/, nh, MOTOR_ID, "ring",
+//                  "/devices/ring/motor_measured",
+//                  "/devices/ring/motor_desired", 50);
 
 // ADIS16470(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName dr,
 //             PinName rst, ros::NodeHandle& nh, int clock_speed = 100000,
 //             uint8_t dev_index = 0, const char* dev_name = NULL,
 //             const char* topic_name = NULL, int refresh_RATE = 1)
-ADIS16470 imu(PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
-              "imu", "/devices/hand/imu", 100);  // Hertz
+ADIS16470 imu(0, PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
+              "imu", "hand_imu", "/devices/hand_imu/imu",
+              50 /*Hz*/);  // Hertz 20
 
 #endif
 #else
@@ -111,16 +112,28 @@ Motor motor(0, p19, p25, p26, p6, p8, p7, p5, MOTOR_ID,
 #endif
 
 static int MAX_REFRESH_RATE = RATE;
+static int devices_counter = 0;
+
+void addDevice(Device* device)
+{
+  device_manager.addDevice(device, devices_counter);
+  devices_counter++;
+  //   char str[100];
+  // #ifndef DISABLE_ROS
+  //   sprintf(str, "Counter: %d", devices_counter);
+  //   nh.logdebug(str);
+  // #endif
+}
 
 void addDevices()
 {
-  // device_manager.addDevice(&bend_sensor, BEND_SENSOR_ID);
-  // device_manager.addDevice(&strain_gauge, STRAIN_GAUGE_ID);
-  device_manager.addDevice(&imu, ADI_IMU_ID);
-  // device_manager.addDevice(&thumb_motor, THUMB_MOTOR_ID);
-  device_manager.addDevice(&index_motor, 1);
-  // device_manager.addDevice(&middle_motor, MIDDLE_MOTOR_ID);
-  // device_manager.addDevice(&ring_motor, RING_MOTOR_ID);
+  // addDevice(&bend_sensor);
+  // addDevice(&strain_gauge);
+  addDevice(&imu);
+  // addDevice(&thumb_motor);
+  addDevice(&index_motor);
+  // addDevice(&middle_motor);
+  // addDevice(&ring_motor);
 
 #ifdef DISABLE_ROS
   print("Added Devices\n");
@@ -151,12 +164,19 @@ int main()
 #ifndef DISABLE_ROS
   nh.getHardware()->setBaud(115200);  // 57600
   nh.initNode();
+
+  // wait until you are actually connected
+  while (!nh.connected())
+  {
+    nh.spinOnce();
+  }
 #else
   wait_ms(1000);
   print("Hello\n");
   wait_ms(1000);
-  char str[100];
 #endif
+
+  char str[100];
 
   addDevices();
 
@@ -165,9 +185,41 @@ int main()
   {
     if (!is_init)
     {
-      is_init = device_manager.initializeDevices();
-#ifdef DISABLE_ROS
-      sprintf(str, "Not initialized count: %d\n", i);
+      device_manager.initializeDevices();
+
+      is_init = device_manager.getInitStatus();
+
+#ifndef DISABLE_ROS
+      for (int i = 0; i < NUM_DEVICES; i++)
+      {
+        Device* dev = device_manager.getDevice(i);
+        if (device_manager._init_status[i])
+        {
+          const char* tempstr = "Successfully initialized:  - ";
+          snprintf(str,
+                   strlen(tempstr) + strlen(dev->getDeviceName()) +
+                       sizeof(dev->getId()) + 1,
+                   "Successfully initialized: %s - %d", dev->getDeviceName(),
+                   dev->getId());
+          nh.loginfo(str);
+        }
+        else
+        {
+          const char* tempstr = "Failed to initialize:  - ";
+          snprintf(str,
+                   strlen(tempstr) + strlen(dev->getDeviceName()) +
+                       sizeof(dev->getId()) + 1,
+                   "Failed to initialize: %s - %d", dev->getDeviceName(),
+                   dev->getId());
+          nh.logwarn(str);
+        }
+      }
+
+      if (is_init)
+        nh.loginfo("Initialization Successful");
+      else
+        nh.logwarn("Initialization Failed, Retrying ...");
+#else
       print(str);
 #endif
     }

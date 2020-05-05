@@ -74,11 +74,12 @@ public:
    * @param topic_name
    * @param refresh_rate
    */
-  SPIDevice(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName dr,
-            PinName rst, ros::NodeHandle& nh, int clock_speed = 100000,
-            uint8_t dev_index = 0, const char* dev_name = NULL,
+  SPIDevice(uint8_t id, PinName mosi, PinName miso, PinName sclk, PinName cs,
+            PinName dr, PinName rst, ros::NodeHandle& nh,
+            int clock_speed = 100000, uint8_t dev_index = 0,
+            const char* dev_name = NULL, const char* frame_name = NULL,
             const char* topic_name = NULL, int refresh_rate = 1)
-    : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
+    : Device(id, dev_index, nh, dev_name, frame_name, topic_name, refresh_rate)
     , _mosi(mosi)
     , _miso(miso)
     , _sclk(sclk)

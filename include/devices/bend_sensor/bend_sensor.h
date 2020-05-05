@@ -113,9 +113,9 @@ public:
   // CONSTRUCTORS
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
-             uint8_t dev_index, const char* dev_name, const char* topic_name,
-             PinName reset_pin, int refresh_rate = 1);
+  BendSensor(uint8_t id, int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+             uint8_t dev_index, const char* dev_name, const char* frame_name,
+             const char* topic_name, PinName reset_pin, int refresh_rate = 1);
 #else
   BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
              uint8_t dev_index, const char* dev_name, const char* topic_name,

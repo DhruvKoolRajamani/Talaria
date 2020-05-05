@@ -44,10 +44,10 @@ public:
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   StrainGauge(uint8_t id, PinName pin_name, ros::NodeHandle& nh,
-              uint8_t dev_index, const char* dev_name, const char* topic_name,
-              int refresh_rate)
-    : AnalogDevice(id, pin_name, nh, dev_index, dev_name, topic_name,
-                   refresh_rate)
+              uint8_t dev_index, const char* dev_name, const char* frame_name,
+              const char* topic_name, int refresh_rate)
+    : AnalogDevice(id, pin_name, nh, dev_index, dev_name, frame_name,
+                   topic_name, refresh_rate)
     , _pub_strain_gauge(topic_name, &(this->_msg_strain_gauge))
   {
 #else

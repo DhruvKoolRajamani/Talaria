@@ -85,18 +85,8 @@ class ADIS16470 : public SPIDevice
 private:
 #ifndef DISABLE_ROS
   ros::Publisher _pub_imu;
-  std_msgs::String debugMsg;
-  ros::Publisher _pub_debug =
-      ros::Publisher("/devices/hand/imu/debug", &debugMsg);
-  // Create a custom message for IMU but for now using standard
-  // sensor_msgs::Imu _msg_imu;
   imu_msg::imu _msg_imu;
-  std_msgs::Byte _msg_chip_id;
 #endif
-
-  uint16_t* _imu_burst = nullptr;
-  int16_t burstChecksum = 0;
-
   // Accelerometer
   float _accl[3] = { 0., 0., 0. };
 
@@ -117,18 +107,9 @@ private:
   // Temperature
   float TEMPS = 0;
 
-  // Data Ready interrupt
-  InterruptIn _dr_interrupt;
-
 protected:
 public:
   // CONSTRUCTORS
-
-  // enum REGISTER_ADDRESS
-  // {
-  //   CHIP_ID = 0x00,
-  //   POLLING_ID = 0x12
-  // };
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -148,14 +129,14 @@ public:
    * @param topic_name
    * @param refresh_rate
    */
-  ADIS16470(PinName mosi, PinName miso, PinName sclk, PinName cs, PinName dr,
-            PinName rst, ros::NodeHandle& nh, int clock_speed = 1000000,
-            uint8_t dev_index = 0, const char* dev_name = NULL,
+  ADIS16470(uint8_t id, PinName mosi, PinName miso, PinName sclk, PinName cs,
+            PinName dr, PinName rst, ros::NodeHandle& nh,
+            int clock_speed = 1000000, uint8_t dev_index = 0,
+            const char* dev_name = NULL, const char* frame_name = NULL,
             const char* topic_name = NULL, int refresh_rate = 1)
-    : SPIDevice(mosi, miso, sclk, cs, dr, rst, nh, clock_speed, dev_index,
-                dev_name, topic_name, refresh_rate)
+    : SPIDevice(id, mosi, miso, sclk, cs, dr, rst, nh, clock_speed, dev_index,
+                dev_name, frame_name, topic_name, refresh_rate)
     , _pub_imu(topic_name, &(this->_msg_imu))
-    , _dr_interrupt(dr)
   {
     wait_us(500);
 #else
@@ -166,13 +147,10 @@ public:
     : SPIDevice(mosi, miso, sclk, cs, dr, rst, nh, clock_speed, dev_index,
                 dev_name, topic_name, refresh_rate)
     , _pub_imu(topic_name, &(this->_msg_imu))
-    , _dr_interrupt(dr)
   {
     delay(500);
 #endif
     setIsTopicAdvertised(nh.advertise(_pub_imu));
-    nh.advertise(_pub_debug);
-    _imu_burst = (uint16_t*)malloc(20 * sizeof(uint16_t));
   }
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
@@ -188,159 +166,13 @@ public:
 #endif
 
   // DESTRUCTORS
-  virtual ~ADIS16470()
-  {
-    if (_imu_burst) free(_imu_burst);
-  }
+  virtual ~ADIS16470() {}
 
   // GETTERS
 
   // SETTERS
 
   // METHODS
-
-  /**
-   * @brief Intiates a burst read from the sensor. Returns a pointer to an array
-   * of sensor data.
-   *
-   * @return uint8_t*
-   */
-  uint8_t* byteBurst()
-  {
-    static uint8_t burstdata[20];
-
-// Trigger Burst Read
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-    select();
-    _spi_bus->write(GLOB_CMD);
-    _spi_bus->write(0x00);
-
-    // Read Burst Data
-    burstdata[0] = (uint8_t)_spi_bus->write(0x00);  // DIAG_STAT
-    burstdata[1] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[2] = (uint8_t)_spi_bus->write(0x00);  // XGYRO_OUT
-    burstdata[3] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[4] = (uint8_t)_spi_bus->write(0x00);  // YGYRO_OUT
-    burstdata[5] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[6] = (uint8_t)_spi_bus->write(0x00);  // ZGYRO_OUT
-    burstdata[7] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[8] = (uint8_t)_spi_bus->write(0x00);  // XACCEL_OUT
-    burstdata[9] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[10] = (uint8_t)_spi_bus->write(0x00);  // YACCEL_OUT
-    burstdata[11] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[12] = (uint8_t)_spi_bus->write(0x00);  // ZACCEL_OUT
-    burstdata[13] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[14] = (uint8_t)_spi_bus->write(0x00);  // TEMP_OUT
-    burstdata[15] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[16] = (uint8_t)_spi_bus->write(0x00);  // TIME_STMP
-    burstdata[17] = (uint8_t)_spi_bus->write(0x00);
-    burstdata[18] = (uint8_t)_spi_bus->write(0x00);  // CHECKSUM
-    burstdata[19] = (uint8_t)_spi_bus->write(0x00);
-
-    deselect();
-#else
-    digitalWrite(_cs, LOW);
-    _spi_bus->transfer(GLOB_CMD);
-    _spi_bus->transfer(0x00);
-
-    // Read Burst Data
-    burstdata[0] = _spi_bus->transfer(0x00);  // DIAG_STAT
-    burstdata[1] = _spi_bus->transfer(0x00);
-    burstdata[2] = _spi_bus->transfer(0x00);  // XGYRO_OUT
-    burstdata[3] = _spi_bus->transfer(0x00);
-    burstdata[4] = _spi_bus->transfer(0x00);  // YGYRO_OUT
-    burstdata[5] = _spi_bus->transfer(0x00);
-    burstdata[6] = _spi_bus->transfer(0x00);  // ZGYRO_OUT
-    burstdata[7] = _spi_bus->transfer(0x00);
-    burstdata[8] = _spi_bus->transfer(0x00);  // XACCEL_OUT
-    burstdata[9] = _spi_bus->transfer(0x00);
-    burstdata[10] = _spi_bus->transfer(0x00);  // YACCEL_OUT
-    burstdata[11] = _spi_bus->transfer(0x00);
-    burstdata[12] = _spi_bus->transfer(0x00);  // ZACCEL_OUT
-    burstdata[13] = _spi_bus->transfer(0x00);
-    burstdata[14] = _spi_bus->transfer(0x00);  // TEMP_OUT
-    burstdata[15] = _spi_bus->transfer(0x00);
-    burstdata[16] = _spi_bus->transfer(0x00);  // TIME_STMP
-    burstdata[17] = _spi_bus->transfer(0x00);
-    burstdata[18] = _spi_bus->transfer(0x00);  // CHECKSUM
-    burstdata[19] = _spi_bus->transfer(0x00);
-    digitalWrite(_cs, HIGH);
-#endif
-
-    return burstdata;
-  }
-
-  /**
-   * @brief Intiates a burst read from the sensor. Returns a pointer to an array
-   * of sensor data.
-   *
-   * @return uint16_t*
-   */
-  uint16_t* wordBurst()
-  {
-    static uint16_t burstwords[10];
-
-    // Trigger Burst Read
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-    select();
-    _spi_bus->write(GLOB_CMD);
-    _spi_bus->write(0x00);
-
-    burstwords[0] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // DIAG_STA
-    burstwords[1] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // XGYRO
-    burstwords[2] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // YGYRO
-    burstwords[3] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // ZGYRO
-    burstwords[4] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // XACCEL
-    burstwords[5] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // YACCEL
-    burstwords[6] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // ZACCEL
-    burstwords[7] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // TEMP_OUT
-    burstwords[8] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // TIME_STM
-    burstwords[9] = (((uint8_t)_spi_bus->write(0x00) << 8) |
-                     ((uint8_t)_spi_bus->write(0x00) & 0xFF));  // CHECKSUM
-
-    deselect();
-#else
-    digitalWrite(_CS, LOW);
-    SPI.transfer(0x68);
-    SPI.transfer(0x00);
-
-    // Read Burst Data
-    burstwords[0] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // DIAG_STAT
-    burstwords[1] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // XGYRO
-    burstwords[2] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // YGYRO
-    burstwords[3] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // ZGYRO
-    burstwords[4] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // XACCEL
-    burstwords[5] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // YACCEL
-    burstwords[6] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // ZACCEL
-    burstwords[7] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // TEMP_OUT
-    burstwords[8] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // TIME_STMP
-    burstwords[9] =
-        ((SPI.transfer(0x00) << 8) | (SPI.transfer(0x00) & 0xFF));  // CHECKSUM
-
-    digitalWrite(_CS, HIGH);
-#endif
-
-    return burstwords;
-  }
 
   /**
    * @brief Calculates checksum based on burst data. Returns the calculated
@@ -450,8 +282,6 @@ public:
   {
     this->begin();
 
-    // Replace with whoami?
-    // if (this->ping(REGISTER_ADDRESS::CHIP_ID))
     if (checkSensorID())
     {
       this->enable();
@@ -471,7 +301,6 @@ public:
       DECR = readWord(DEC_RATE);
 
       // if (!setBiasEstimationTime()) this->setConfiguredStatus(true);
-
       _msg_imu.time.data = this->getNodeHandle()->now();
       _msg_imu.accelerometer[0] = _accl[0];
       _msg_imu.accelerometer[1] = _accl[1];
@@ -508,57 +337,6 @@ public:
     writeWord(GLOB_CMD, 0x01);
     return true;
   }
-
-  void readData()
-  {
-    // _imu_burst = {};
-    memcpy(_imu_burst, wordBurst(), 20 * sizeof(uint8_t));
-
-    // rawData();
-    // scaleData();
-
-    // _msg_imu.time.data = this->getNodeHandle()->now();
-    // _msg_imu.accelerometer[0].data = AXS;
-    // _msg_imu.accelerometer[1].data = AYS;
-    // _msg_imu.accelerometer[2].data = AZS;
-    // _msg_imu.gyroscope[0].data = GXS;
-    // _msg_imu.gyroscope[1].data = GYS;
-    // _msg_imu.gyroscope[2].data = GZS;
-    // _msg_imu.control_regs[0].data = MSC;
-    // _msg_imu.control_regs[1].data = FLTR;
-    // _msg_imu.control_regs[2].data = DECR;
-
-    burstChecksum = checksum(_imu_burst);
-    this->setHealthStatus(burstChecksum == *(_imu_burst + 9));
-
-    // // _msg_imu.checksum.data = checksum(burstData);
-    // // _msg_imu.temperature.data = TEMPS;
-
-    // if (this->getIsTopicAdvertised()) _pub_imu.publish(&(this->_msg_imu));
-  }
-
-  void rawData()
-  {
-    _gyro[0] = *(_imu_burst + 1);  // Scale X Gyro
-    _gyro[1] = *(_imu_burst + 2);  // Scale Y Gyro
-    _gyro[2] = *(_imu_burst + 3);  // Scale Z Gyro
-    _accl[0] = *(_imu_burst + 4);  // Scale X Accel
-    _accl[1] = *(_imu_burst + 5);  // Scale Y Accel
-    _accl[2] = *(_imu_burst + 6);  // Scale Z Accel
-    TEMPS = *(_imu_burst + 7);     // Scale Temp Sensor
-  }
-
-  void scaleData()
-  {
-    _gyro[0] = gyroScale(*(_imu_burst + 1));   // Scale X Gyro
-    _gyro[1] = gyroScale(*(_imu_burst + 2));   // Scale Y Gyro
-    _gyro[2] = gyroScale(*(_imu_burst + 3));   // Scale Z Gyro
-    _accl[0] = accelScale(*(_imu_burst + 4));  // Scale X Accel
-    _accl[1] = accelScale(*(_imu_burst + 5));  // Scale Y Accel
-    _accl[2] = accelScale(*(_imu_burst + 6));  // Scale Z Accel
-    TEMPS = tempScale(*(_imu_burst + 7));      // Scale Temp Sensor
-  }
-
   void update()
   {
     if (this->getEnabledStatus())
@@ -572,10 +350,6 @@ public:
            (current_time - _prev_update_time) >= _refresh_rate) &&
           this->getConfiguredStatus())
       {
-        // scaleData();
-        // burstChecksum = checksum(_imu_burst);
-        // this->setHealthStatus(burstChecksum == *(_imu_burst + 9));
-
         sensorUpdate();
 
         first_update = false;
@@ -583,22 +357,6 @@ public:
         // Publish Diagnostic messages
         Device::update();
 #ifndef DISABLE_ROS
-        char _debug[255];
-        if (_id_check_pass)
-        {
-          sprintf(_debug,
-                  "FIRMWARE REV: %x PROD ID: %x SERIAL NO: %x BIAS EST: %x",
-                  FIRM_REV_VAL, PROD_ID_VAL, SER_NO_VAL, _cur_bias_est_time);
-          debugMsg.data = _debug;
-          _pub_debug.publish(&debugMsg);
-        }
-        else
-        {
-          sprintf(_debug, "Bad Sensor Address");
-          debugMsg.data = _debug;
-          _pub_debug.publish(&debugMsg);
-        }
-
         _msg_imu.time.data = this->getNodeHandle()->now();
         _msg_imu.accelerometer[0] = _accl[0];
         _msg_imu.accelerometer[1] = _accl[1];
@@ -645,45 +403,6 @@ public:
       _accl[i] = ((int32_t(accl_out[i]) << 16) + int32_t(accl_low[i])) * 9.8 /
                  52428800.0;
     }
-
-    // std_msgs::Header header;
-    // header.frame_id = this->getDeviceName();
-    // header.stamp = this->getNodeHandle()->now();
-    // _msg_imu.header = header;
-
-    // geometry_msgs::Vector3 angular_velocity;
-    // geometry_msgs::Vector3 linear_acceleration;
-    // geometry_msgs::Quaternion orientation;
-
-    // angular_velocity.x = GXS;
-    // angular_velocity.y = GYS;
-    // angular_velocity.z = GZS;
-    // linear_acceleration.x = AXS;
-    // linear_acceleration.y = AYS;
-    // linear_acceleration.z = AZS;
-
-    // double unknown_cov[] = { 0., 0., 0., 0., 0., 0., 0., 0., 0. };
-    // double* ukn_cov_ptr = unknown_cov;
-    // double* imu_cov_ptr = _msg_imu.angular_velocity_covariance;
-
-    // while (ukn_cov_ptr != unknown_cov + 9)
-    //   *imu_cov_ptr++ = *ukn_cov_ptr++;
-
-    // ukn_cov_ptr = unknown_cov;
-    // imu_cov_ptr = _msg_imu.linear_acceleration_covariance;
-
-    // while (ukn_cov_ptr != unknown_cov + 9)
-    //   *imu_cov_ptr++ = *ukn_cov_ptr++;
-
-    // unknown_cov[0] = -1;
-    // ukn_cov_ptr = unknown_cov;
-    // imu_cov_ptr = _msg_imu.orientation_covariance;
-
-    // while (ukn_cov_ptr != unknown_cov + 9)
-    //   *imu_cov_ptr++ = *ukn_cov_ptr++;
-
-    // _msg_imu.angular_velocity = angular_velocity;
-    // _msg_imu.linear_acceleration = linear_acceleration;
   }
 };
 

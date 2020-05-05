@@ -59,6 +59,8 @@ public:
     ENCODER = 1
   };
 
+  bool _init_status[NUM_DEVICES];
+
   /** CONSTRUCTORS */
 
 #ifndef DISABLE_ROS
@@ -81,6 +83,10 @@ public:
 
   /** GETTERS */
   int getMaxRefreshRate();
+
+  Device* getDevice(int i);
+
+  bool getInitStatus();
 
   /** SETTERS */
 

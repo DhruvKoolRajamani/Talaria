@@ -30,7 +30,6 @@ bool Device::_is_diagnostic_published = false;
 Device::Device()
   : _en_status(true), _conf_status(false), _health_status(false), _dev_index(0)
 {
-  _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
 #ifndef DISABLE_ROS
   _dev_name = static_cast<char*>(malloc(DEVICE_NAME_SIZE));
   _topic_name = static_cast<char*>(malloc(DEVICE_TOPIC_NAME_SIZE));
@@ -44,23 +43,24 @@ Device::Device()
  * @param uint8_t dev_index
  * @param const char* dev_name
  */
-Device::Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name,
+Device::Device(uint8_t id, uint8_t dev_index, ros::NodeHandle& nh,
+               const char* dev_name, const char* frame_name,
                const char* topic_name, int refresh_rate)
   : _en_status(true)
   , _conf_status(false)
   , _health_status(false)
   , _dev_index(dev_index)
   , _nh(&nh)
-  , _refresh_rate(RATE * 1000. / (float)(refresh_rate))  // 1000 * ((rate <= 2)
-                                                         // ? 2 : rate /
-                                                         // refresh_rate)
+  , _refresh_rate((refresh_rate >= 2) ? (1000. / refresh_rate) : 2.)
+  , _dev_Id(id)
 {
   int dev_name_len = strlen(dev_name);
   int topic_name_len = strlen(topic_name);
-  _dev_Id = static_cast<uint8_t*>(malloc(DEVICE_ID_SIZE));
   _dev_name = static_cast<char*>(malloc(dev_name_len + 1));
+  _frame_name = static_cast<char*>(malloc(dev_name_len + 1));
   _topic_name = static_cast<char*>(malloc(topic_name_len + 1));
   if (dev_name != NULL) snprintf(_dev_name, dev_name_len + 1, dev_name);
+  if (frame_name != NULL) snprintf(_frame_name, dev_name_len + 1, frame_name);
   if (topic_name != NULL) snprintf(_topic_name, topic_name_len + 1, topic_name);
 
 #ifndef DISABLE_DIAGNOSTICS
@@ -129,8 +129,8 @@ Device::Device(uint8_t dev_index, int refresh_rate)
  */
 Device::~Device()
 {
-  free(_dev_Id);
 #ifndef DISABLE_ROS
+  free(_frame_name);
   free(_topic_name);
   free(_dev_name);
 #endif
@@ -155,7 +155,7 @@ ros::NodeHandle* Device::getNodeHandle() { return _nh; }
 bool Device::getIsTopicAdvertised() { return _is_topic_advertised; }
 #endif
 
-int Device::getRefreshRate() { return _refresh_rate; }
+double Device::getRefreshRate() { return _refresh_rate; }
 
 /**
  * @brief Get the Id Size object
@@ -167,9 +167,9 @@ int Device::getIdSize() { return DEVICE_ID_SIZE; }
 /**
  * @brief Get the Id object
  *
- * @return uint8_t* _dev_Id
+ * @return uint8_t _dev_Id
  */
-uint8_t* Device::getId() { return _dev_Id; }
+uint8_t Device::getId() { return _dev_Id; }
 
 /**
  * @brief Get the Index object
@@ -209,6 +209,8 @@ bool Device::getEnabledStatus() { return _en_status; }
  * @return char* _dev_name
  */
 char* Device::getDeviceName() { return _dev_name; }
+
+char* Device::getFrameName() { return _frame_name; }
 #endif
 
 #ifndef DISABLE_ROS
@@ -410,7 +412,7 @@ void Device::setIndex(uint8_t index)
  *
  * @param uint8_t id
  */
-void Device::setId(uint8_t id) { *_dev_Id = id; }
+void Device::setId(uint8_t id) { _dev_Id = id; }
 
 /**
  * @brief Set the Health Status object

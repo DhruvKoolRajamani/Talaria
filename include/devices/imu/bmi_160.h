@@ -40,10 +40,12 @@ public:
   };
 
 #ifndef DISABLE_ROS
-  BMI_160(int address, I2CBus& i2c_bus, ros::NodeHandle& nh, uint8_t dev_index,
-          const char* dev_name, const char* topic_name, int refresh_rate = 1)
-    : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name,
-                refresh_rate)
+  BMI_160(uint8_t id, int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+          uint8_t dev_index, const char* dev_name,
+          const char* frame_name, const char* topic_name,
+          int refresh_rate = 1)
+    : I2CDevice(id, address, i2c_bus, nh, dev_index, dev_name, frame_name,
+                topic_name, refresh_rate)
     , _pub_imu(topic_name, &(this->_msg_chip_id))
   {
     setIsTopicAdvertised(nh.advertise(_pub_imu));
@@ -113,12 +115,6 @@ public:
       }
     }
   }
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT uint64_t current_time = get_ms_count();
-#else
-unsigned long current_time = millis();
-#endif
-  if (first_update || (current_time - _prev_update_time) >= _refresh_rate)
-  {
-  };
+};
 
 #endif  // BMI_160_H

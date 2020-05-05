@@ -41,7 +41,7 @@ private:
   PinName _vRef;     // p137 -- p4 + jumper _vRef
   // analog pin
   PinName _aVSense;  // p90 -- across R3 _aVSense
-  PwmDevice* _ref = nullptr;
+  // PwmDevice* _ref = nullptr;
 
   // digital pins
   PinName _aPhase;   // p101 -- p7 M0
@@ -81,8 +81,8 @@ public:
   Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-        const char* meas_topic_name, const char* des_topic_name,
-        int refresh_rate);
+        const char* frame_name, const char* meas_topic_name,
+        const char* des_topic_name, int refresh_rate);
 #else
   Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
         int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,

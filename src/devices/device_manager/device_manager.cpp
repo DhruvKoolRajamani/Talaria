@@ -38,6 +38,7 @@ bool DeviceManager::addDevice(Device* device, int index)
 {
   if (index > NUM_DEVICES) return false;
   _devices[index] = device;
+  _init_status[index] = false;
   return true;
 }
 
@@ -57,6 +58,17 @@ void DeviceManager::writeByteStream()
 // #else
 // Perform CRC here
 #endif
+}
+
+bool DeviceManager::getInitStatus()
+{
+  bool status = true;
+  for (int i = 0; i < NUM_DEVICES; i++)
+  {
+    if (!_init_status[i]) status = false;
+  }
+
+  return status;
 }
 
 bool DeviceManager::initializeDevices()
@@ -81,7 +93,8 @@ bool DeviceManager::initializeDevices()
       sprintf(str, "device: %d\n", _devices[i]->getIndex());
       print(str);
 #endif
-      init_flag = _devices[i]->initialize();
+      if (!_init_status[i]) init_flag = _devices[i]->initialize();
+      _init_status[i] = init_flag;
     }
   }
   return init_flag;
@@ -101,10 +114,12 @@ void DeviceManager::updateDevices()
       continue;
     else
     {
-      _devices[i]->update();
+      if (_init_status[i]) _devices[i]->update();
     }
   }
 }
+
+Device* DeviceManager::getDevice(int i) { return _devices[i]; }
 
 int DeviceManager::getMaxRefreshRate()
 {

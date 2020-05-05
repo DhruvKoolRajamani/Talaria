@@ -39,7 +39,7 @@ private:
 
   static const int DEVICE_ID_SIZE = 8;
 
-  uint8_t* _dev_Id;
+  uint8_t _dev_Id;
   uint8_t _dev_index;
 
 #ifndef DISABLE_ROS
@@ -59,6 +59,7 @@ private:
 #endif
 
   char* _dev_name;
+  char* _frame_name;
   char* _topic_name;
 #else
   // uint8_t* _shared_data_stream;
@@ -73,7 +74,7 @@ public:
   unsigned long _prev_update_time = 0;  // millis();
 #endif
   bool first_update = true;
-  int _refresh_rate = 0;
+  double _refresh_rate = 0;
   /** CONSTRUCTORS */
 
   /**
@@ -89,7 +90,8 @@ public:
    * @param uint8_t dev_index
    * @param const char* dev_name
    */
-  Device(uint8_t dev_index, ros::NodeHandle& nh, const char* dev_name = NULL,
+  Device(uint8_t id, uint8_t dev_index, ros::NodeHandle& nh,
+         const char* dev_name = NULL, const char* frame_name = NULL,
          const char* prefix_path = NULL, int refresh_rate = 1);
 #else
   /**
@@ -123,9 +125,9 @@ public:
   /**
    * @brief Get the Refresh Rate object
    *
-   * @return int _refresh_rate
+   * @return double _refresh_rate
    */
-  int getRefreshRate();
+  double getRefreshRate();
 
   /**
    * @brief Get the Id Size object
@@ -137,9 +139,9 @@ public:
   /**
    * @brief Get the Id object
    *
-   * @return uint8_t* _dev_Id
+   * @return uint8_t _dev_Id
    */
-  uint8_t* getId();
+  uint8_t getId();
 
   /**
    * @brief Get the Index object
@@ -179,6 +181,13 @@ public:
    * @return char* _dev_name
    */
   char* getDeviceName();
+
+  /**
+   * @brief Get the Frame Name object
+   *
+   * @return char*
+   */
+  char* getFrameName();
 
   /**
    * @brief Get the Is Topic Advertised object

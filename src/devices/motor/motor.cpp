@@ -11,10 +11,10 @@
 Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
              PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
              ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-             const char* meas_topic_name, const char* des_topic_name,
-             int refresh_rate)
-  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, meas_topic_name,
-                 refresh_rate)
+             const char* frame_name, const char* meas_topic_name,
+             const char* des_topic_name, int refresh_rate)
+  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, frame_name,
+                 meas_topic_name, refresh_rate)
   , _aVSense(aVSense)
   , _aEnable(aEnable)
   , _vRef(vRef)
@@ -24,7 +24,7 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _aPhase(aPhase)
   , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
   , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
-  , _ref(new PwmDevice(vRef))
+// , _ref(new PwmDevice(vRef))
 {
 #else
 Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
@@ -95,7 +95,10 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
 #endif
 
 // DESTRUCTORS
-Motor::~Motor() {}
+Motor::~Motor()
+{
+  // if (_ref) free(_ref);
+}
 
 // GETTERS
 
@@ -123,11 +126,11 @@ bool Motor::initialize()
 
   if (true)
   {
-    setPwm();
+    // setPwm();
     // 5.2 for test, 6.3 for main
     // setTorque(5);
 #ifndef DISABLE_ROS
-    _msg_motor_measured.header.frame_id = "index";
+    _msg_motor_measured.header.frame_id = this->getFrameName();
     _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
 #endif
     this->setEnabledStatus(true);
@@ -222,7 +225,9 @@ void Motor::setDir() { DigitalOut phase(_aPhase, _desiredDir); }
 float Motor::setVRef(float desiredTorque)
 {
   float new_vRef = (abs(desiredTorque) * 0.5 * 80 / 6) / _torqueConst;
-  _ref->writePWMData(new_vRef);
+  PwmOut vrefOut(_vRef);
+  vrefOut.write(new_vRef);
+  // _ref->writePWMData(new_vRef);
 }
 
 #else
@@ -249,8 +254,9 @@ void Motor::update()
 #else
     unsigned long current_time = millis();
 #endif
-    if (first_update || (current_time - _prev_update_time) >= _refresh_rate &&
-                            this->getConfiguredStatus())
+    if (first_update ||
+        (double)(current_time - _prev_update_time) >= _refresh_rate &&
+            this->getConfiguredStatus())
     {
       first_update = false;
       _prev_update_time = current_time;
@@ -266,16 +272,15 @@ void Motor::update()
       sprintf(cstr, "Measured torque = %f\n", _error);
       print(cstr);
 #else
-      motor_msg::motor_measured temp = motor_msg::motor_measured();
-      temp.header.frame_id = "index";
+      motor_msg::motor_measured temp;
+      temp.header.frame_id = this->getDeviceName();
       temp.header.stamp = this->getNodeHandle()->now();
       temp.motor_id.data = 0;
       temp.desired_force.data = _desiredTorque;
       temp.measured_force.data = _error;
 
       // _msg_motor_measured = temp;
-
-      _pub_motor.publish(&temp);
+      if (this->getIsTopicAdvertised()) _pub_motor.publish(&temp);
 #endif
     }
   }

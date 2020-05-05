@@ -13,12 +13,13 @@
 // CONSTRUCTORS
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-BendSensor::BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
-                       uint8_t dev_index, const char* dev_name,
+BendSensor::BendSensor(uint8_t id, int address, I2CBus& i2c_bus,
+                       ros::NodeHandle& nh, uint8_t dev_index,
+                       const char* dev_name, const char* frame_name,
                        const char* topic_name, PinName reset_pin,
                        int refresh_rate)
-  : I2CDevice(address, i2c_bus, nh, dev_index, dev_name, topic_name,
-              refresh_rate)
+  : I2CDevice(id, address, i2c_bus, nh, dev_index, dev_name, frame_name,
+              topic_name, refresh_rate)
   , _reset_pin(reset_pin)
   , _pub_bend_sensor(topic_name, &(this->_msg_bend_sensor))
 {
@@ -74,7 +75,7 @@ bool BendSensor::initialize()
 #ifdef DISABLE_ROS
   print("Starting Bend Initialize\n");
 #else
-  _msg_bend_sensor.header.frame_id = this->getDeviceName();
+  _msg_bend_sensor.header.frame_id = this->getFrameName();
   _msg_bend_sensor.header.stamp = this->getNodeHandle()->now();
 #endif
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT

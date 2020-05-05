@@ -42,13 +42,9 @@ static void print(const char* str)
 
 typedef enum
 {
-  // BEND_SENSOR_ID,
-  // AD_IMU_SENSOR_ID,
+  BEND_SENSOR_ID,
   ADI_IMU_ID,
-  THUMB_MOTOR_ID,
-  INDEX_MOTOR_ID,
-  MIDDLE_MOTOR_ID,
-  RING_MOTOR_ID
+  MOTOR_ID
 } hand_devices_id_enum;
 
 typedef enum
@@ -62,5 +58,53 @@ const float RATE = 2;
 #else
 const float RATE = 1;
 #endif
+
+template <typename T>
+char* concatenate(T s1, T s2, T s3 = nullptr, T s4 = nullptr, T s5 = nullptr,
+                  T s6 = nullptr)
+{
+  int count = 1;
+  int len_s1 = strlen(s1);
+  int len_s2 = strlen(s2);
+  int len_s3 = 0;
+  if (s3 != NULL)
+  {
+    len_s3 = strlen(s3);
+    count++;
+  }
+  int len_s4 = 0;
+  if (s4 != NULL)
+  {
+    len_s4 = strlen(s4);
+    count++;
+  }
+  int len_s5 = 0;
+  if (s5 != NULL)
+  {
+    len_s5 = strlen(s5);
+    count++;
+  }
+  int len_s6 = 0;
+  if (s6 != NULL)
+  {
+    len_s6 = strlen(s6);
+    count++;
+  }
+
+  int len_total = len_s1 + len_s2 + len_s3 + len_s4 + len_s5 + len_s6 + 1;
+
+  char* str = static_cast<char*>(malloc(len_total));
+
+  T s_ptr[] = { s2, s3, s4, s5, s6 };
+  int len_ptr[] = { len_s2, len_s3, len_s4, len_s5, len_s6 };
+
+  snprintf(str, len_s1 + 1, s1);
+  for (int i = 0; i < count; i++)
+  {
+    strncat(str, s_ptr[i], len_ptr[i] + 1);
+  }
+
+  return str;
+}
 
 #endif  // HARDWARE_H

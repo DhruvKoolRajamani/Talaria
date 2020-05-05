@@ -33,7 +33,6 @@ private:
   bool readReady = false;
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  uint8_t _id;
   PinName _pin_name;
 #else
   uint8_t _id;
@@ -47,18 +46,17 @@ public:
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   AnalogDevice(uint8_t id, PinName pin_name, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
-               const char* topic_name = NULL, int refresh_rate = 1)
+               const char* frame_name = NULL, const char* topic_name = NULL,
+               int refresh_rate = 1)
     : AnalogIn(pin_name)
-    , Device(dev_index, nh, dev_name, topic_name, refresh_rate)
-    , _id(id)
+    , Device(id, dev_index, nh, dev_name, frame_name, topic_name, refresh_rate)
     , _pin_name(pin_name)
   {
 #else
   AnalogDevice(uint8_t id, int pin_name, ros::NodeHandle& nh,
                uint8_t dev_index = 0, const char* dev_name = NULL,
                const char* topic_name = NULL, int refresh_rate = 1)
-    : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
-    , _id(id)
+    : Device(id, dev_index, nh, dev_name, topic_name, refresh_rate)
     , _pin_name(pin_name)
   {
     pinMode(_pin_name, INPUT);
@@ -78,13 +76,12 @@ public:
   AnalogDevice(uint8_t id, PinName pin_name, uint8_t dev_index,
                int refresh_rate = 1)
     : AnalogIn(pin_name)
-    , Device(dev_index, refresh_rate)
-    , _id(id)
+    , Device(id, dev_index, refresh_rate)
     , _pin_name(pin_name){
 #else
   AnalogDevice(uint8_t id, int pin_name, uint8_t dev_index,
                int refresh_rate = 1)
-    : Device(dev_index, refresh_rate), _id(id), _pin_name(pin_name)
+    : Device(id, dev_index, refresh_rate), _pin_name(pin_name)
   {
     pinMode(_pin_name, INPUT);
 #endif
@@ -101,9 +98,7 @@ public:
    * @brief Destroy the AnalogDevice object
    *
    */
-  virtual ~AnalogDevice()
-  {
-  }
+  virtual ~AnalogDevice() {}
 
 /** METHODS */
 

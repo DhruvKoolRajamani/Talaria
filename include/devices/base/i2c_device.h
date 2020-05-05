@@ -46,10 +46,11 @@ public:
  * @param dev_index
  */
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-  I2CDevice(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
+  I2CDevice(uint8_t id, int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
             uint8_t dev_index = 0, const char* dev_name = NULL,
-            const char* topic_name = NULL, int refresh_rate = 1)
-    : Device(dev_index, nh, dev_name, topic_name, refresh_rate)
+            const char* frame_name = NULL, const char* topic_name = NULL,
+            int refresh_rate = 1)
+    : Device(id, dev_index, nh, dev_name, frame_name, topic_name, refresh_rate)
     , _address(address << 1)
     , _i2c_bus(&i2c_bus)
   {
@@ -100,9 +101,7 @@ public:
    * @brief Destroy the I2CDevice object
    *
    */
-  ~I2CDevice()
-  {
-  }
+  ~I2CDevice() {}
 
   /** METHODS */
 
@@ -319,10 +318,7 @@ public:
    *
    * @return uint8_t
    */
-  uint8_t getChipId()
-  {
-    return _chip_id;
-  }
+  uint8_t getChipId() { return _chip_id; }
 
   /** SETTERS */
 
@@ -331,20 +327,14 @@ public:
    *
    * @param chip_id
    */
-  void setChipId(uint8_t chip_id)
-  {
-    _chip_id = chip_id;
-  }
+  void setChipId(uint8_t chip_id) { _chip_id = chip_id; }
 
   /**
    * @brief Set the Device Address object
    *
    * @param address
    */
-  void setDeviceAddress(int address)
-  {
-    _address = address;
-  }
+  void setDeviceAddress(int address) { _address = address; }
 
 #ifdef PIO_FRAMEWORK_ARDUINO_PRESENT
   bool customPing()

@@ -72,9 +72,7 @@ public:
    * @brief Destroy the I2CBus object
    *
    */
-  virtual ~I2CBus()
-  {
-  }
+  virtual ~I2CBus() {}
 
   /** GETTERS */
 
@@ -83,30 +81,21 @@ public:
    *
    * @return uint8_t
    */
-  uint8_t getId()
-  {
-    return _id;
-  }
+  uint8_t getId() { return _id; }
 
   /**
    * @brief Get the Init Status object
    *
    * @return uint8_t
    */
-  uint8_t getInitStatus()
-  {
-    return _init_status;
-  }
+  uint8_t getInitStatus() { return _init_status; }
 
   /**
    * @brief Get the Clock Speed object
    *
    * @return uint8_t
    */
-  int getClockSpeed()
-  {
-    return _clock_speed;
-  }
+  int getClockSpeed() { return _clock_speed; }
 
   /** SETTERS */
 
@@ -115,20 +104,14 @@ public:
    *
    * @param state
    */
-  void setInitStatus(bool state)
-  {
-    _init_status = state;
-  }
+  void setInitStatus(bool state) { _init_status = state; }
 
   /**
    * @brief Set the Id object
    *
    * @param id
    */
-  void setId(uint8_t id)
-  {
-    _id = id;
-  }
+  void setId(uint8_t id) { _id = id; }
 
   /**
    * @brief Set the Clock Speed object
