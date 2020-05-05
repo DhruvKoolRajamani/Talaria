@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # TALARIA_WS="/home/dhruv/Talaria"
-TALARIA_WS="$pwd"
+TALARIA_WS="$(pwd)"
 UPLOAD_FLAG="False"
 
 run_setup() {
@@ -12,12 +12,13 @@ run_setup() {
         echo "[option 1]                                                            "
         echo "     mbed    Runs the Talaria environment mbed with rosserial         "
         echo "  arduino    Runs the Talaria environment arduino with rosserial      "
-        echo "  nucleo    Runs the Talaria environment arduino with rosserial      "
+        echo "   nucleo    Runs the Talaria environment arduino with rosserial      "
         echo 
         echo "[option 2]                                                            "
+        echo "   ros       Runs the Talaria environment with rosserial              "
         echo "   serial    Runs the Talaria environment in the serial monitor       "
         echo 
-        echo "[option 2]                                                            "
+        echo "[option 3]                                                            "
         echo "   upload    Runs the Talaria environment and uploads the environment "
         echo "             to the microcontroller                                   "
         echo
@@ -28,24 +29,47 @@ run_setup() {
     clean
 
     local FRAMEWORK_NAME=$1
-    local ENV_TYPE=$2
+    local ENV_ROS="ros"
+    local ENV_SERIAL="serial"
+    local ENV_TYPE="ros"
     local ARD_FRAMEWORK="arduino"
     local MBED_FRAMEWORK="mbed"
     local NUCLEO_FRAMEWORK="nucleo"
-    local ENV_SERIAL="serial"
     local ENV_NUMBER=0
 
-    if [[ -z "$3" ]]; then
-        if [[ "$3" = "upload" ]]; then
+    if [[ -z "$2" ]]; then
+        echo "Default environment rosserial"
+    else
+        if [[ "$2" = "ros" ]]; then
+            ENV_TYPE=$ENV_ROS
+        elif [[ "$2" = "serial" ]]; then
+            ENV_TYPE=$ENV_SERIAL
+        elif [[ "$2" = "upload" ]]; then
             UPLOAD_FLAG="True"
         else
-            UPLOAD_FLAG="False"
+            echo "Invalid argument $2"
+            return
         fi
     fi
 
-    if [[ $ENV_TYPE = $ENV_SERIAL ]]; then
+    echo
+    echo  "$ENV_TYPE"
+    echo
+
+    if [[ "$3" -eq "0" ]]; then
+        echo "Default upload False"
+    else
+        if [[ "$3" = "upload" ]]; then
+            UPLOAD_FLAG="True"
+        else
+            echo "Invalid argument $2"
+            return
+        fi
+    fi
+
+    if [[ $ENV_TYPE = "$ENV_SERIAL" ]]; then
         echo
-        echo "Running serial client"
+        echo "Running serial build"
         echo
 
         if [[ "$FRAMEWORK_NAME" = "$MBED_FRAMEWORK" ]]; then
@@ -64,6 +88,10 @@ run_setup() {
             return
         fi
     else
+        echo
+        echo "Running rosserial build"
+        echo
+
         if [[ "$FRAMEWORK_NAME" = "$MBED_FRAMEWORK" ]]; then
             PLATFORMIO_DEFAULT_ENVS="Talaria-hand"
             ENV_NUMBER=1
