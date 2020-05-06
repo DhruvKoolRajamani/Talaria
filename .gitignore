@@ -64,7 +64,7 @@ platformio/platforms/ststm32/platform.py
 platformio/platforms/ststm32/platform.pyc
 platformio/platforms/ststm32/README.md
 platformio/platforms/ststm32/tests
-add
+
 platformio/packages/framework-mbed
 platformio/packages/toolchain-gccarmnoneeabi
 platformio/packages/tool-dfuutil

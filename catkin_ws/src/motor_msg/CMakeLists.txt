@@ -50,6 +50,7 @@ add_message_files(
   FILES
   motor_measured.msg
   motor_desired.msg
+  cmd_light.msg
 #   Message2.msg
 )
 

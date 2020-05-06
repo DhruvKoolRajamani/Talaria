@@ -24,8 +24,9 @@
 
 #ifndef DISABLE_ROS
 // Add header file for custom ros message for bend sensor
-#include "motor_msg/motor_desired.h"
-#include "motor_msg/motor_measured.h"
+// #include "motor_msg/motor_desired.h"
+// #include "motor_msg/motor_measured.h"
+#include "motor_msg/cmd_light.h"
 #include "std_msgs/String.h"
 #endif
 
@@ -64,10 +65,13 @@ private:
 #endif
 
 #ifndef DISABLE_ROS
+#ifdef CURRENT_SENSE
   ros::Publisher _pub_motor;
   ros::Subscriber<motor_msg::motor_desired, Motor> _sub_motor;
-  // Create a custom ros message for motor but for now using standard
   motor_msg::motor_measured _msg_motor_measured;
+#else
+  ros::Subscriber<motor_msg::cmd_light, Motor> _sub_motor;
+#endif
 #else
   char str[100];
 #endif
@@ -81,8 +85,8 @@ public:
   Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
         PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
         ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
-        const char* frame_name, const char* meas_topic_name,
-        const char* des_topic_name, int refresh_rate);
+        const char* frame_name, const char* meas_topic_name = NULL,
+        const char* des_topic_name = NULL, int refresh_rate = 1);
 #else
   Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep, int nFault,
         int nConfig, int aPhase, ros::NodeHandle& nh, uint8_t dev_index,
@@ -155,7 +159,11 @@ public:
    *
    * @param msg_motor_desired
    */
+#ifdef CURRENT_SENSE
   void motorDesiredCb(const motor_msg::motor_desired& msg_motor_desired);
+#else
+  void motorDesiredCb(const motor_msg::cmd_light& msg_motor_desired);
+#endif
 #endif
 };
 

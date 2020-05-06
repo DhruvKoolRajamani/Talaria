@@ -62,9 +62,8 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 // Index
 Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PC_9 /*vRef*/,
                   PF_14 /*nSleep*/, PE_8 /*nFault*/, PE_13 /*nConfig*/,
-                  PE_11 /*aPhase*/, nh, MOTOR_ID, "motor", "index",
-                  "/devices/index/motor_measured",
-                  "/devices/index/motor_desired", 20 /*Hz*/);  // 10
+                  PE_11 /*aPhase*/, nh, MOTOR_ID, "motor", "index", nullptr,
+                  "/devices/index/motor_cmd", 20 /*Hz*/);  // 10
 
 // // Index
 // Motor middle_motor(2, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
@@ -158,7 +157,7 @@ volatile bool is_init = false;
 int main()
 {
 #ifndef DISABLE_ROS
-  nh.getHardware()->setBaud(115200);  // 57600
+  nh.getHardware()->setBaud(9600);  // 57600
   nh.initNode();
 
   // wait until you are actually connected

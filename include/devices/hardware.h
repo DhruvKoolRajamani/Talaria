@@ -54,7 +54,7 @@ typedef enum
 } lle_devices_id_enum;
 
 #ifndef DISABLE_ROS
-const float RATE = 2;
+const float RATE = 5;
 #else
 const float RATE = 1;
 #endif

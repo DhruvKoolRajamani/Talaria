@@ -15,11 +15,12 @@
 #include "devices/base/spi_device.h"
 
 #ifndef DISABLE_ROS
-#include "imu_msg/imu.h"
-#include "std_msgs/Byte.h"
-#include "geometry_msgs/Vector3.h"
-#include "geometry_msgs/Quaternion.h"
-#include "std_msgs/Float64.h"
+// #include "imu_msg/imu.h"
+#include "imu_msg/imu_light.h"
+// #include "std_msgs/Byte.h"
+// #include "geometry_msgs/Vector3.h"
+// #include "geometry_msgs/Quaternion.h"
+// #include "std_msgs/Float64.h"
 #endif
 
 // MOVE ALL THESE TO ENUM
@@ -85,13 +86,16 @@ class ADIS16470 : public SPIDevice
 private:
 #ifndef DISABLE_ROS
   ros::Publisher _pub_imu;
-  imu_msg::imu _msg_imu;
+  imu_msg::imu_light _msg_imu;
 #endif
   // Accelerometer
   float _accl[3] = { 0., 0., 0. };
 
   // Gyro
   float _gyro[3] = { 0., 0., 0. };
+
+  int16_t _accl_light[3] = { 0, 0, 0 };
+  int16_t _gyro_light[3] = { 0, 0, 0 };
 
   // Control registers
   int16_t MSC = 0;
@@ -301,17 +305,25 @@ public:
       DECR = readWord(DEC_RATE);
 
       // if (!setBiasEstimationTime()) this->setConfiguredStatus(true);
-      _msg_imu.time.data = this->getNodeHandle()->now();
-      _msg_imu.accelerometer[0] = _accl[0];
-      _msg_imu.accelerometer[1] = _accl[1];
-      _msg_imu.accelerometer[2] = _accl[2];
-      _msg_imu.gyroscope[0] = _gyro[0];
-      _msg_imu.gyroscope[1] = _gyro[1];
-      _msg_imu.gyroscope[2] = _gyro[2];
-      _msg_imu.control_regs[0] = MSC;
-      _msg_imu.control_regs[1] = FLTR;
-      _msg_imu.control_regs[2] = DECR;
-      _msg_imu.status = this->getHealthStatus();
+      // _msg_imu.time.data = this->getNodeHandle()->now();
+      // _msg_imu.accelerometer[0] = _accl[0];
+      // _msg_imu.accelerometer[1] = _accl[1];
+      // _msg_imu.accelerometer[2] = _accl[2];
+      // _msg_imu.gyroscope[0] = _gyro[0];
+      // _msg_imu.gyroscope[1] = _gyro[1];
+      // _msg_imu.gyroscope[2] = _gyro[2];
+      // _msg_imu.control_regs[0] = MSC;
+      // _msg_imu.control_regs[1] = FLTR;
+      // _msg_imu.control_regs[2] = DECR;
+      // _msg_imu.status = this->getHealthStatus();
+      // _pub_imu.publish(&_msg_imu);
+
+      _msg_imu.accelerometer[0] = _accl_light[0];
+      _msg_imu.accelerometer[1] = _accl_light[1];
+      _msg_imu.accelerometer[2] = _accl_light[2];
+      _msg_imu.gyroscope[0] = _gyro_light[0];
+      _msg_imu.gyroscope[1] = _gyro_light[1];
+      _msg_imu.gyroscope[2] = _gyro_light[2];
       _pub_imu.publish(&_msg_imu);
 
       // _dr_interrupt.rise(this, &ADIS16470::readData);
@@ -357,17 +369,27 @@ public:
         // Publish Diagnostic messages
         Device::update();
 #ifndef DISABLE_ROS
-        _msg_imu.time.data = this->getNodeHandle()->now();
+        // _msg_imu.time.data = this->getNodeHandle()->now();
+        // _msg_imu.accelerometer[0] = _accl[0];
+        // _msg_imu.accelerometer[1] = _accl[1];
+        // _msg_imu.accelerometer[2] = _accl[2];
+        // _msg_imu.gyroscope[0] = _gyro[0];
+        // _msg_imu.gyroscope[1] = _gyro[1];
+        // _msg_imu.gyroscope[2] = _gyro[2];
+        // _msg_imu.control_regs[0] = MSC;
+        // _msg_imu.control_regs[1] = FLTR;
+        // _msg_imu.control_regs[2] = DECR;
+        // _msg_imu.status = this->getHealthStatus();
+
         _msg_imu.accelerometer[0] = _accl[0];
         _msg_imu.accelerometer[1] = _accl[1];
         _msg_imu.accelerometer[2] = _accl[2];
         _msg_imu.gyroscope[0] = _gyro[0];
         _msg_imu.gyroscope[1] = _gyro[1];
         _msg_imu.gyroscope[2] = _gyro[2];
-        _msg_imu.control_regs[0] = MSC;
-        _msg_imu.control_regs[1] = FLTR;
-        _msg_imu.control_regs[2] = DECR;
-        _msg_imu.status = this->getHealthStatus();
+        if (!this->getHealthStatus())
+          this->getNodeHandle()->logwarn("IMU is not working");
+
         if (this->getIsTopicAdvertised()) _pub_imu.publish(&_msg_imu);
 #endif
       }
@@ -398,10 +420,12 @@ public:
 
     for (int i = 0; i < 3; i++)
     {
-      _gyro[i] = ((int32_t(gyro_out[i]) << 16) + int32_t(gyro_low[i])) * M_PI /
-                 180.0 / 655360.0;
-      _accl[i] = ((int32_t(accl_out[i]) << 16) + int32_t(accl_low[i])) * 9.8 /
-                 52428800.0;
+      _gyro_light[i] =
+          (int16_t)((int32_t(gyro_out[i]) << 16) + int32_t(gyro_low[i]));
+      _accl_light[i] =
+          (int16_t)((int32_t(accl_out[i]) << 16) + int32_t(accl_low[i]));
+      _gyro[i] = _gyro_light[i] * M_PI / 180.0 / 655360.0;
+      _accl[i] = _accl_light[i] * 9.8 / 52428800.0;
     }
   }
 };

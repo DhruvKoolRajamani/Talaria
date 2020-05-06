@@ -8,6 +8,7 @@
 
 #ifndef DISABLE_ROS
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+#ifdef CURRENT_SENSE
 Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
              PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
              ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
@@ -22,10 +23,28 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _nFault(nFault)
   , _nConfig(nConfig)
   , _aPhase(aPhase)
+  , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
   , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
+{
+#else
+Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
+             PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
+             ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
+             const char* frame_name, const char* meas_topic_name,
+             const char* des_topic_name, int refresh_rate)
+  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, frame_name,
+                 meas_topic_name, refresh_rate)
+  , _aVSense(aVSense)
+  , _aEnable(aEnable)
+  , _vRef(vRef)
+  , _nSleep(nSleep)
+  , _nFault(nFault)
+  , _nConfig(nConfig)
+  , _aPhase(aPhase)
   , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
 // , _ref(new PwmDevice(vRef))
 {
+#endif
 #else
 Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
              int nFault, int nConfig, int aPhase, ros::NodeHandle& nh,
@@ -41,8 +60,10 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
   , _nFault(nFault)
   , _nConfig(nConfig)
   , _aPhase(aPhase)
-  , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
   , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
+#ifdef CURRENT_SENSE
+  , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
+#endif
 {
   pinMode(_aVSense, INPUT);
   pinMode(_aPhase, OUTPUT);
@@ -52,7 +73,9 @@ Motor::Motor(uint8_t id, int aVSense, int aEnable, int vRef, int nSleep,
   // analogWriteResolution(12);
   pinMode(13, OUTPUT);
 #endif
+#ifdef CURRENT_SENSE
   setIsTopicAdvertised(nh.advertise(_pub_motor));
+#endif
   this->getNodeHandle()->subscribe(_sub_motor);
 }
 #else
@@ -130,8 +153,10 @@ bool Motor::initialize()
     // 5.2 for test, 6.3 for main
     // setTorque(5);
 #ifndef DISABLE_ROS
+#ifdef CURRENT_SENSE
     _msg_motor_measured.header.frame_id = this->getFrameName();
     _msg_motor_measured.header.stamp = this->getNodeHandle()->now();
+#endif
 #endif
     this->setEnabledStatus(true);
     this->setConfiguredStatus(true);
@@ -272,6 +297,7 @@ void Motor::update()
       sprintf(cstr, "Measured torque = %f\n", _error);
       print(cstr);
 #else
+#ifdef CURRENT_SENSE
       motor_msg::motor_measured temp;
       temp.header.frame_id = this->getDeviceName();
       temp.header.stamp = this->getNodeHandle()->now();
@@ -279,19 +305,29 @@ void Motor::update()
       temp.desired_force.data = _desiredTorque;
       temp.measured_force.data = _error;
 
-      // _msg_motor_measured = temp;
+      _msg_motor_measured = temp;
       if (this->getIsTopicAdvertised()) _pub_motor.publish(&temp);
+#endif
 #endif
     }
   }
 }
 
 #ifndef DISABLE_ROS
+#ifdef CURRENT_SENSE
 void Motor::motorDesiredCb(const motor_msg::motor_desired& msg)
+#else
+void Motor::motorDesiredCb(const motor_msg::cmd_light& msg)
+#endif
 {
-  // _measuredI = 0.5;
+// _measuredI = 0.5;
+#ifdef CURRENT_SENSE
   setTorque(msg.desired_force.data, msg.torque_constant.data);
   setVRef(msg.desired_force.data);
+#else
+  setTorque(msg.cmd, 10.9);
+  setVRef(msg.cmd);
+#endif
   _measuredI = getISense();
 }
 #endif
