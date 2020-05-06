@@ -85,7 +85,7 @@ Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PC_9 /*vRef*/,
 //             const char* topic_name = NULL, int refresh_RATE = 1)
 ADIS16470 imu(0, PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
               "imu", "hand_imu", "/devices/hand_imu/imu",
-              50 /*Hz*/);  // Hertz 20
+              100 /*Hz*/);  // Hertz 20
 
 #endif
 #else
@@ -157,7 +157,7 @@ volatile bool is_init = false;
 int main()
 {
 #ifndef DISABLE_ROS
-  nh.getHardware()->setBaud(9600);  // 57600
+  nh.getHardware()->setBaud(115200);  // 57600
   nh.initNode();
 
   // wait until you are actually connected

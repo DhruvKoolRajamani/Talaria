@@ -1,1 +1,1 @@
-int8 cmd
+int16 cmd

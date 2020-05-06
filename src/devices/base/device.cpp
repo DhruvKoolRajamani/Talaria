@@ -51,7 +51,9 @@ Device::Device(uint8_t id, uint8_t dev_index, ros::NodeHandle& nh,
   , _health_status(false)
   , _dev_index(dev_index)
   , _nh(&nh)
-  , _refresh_rate((refresh_rate >= 2) ? (1000. / refresh_rate) : 2.)
+  , _refresh_rate((refresh_rate < (1000. / RATE) && (_refresh_rate > 0.)) ?
+                      (1000. / refresh_rate) :
+                      RATE)
   , _dev_Id(id)
 {
   int dev_name_len = strlen(dev_name);

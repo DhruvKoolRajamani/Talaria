@@ -27,14 +27,14 @@ Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
   , _pub_motor(meas_topic_name, &(this->_msg_motor_measured))
 {
 #else
-Motor::Motor(uint8_t id, PinName aVSense, PinName aEnable, PinName vRef,
+Motor::Motor(uint8_t id, PinName aVEnc, PinName aEnable, PinName vRef,
              PinName nSleep, PinName nFault, PinName nConfig, PinName aPhase,
              ros::NodeHandle& nh, uint8_t dev_index, const char* dev_name,
              const char* frame_name, const char* meas_topic_name,
              const char* des_topic_name, int refresh_rate)
-  : AnalogDevice(id, aVSense, nh, dev_index, dev_name, frame_name,
+  : AnalogDevice(id, aVEnc, nh, dev_index, dev_name, frame_name,
                  meas_topic_name, refresh_rate)
-  , _aVSense(aVSense)
+  , _aVEnc(aVEnc)
   , _aEnable(aEnable)
   , _vRef(vRef)
   , _nSleep(nSleep)
@@ -195,22 +195,8 @@ bool Motor::initialize()
 #endif
 
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-void Motor::setPwm()
-{
-  float speed = 1;  // get desired speed from usb
-  PwmDevice enable(_aEnable);
-  enable.writePWMData(speed);
-}
-
-#else
-void Motor::setPwm()
-{
-  float speed = 1.00;  // get desired speed from usb
-  _aEnable.writePWMData(speed);
-}
-#endif
-
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
+void Motor::setDir() { DigitalOut phase(_aPhase, _desiredDir); }
+#ifdef CURRENT_SENSE
 float Motor::getISense()
 {
   AnalogIn input(_aVSense);
@@ -226,16 +212,6 @@ float Motor::getISense()
   // return (iSense);//*(_desiredTorque > 0) ? 1 : -1);  // *10
 }
 
-#else
-float Motor::getISense()
-{
-  int val = analogRead(_aVSense);
-  float vSense = val * 5.0 / 1023.0;
-  float iSense = vSense * aRSense;
-  return iSense;
-}
-#endif
-
 void Motor::setTorque(float desired_torque, float torque_constant)
 {
   _torqueConst = torque_constant;
@@ -244,9 +220,6 @@ void Motor::setTorque(float desired_torque, float torque_constant)
   setDir();
 }
 
-#ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
-void Motor::setDir() { DigitalOut phase(_aPhase, _desiredDir); }
-
 float Motor::setVRef(float desiredTorque)
 {
   float new_vRef = (abs(desiredTorque) * 0.5 * 80 / 6) / _torqueConst;
@@ -254,8 +227,37 @@ float Motor::setVRef(float desiredTorque)
   vrefOut.write(new_vRef);
   // _ref->writePWMData(new_vRef);
 }
-
 #else
+float Motor::getPosition()
+{
+  AnalogIn input(_aVEnc);
+  float encValue = input;
+  return encValue;
+}
+
+void Motor::setPosition(float desired_pos)
+{
+  float cur_pos = getPosition();
+  float delta = desired_pos - cur_pos;
+  do
+  {
+    _desiredDir = (delta > 0) ? 1 : 0;
+    setDir();
+    // Write pwm here!!!
+    // _ref->write(abs(delta));
+    cur_pos = getPosition();
+  } while (abs(delta) <= 0.01);
+}
+#endif
+#else
+float Motor::getISense()
+{
+  int val = analogRead(_aVSense);
+  float vSense = val * 5.0 / 1023.0;
+  float iSense = vSense * aRSense;
+  return iSense;
+}
+
 float Motor::setVRef(float desiredTorque)
 {
   float new_vRef = desiredTorque * 0.5 / _torqueConst;
@@ -287,10 +289,7 @@ void Motor::update()
       _prev_update_time = current_time;
       // Publish Diagnostic messages
       Device::update();
-      // setPwm();
 
-      // setTorque(1);  // Remove once subscriber works
-      _error = (_measuredI)*_torqueConst;
 #ifdef DISABLE_ROS
       sprintf(cstr, "Measured torque = %f\n", _error);
       print(cstr);
@@ -298,6 +297,9 @@ void Motor::update()
       print(cstr);
 #else
 #ifdef CURRENT_SENSE
+      // setTorque(1);  // Remove once subscriber works
+      _error = (_measuredI)*_torqueConst;
+
       motor_msg::motor_measured temp;
       temp.header.frame_id = this->getDeviceName();
       temp.header.stamp = this->getNodeHandle()->now();
@@ -324,10 +326,10 @@ void Motor::motorDesiredCb(const motor_msg::cmd_light& msg)
 #ifdef CURRENT_SENSE
   setTorque(msg.desired_force.data, msg.torque_constant.data);
   setVRef(msg.desired_force.data);
-#else
-  setTorque(msg.cmd, 10.9);
-  setVRef(msg.cmd);
-#endif
   _measuredI = getISense();
+#else
+  _desiredPos = msg.cmd / 1000.;
+  setPosition(_desiredPos);
+#endif
 }
 #endif

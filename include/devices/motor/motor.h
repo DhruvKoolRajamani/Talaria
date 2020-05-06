@@ -40,8 +40,14 @@ private:
   // pwm pins
   PinName _aEnable;  // p136 -- p8 _aEnable
   PinName _vRef;     // p137 -- p4 + jumper _vRef
-  // analog pin
+// analog pin
+#ifdef CURRENT_SENSE
   PinName _aVSense;  // p90 -- across R3 _aVSense
+  float _measuredI, _desiredTorque, _error;
+#else
+  PinName _aVEnc;
+  float _measuredPos, _desiredPos;
+#endif
   // PwmDevice* _ref = nullptr;
 
   // digital pins
@@ -49,7 +55,7 @@ private:
   PinName _nSleep;   // p94 -- p3 _nSleep
   PinName _nConfig;  // p96 -- p5 + jumper _nConfig
   PinName _nFault;   // p95 -- p7r _nFault
-  float _measuredI, _desiredTorque, _error;
+
   bool _desiredDir;
 
 #else
@@ -122,12 +128,7 @@ public:
 
   void update() override;
 
-  /**
-   * @brief Control motor speed
-   *
-   */
-  void setPwm();
-
+#ifdef CURRENT_SENSE
   /**
    * @brief Read current across sense resistor
    *
@@ -141,7 +142,7 @@ public:
    * @param desired_torque
    */
   void setTorque(float desired_torque, float torque_constant = 0.0f);
-  void setDir();
+
   /**
    * @brief Initialize motor
    *
@@ -152,6 +153,28 @@ public:
    *
    */
   float setVRef(float desired_torque);
+#else
+
+  /**
+   * @brief Get the Position object
+   *
+   * @return float
+   */
+  float getPosition();
+
+  /**
+   * @brief Set the Position object
+   *
+   * @param desired_pos
+   */
+  void setPosition(float desired_pos);
+#endif
+
+  /**
+   * @brief Set the Dir object
+   *
+   */
+  void setDir();
 
 #ifndef DISABLE_ROS
   /**
