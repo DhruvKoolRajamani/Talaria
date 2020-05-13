@@ -60,17 +60,16 @@ Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
 //                   "/devices/thumb/motor_desired", 50);
 
 // Index
-Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PC_9 /*vRef*/,
+Motor index_motor(0, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_9 /*vRef*/,
                   PF_14 /*nSleep*/, PE_8 /*nFault*/, PE_13 /*nConfig*/,
                   PE_11 /*aPhase*/, nh, MOTOR_ID, "motor", "index", nullptr,
                   "/devices/index/motor_cmd", 20 /*Hz*/);  // 10
 
 // // Index
-// Motor middle_motor(2, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
-//                    PF_15 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
-//                    PE_13 /*aPhase*/, nh, MOTOR_ID, "middle",
-//                    "/devices/middle/motor_measured",
-//                    "/devices/middle/motor_desired", 50);
+Motor middle_motor(1, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_8 /*vRef*/,
+                   PE_9 /*nSleep*/, PE_8 /*nFault*/, PE_11 /*nConfig*/,
+                   PF_13 /*aPhase*/, nh, MOTOR_ID, "motor", "middle", nullptr,
+                   "/devices/middle/motor_cmd", 20 /*Hz*/);  // 10
 
 // // Index
 // Motor ring_motor(3, PA_3 /*aVSense*/, PD_9 /*aEnable*/, PB_9 /*vRef*/,
@@ -127,7 +126,7 @@ void addDevices()
   addDevice(&imu);
   // addDevice(&thumb_motor);
   addDevice(&index_motor);
-  // addDevice(&middle_motor);
+  addDevice(&middle_motor);
   // addDevice(&ring_motor);
 
 #ifdef DISABLE_ROS

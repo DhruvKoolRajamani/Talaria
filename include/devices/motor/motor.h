@@ -48,7 +48,7 @@ private:
   PinName _aVEnc;
   float _measuredPos, _desiredPos;
 #endif
-  // PwmDevice* _ref = nullptr;
+  PwmOut* _ref = nullptr;
 
   // digital pins
   PinName _aPhase;   // p101 -- p7 M0

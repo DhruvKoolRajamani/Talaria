@@ -42,7 +42,7 @@ Motor::Motor(uint8_t id, PinName aVEnc, PinName aEnable, PinName vRef,
   , _nConfig(nConfig)
   , _aPhase(aPhase)
   , _sub_motor(des_topic_name, &Motor::motorDesiredCb, this)
-// , _ref(new PwmDevice(vRef))
+  , _ref(new PwmOut(vRef))
 {
 #endif
 #else
@@ -140,6 +140,15 @@ bool Motor::initialize()
   DigitalOut config(_nConfig, false);  // enable phase mode (DC motor)
   DigitalOut phase(_aPhase, true);
   DigitalIn fault(_nFault);
+  _ref->period_ms(1.0);
+  // while (true)
+  // {
+  //   _desiredDir = 1;
+  //   setDir();
+  //   _ref->write(0.5f);
+  //   wait_ms(200);
+  //   break;
+  // }
   // fault.mode(PullUp);
 
 #ifdef DISABLE_ROS
@@ -237,16 +246,36 @@ float Motor::getPosition()
 
 void Motor::setPosition(float desired_pos)
 {
-  float cur_pos = getPosition();
-  float delta = desired_pos - cur_pos;
-  do
+  // float cur_pos = getPosition();
+  // float delta = desired_pos - cur_pos;
+  // do
+  // {
+  //   _desiredDir = (delta > 0) ? 1 : 0;
+  //   setDir();
+  //   // Write pwm here!!!
+  //   // _ref->write(abs(delta));
+  //   cur_pos = getPosition();
+  // } while (abs(delta) <= 0.01);
+  if (desired_pos > 550)
   {
-    _desiredDir = (delta > 0) ? 1 : 0;
+    // this->getNodeHandle()->loginfo("Enter grasp posn");
+
+    _desiredDir = 1;
     setDir();
-    // Write pwm here!!!
-    // _ref->write(abs(delta));
-    cur_pos = getPosition();
-  } while (abs(delta) <= 0.01);
+    _ref->write(0.1f);
+  }
+  else if (desired_pos < 450)
+  {
+    _desiredDir = 0;
+    setDir();
+    _ref->write(0.1f);
+  }
+  else
+  {
+    _desiredDir = 0;
+    setDir();
+    _ref->write(0.0f);
+  }
 }
 #endif
 #else
@@ -328,7 +357,7 @@ void Motor::motorDesiredCb(const motor_msg::cmd_light& msg)
   setVRef(msg.desired_force.data);
   _measuredI = getISense();
 #else
-  _desiredPos = msg.cmd / 1000.;
+  _desiredPos = msg.cmd / 1.;
   setPosition(_desiredPos);
 #endif
 }

@@ -87,3 +87,5 @@ platformio/lib
 platformio/packages
 lib/ros_lib
 catkin_ws/ros_lib/
+*/ros_lib
+ros_lib
