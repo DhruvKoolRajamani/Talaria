@@ -33,13 +33,15 @@ DeviceManager device_manager;
 #ifndef NUCLEO
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
-BendSensor bend_sensor(0x12, PrimaryBus, nh, BEND_SENSOR_ID, "index",
-                       "/devices/index/bend_sensor", p16, 10);
+BendSensor bend_sensor(0 /*id*/, 0x12 /*address*/, PrimaryBus /*Bus*/,
+                       nh /*node_handle*/, BEND_SENSOR_ID /*device_index*/,
+                       "bend_sensor" /*device_name*/, "index" /*frame*/,
+                       "/devices/index/bend_sensor" /*topic*/,
+                       p16 /*reset_pin*/, 10 /*refresh_rate*/);
 Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
-            p8 /*nFault*/, p7 /*nConfig*/, p5 /*aPhase*/, nh, MOTOR_ID, "index",
-            "/devices/index/motor_measured", "/devices/index/motor_desired",
-            10);
-#else
+            p8 /*nFault*/, p7 /*nConfig*/, p5 /*aPhase*/, nh, MOTOR_ID, "motor",
+            "index", nullptr, "/devices/index/motor_cmd", 20 /*Hz*/);
+#else  // MBED
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
 // BendSensor bend_sensor(0, 0x12, PrimaryBus, nh, BEND_SENSOR_ID,
@@ -86,7 +88,7 @@ ADIS16470 imu(0, PA_7, PA_6, PA_5, PD_14, PD_15, PF_12, nh, 1000000, ADI_IMU_ID,
               "imu", "hand_imu", "/devices/hand_imu/imu",
               100 /*Hz*/);  // Hertz 20
 
-#endif
+#endif  // NUCLEO AND MBED OVER
 #else
 StrainGauge strain_gauge(0, A0, nh, STRAIN_GAUGE_ID, "strain_gauge",
                          "/devices/index/strain_gauge", 50);
@@ -121,12 +123,13 @@ void addDevice(Device* device)
 
 void addDevices()
 {
-  // addDevice(&bend_sensor);
+  addDevice(&bend_sensor);
+  addDevice(&motor);
   // addDevice(&strain_gauge);
-  addDevice(&imu);
+  // addDevice(&imu);
   // addDevice(&thumb_motor);
-  addDevice(&index_motor);
-  addDevice(&middle_motor);
+  // addDevice(&index_motor);
+  // addDevice(&middle_motor);
   // addDevice(&ring_motor);
 
 #ifdef DISABLE_ROS
