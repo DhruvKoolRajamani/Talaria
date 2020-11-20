@@ -29,6 +29,8 @@ class BendSensor : public I2CDevice
 private:
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   PinName _reset_pin;
+  PinName _joint1;
+  PinName _joint2;
 #else
   int _reset_pin;
 #endif
@@ -115,11 +117,11 @@ public:
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT
   BendSensor(uint8_t id, int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
              uint8_t dev_index, const char* dev_name, const char* frame_name,
-             const char* topic_name, PinName reset_pin, int refresh_rate = 1);
+             const char* topic_name, PinName reset_pin, PinName joint1, PinName joint2, int refresh_rate = 1);
 #else
   BendSensor(int address, I2CBus& i2c_bus, ros::NodeHandle& nh,
              uint8_t dev_index, const char* dev_name, const char* topic_name,
-             int reset_pin, int refresh_rate = 1);
+             int reset_pin, PinName joint1, PinName joint2, int refresh_rate = 1);
 #endif
 #else
 #ifndef PIO_FRAMEWORK_ARDUINO_PRESENT

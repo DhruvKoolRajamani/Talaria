@@ -16,11 +16,14 @@
 BendSensor::BendSensor(uint8_t id, int address, I2CBus& i2c_bus,
                        ros::NodeHandle& nh, uint8_t dev_index,
                        const char* dev_name, const char* frame_name,
-                       const char* topic_name, PinName reset_pin,
+                       const char* topic_name, PinName reset_pin, 
+                       PinName joint1, PinName joint2,
                        int refresh_rate)
   : I2CDevice(id, address, i2c_bus, nh, dev_index, dev_name, frame_name,
               topic_name, refresh_rate)
   , _reset_pin(reset_pin)
+  , _joint1(joint1)
+  , _joint2(joint2)
   , _pub_bend_sensor(topic_name, &(this->_msg_bend_sensor))
 {
 #else
@@ -178,6 +181,13 @@ bool BendSensor::ping(uint8_t chip_id_reg_address, int delay_ms)
     _msg_bend_sensor.chip_id.data = this->getChipId();
     _msg_bend_sensor.bend.data = this->_bend_angle;
     _msg_bend_sensor.stretch.data = this->_stretch_value;
+
+    AnalogIn angle1(_joint1);
+    _msg_bend_sensor.joint_angle1.data = angle1;
+
+    AnalogIn angle2(_joint2);
+    _msg_bend_sensor.joint_angle2.data = angle2;
+
 #ifndef DISABLE_DIAGNOSTICS
     _diagnostic_chip_id.value = (char*)buffer;
     this->setDiagnosticsData(_diagnostic_chip_id);
@@ -223,6 +233,13 @@ void BendSensor::update()
         _msg_bend_sensor.chip_id.data = this->getChipId();
         _msg_bend_sensor.bend.data = this->_bend_angle;
         _msg_bend_sensor.stretch.data = this->_stretch_value;
+
+        AnalogIn angle1(_joint1);
+        _msg_bend_sensor.joint_angle1.data = angle1;
+
+        AnalogIn angle2(_joint2);
+        _msg_bend_sensor.joint_angle2.data = angle2;
+
         if (this->getIsTopicAdvertised())
           _pub_bend_sensor.publish(&(this->_msg_bend_sensor));
 

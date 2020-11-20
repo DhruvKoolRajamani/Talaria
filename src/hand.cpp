@@ -37,10 +37,11 @@ BendSensor bend_sensor(0 /*id*/, 0x12 /*address*/, PrimaryBus /*Bus*/,
                        nh /*node_handle*/, BEND_SENSOR_ID /*device_index*/,
                        "bend_sensor" /*device_name*/, "index" /*frame*/,
                        "/devices/index/bend_sensor" /*topic*/,
-                       p16 /*reset_pin*/, 10 /*refresh_rate*/);
-Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
-            p8 /*nFault*/, p7 /*nConfig*/, p5 /*aPhase*/, nh, MOTOR_ID, "motor",
-            "index", nullptr, "/devices/index/motor_cmd", 20 /*Hz*/);
+                       p16 /*reset_pin*/,p17 /*joint1*/,p18 /*joint2*/,
+                       10 /*refresh_rate*/);
+// Motor motor(0, p19 /*aVSense*/, p25 /*aEnable*/, p26 /*vRef*/, p6 /*nSleep*/,
+//             p8 /*nFault*/, p7 /*nConfig*/, p5 /*aPhase*/, nh, MOTOR_ID, "motor",
+//             "index", nullptr, "/devices/index/motor_cmd", 20 /*Hz*/);
 #else  // MBED
 // StrainGauge strain_gauge(0, p15, nh, STRAIN_GAUGE_ID, "strain_gauge",
 //                          "/devices/index/strain_gauge", 5);
@@ -124,7 +125,7 @@ void addDevice(Device* device)
 void addDevices()
 {
   addDevice(&bend_sensor);
-  addDevice(&motor);
+  // addDevice(&motor);
   // addDevice(&strain_gauge);
   // addDevice(&imu);
   // addDevice(&thumb_motor);
