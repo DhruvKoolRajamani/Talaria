@@ -16,9 +16,8 @@
 BendSensor::BendSensor(uint8_t id, int address, I2CBus& i2c_bus,
                        ros::NodeHandle& nh, uint8_t dev_index,
                        const char* dev_name, const char* frame_name,
-                       const char* topic_name, PinName reset_pin, 
-                       PinName joint1, PinName joint2,
-                       int refresh_rate)
+                       const char* topic_name, PinName reset_pin,
+                       PinName joint1, PinName joint2, int refresh_rate)
   : I2CDevice(id, address, i2c_bus, nh, dev_index, dev_name, frame_name,
               topic_name, refresh_rate)
   , _reset_pin(reset_pin)

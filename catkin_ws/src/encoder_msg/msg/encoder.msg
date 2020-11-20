@@ -1,0 +1,2 @@
+std_msgs/Float32 joint_angle1
+std_msgs/Float32 joint_angle2

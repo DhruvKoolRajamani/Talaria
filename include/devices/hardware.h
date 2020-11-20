@@ -13,7 +13,7 @@
 #define HARDWARE_H
 
 #ifdef HAND
-const int NUM_DEVICES = 3;
+const int NUM_DEVICES = 1;
 #elif defined(LLE)
 const int NUM_DEVICES = 1;
 #endif
